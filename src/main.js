@@ -9,13 +9,13 @@ const config = {
     pixelArt: true,
     roundPixels: true,
     parent: 'content',
-    width: 400,
-    height: 240,
+    width: 1000,
+    height: 700,
     physics: {
         default: 'arcade',
         arcade: {
             gravity: {
-                y: 800
+                y: 300
             },
             debug: false
         }
