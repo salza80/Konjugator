@@ -1,4 +1,5 @@
 import Block from '../sprites/Block';
+import FallingText from '../sprites/FallingText';
 
 class GameScene extends Phaser.Scene {
     constructor(test) {
@@ -20,7 +21,8 @@ class GameScene extends Phaser.Scene {
         //     loop: true
         // });
 
-        let tilesGroup = this.add.group()
+        this.tilesGroup = this.add.group()
+        this.fallingTextGroup = this.add.group()
 
         let rows = this.getRows(200)
         rows.forEach((row) => {
@@ -31,11 +33,10 @@ class GameScene extends Phaser.Scene {
                     x: x,
                     y: row.y
                 })
-                tilesGroup.add(b, this)
+                this.tilesGroup.add(b, this)
             })
         })
     }
-
 
     getRows(noBlocks) {
         let rows = [];
@@ -85,6 +86,17 @@ class GameScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+        if(this.fallingTextGroup.countActive() < 10) {
+            let b = new FallingText({
+                    scene: this,
+                    x: this.getRandomTileX(),
+                    y: 0,
+                    text: "Here it is",
+                    opts: { fill: "#de77ae" }
+                })
+                this.fallingTextGroup.add(b, this)
+                this.physics.add.collider(this.fallingTextGroup, this.tilesGroup);
+        }
       
     }
 
