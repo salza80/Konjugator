@@ -38,6 +38,8 @@ class GameScene extends Phaser.Scene {
         })
     }
 
+
+
     getRows(noBlocks) {
         let rows = [];
         let i = 0
@@ -86,20 +88,21 @@ class GameScene extends Phaser.Scene {
     }
 
     update(time, delta) {
-        if(this.fallingTextGroup.countActive() < 10) {
+        if(this.fallingTextGroup.countActive() < 1) {
             let b = new FallingText({
                     scene: this,
                     x: this.getRandomTileX(),
                     y: 0,
-                    text: "Here it is",
+                    text: "Here",
                     opts: { fill: "#de77ae" }
                 })
                 this.fallingTextGroup.add(b, this)
-                this.physics.add.collider(this.fallingTextGroup, this.tilesGroup);
+                
         }
-      
-    }
 
+        this.physics.add.collider(this.fallingTextGroup, this.tilesGroup);
+    }
+      
   
 }
 

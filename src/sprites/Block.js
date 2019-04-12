@@ -6,12 +6,13 @@ Classes for enemy types extend this class.
 export default class Block extends Phaser.GameObjects.Sprite {
     constructor(config) {
         super(config.scene, config.x, config.y, config.key);
-        // config.scene.physics.world.enable(this);
+        config.scene.physics.world.enable(this);
       
 
         // start still and wait until needed
         // this.body.setCollideWorldBounds(true);
-        // this.body.allowGravity = false;
+        this.body.allowGravity = false;
+        this.body.setImmovable(true);
         this.beenSeen = false;
 
 
