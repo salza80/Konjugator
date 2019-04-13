@@ -14,7 +14,6 @@ export default class FallingText extends Phaser.GameObjects.Text {
         this.body.allowGravity = true;
         this.body.setMaxSpeed(100)
         
-        // this.body.setVelocityY(5)
         this.body.debugShowBody= true
         this.body.debugBodyColor = 0x0000ff;
 
@@ -29,13 +28,16 @@ export default class FallingText extends Phaser.GameObjects.Text {
     // If you've scaled a Sprite by altering its `width`, `height`, or `scale` and you want to
     // position the Body relative to the Sprite's dimensions (which will differ from its texture's
     // dimensions), you should divide these arguments by the Sprite's current scale:
-        console.log(this.height)
-        console.log(this.width)
 
-         this.body.setSize(this.height, this.width -1)
+         this.body.setSize(this.width, this.height)
     //
 
         // this.body.offset.set(10, 12);
+    }
+
+    blowUp() {
+        this.body.setMaxSpeed(0)
+        this.destroy()
     }
 
     // activated() {

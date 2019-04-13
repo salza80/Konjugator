@@ -36,8 +36,17 @@ class GameScene extends Phaser.Scene {
                 this.tilesGroup.add(b, this)
             })
         })
+
+        // this.physics.add.collider(this.fallingTextGroup, this.tilesGroup);
+        this.physics.add.overlap(this.fallingTextGroup, this.tilesGroup, this.smashBlock, null, this);
     }
 
+    smashBlock(fallingText, block) {
+        console.log(fallingText)
+        console.log(block)
+        fallingText.blowUp()
+        block.blowUp()
+    }   
 
 
     getRows(noBlocks) {
@@ -97,10 +106,11 @@ class GameScene extends Phaser.Scene {
                     opts: { fill: "#de77ae" }
                 })
                 this.fallingTextGroup.add(b, this)
+                // this.physics.add.collider(this.fallingTextGroup, this.tilesGroup);
                 
         }
 
-        this.physics.add.collider(this.fallingTextGroup, this.tilesGroup);
+        
     }
       
   

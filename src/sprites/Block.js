@@ -31,6 +31,11 @@ export default class Block extends Phaser.GameObjects.Sprite {
         // this.body.offset.set(10, 12);
     }
 
+    blowUp() {
+      this.destroy()
+
+    }
+
     // activated() {
     //     // Method to check if an enemy is activated, the enemy will stay put
     //     // until activated so that starting positions is correct
