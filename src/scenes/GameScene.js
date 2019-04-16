@@ -1,5 +1,8 @@
 import Block from '../sprites/Block';
 import FallingText from '../sprites/FallingText';
+import InputText from '../sprites/InputText';
+import Bullet from '../sprites/Bullet';
+import { getRandomInt } from '../helpers/util.js'
 
 class GameScene extends Phaser.Scene {
     constructor(test) {
@@ -13,102 +16,77 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
-       
-      
-        // // Add and play the music
-        // this.music = this.sound.add('overworld');
-        // this.music.play({
-        //     loop: true
-        // });
+     
+    
+      // // Add and play the music
+      this.music = this.sound.add('overworld');
+      this.music.play({
+          loop: true
+      });
+      this.timers = [];
+      this.tilesGroup = this.add.group()
+      this.fallingTextGroup = this.add.group()
+      this.inputGroup = this.add.group()
+      this.bullets = this.add.group()
 
-        this.tilesGroup = this.add.group()
-        this.fallingTextGroup = this.add.group()
+      this.tilesGroup.addMultiple(Block.createStartBlocks(100, this), this)
+      this.physics.add.overlap(this.fallingTextGroup, this.tilesGroup, this.smashBlock, null, this);
 
-        let rows = this.getRows(200)
-        rows.forEach((row) => {
-            row.x.forEach((x) => {
-                let b = new Block({
-                    scene: this,
-                    key: 'block',
-                    x: x,
-                    y: row.y
-                })
-                this.tilesGroup.add(b, this)
-            })
-        })
+      this.inputText = new InputText({
+          scene: this,
+          x: 400,
+          y: 600,
+          text: "test",
+          opts: { fill: "#de77ae", fontSize: 20 }
+      })
+      this.input.keyboard.on('keydown-' + 'ENTER', this.fire, this)
+      this.timers.push(this.time.addEvent({delay: 10000, callback: this.spawnFallingText, callbackScope: this, loop: true}))
+      this.timers.push(this.time.addEvent({delay: 5000, callback: this.spawnFallingText, callbackScope: this, loop: true}))
+    }
 
-        // this.physics.add.collider(this.fallingTextGroup, this.tilesGroup);
-        this.physics.add.overlap(this.fallingTextGroup, this.tilesGroup, this.smashBlock, null, this);
+    fire() {
+      let t = this.inputText.text
+              this.inputText.setText('')
+
+      this.fallingTextGroup.getChildren().every((fallingText) => {
+        if (fallingText.text === t) {
+          let b = new Bullet({
+                scene: this,
+                key: 'bullet',
+                x: fallingText.x + (fallingText.width / 2),
+                y: 600
+              })
+          this.bullets.add(b)
+          this.physics.add.overlap(b, fallingText, this.hit, null, this)
+          return false
+        } 
+      })
+    }
+
+    hit(bullet, fallingText) {
+      bullet.destroy()
+      fallingText.destroy()
     }
 
     smashBlock(fallingText, block) {
-        console.log(fallingText)
-        console.log(block)
-        fallingText.blowUp()
         block.blowUp()
-    }   
-
-
-    getRows(noBlocks) {
-        let rows = [];
-        let i = 0
-        while (i < noBlocks) {
-            let randomX = this.getRandomTileX()
-            rows.forEach((row, rowIndex) => {
-                if(!row.x.includes(randomX)){
-                    row.x.push(randomX)
-                    randomX = undefined
-                    return false;
-                }
-            })
-            if (randomX){
-                rows.push({y: undefined, x: [randomX]})
-            }
-            i++    
-        }
-
-        rows.forEach((row, rowIndex) => {
-            let y = 695 - (rowIndex * 11)
-            row.y=y
-        })
-       
-        return rows
+        fallingText.blowUp()
     }
 
-    // getRandomRow() {
-    //     let arrayX = [];
-    //     let i = 0
-    //     while (i < 50) {
-    //         let random = this.getRandomTileX()
-    //         if(!arrayX.includes(random)) {
-    //             arrayX.push(random)
-    //         }
-    //         i++    
-    //     }
-    //     return arrayX
+    spawnFallingText() {
+      let b = new FallingText({
+          scene: this,
+          x: Block.getRandomTileX(),
+          y: 0,
+          text: "Here",
+          opts: { fill: "#de77ae" }
+      })
+      this.fallingTextGroup.add(b, this)
+    } 
 
-    // }
-
-    getRandomTileX () {
-        let min=0; 
-        let max=99;  
-        let random = Math.floor(Math.random() * (+max - +min)) + +min;
-        return (random * 10) + 5
-    }
 
     update(time, delta) {
-        if(this.fallingTextGroup.countActive() < 1) {
-            let b = new FallingText({
-                    scene: this,
-                    x: this.getRandomTileX(),
-                    y: 0,
-                    text: "Here",
-                    opts: { fill: "#de77ae" }
-                })
-                this.fallingTextGroup.add(b, this)
-                // this.physics.add.collider(this.fallingTextGroup, this.tilesGroup);
-                
-        }
+      
 
         
     }

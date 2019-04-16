@@ -12,11 +12,10 @@ export default class FallingText extends Phaser.GameObjects.Text {
         // start still and wait until needed
         // this.body.setCollideWorldBounds(true);
         this.body.allowGravity = true;
-        this.body.setMaxSpeed(100)
+        this.body.setMaxSpeed(50)
         
         this.body.debugShowBody= true
         this.body.debugBodyColor = 0x0000ff;
-
 
         // Standard sprite is 16x16 pixels with a smaller body
         // this.setSize(10, 10);
@@ -35,8 +34,15 @@ export default class FallingText extends Phaser.GameObjects.Text {
         // this.body.offset.set(10, 12);
     }
 
+
+
     blowUp() {
         this.body.setMaxSpeed(0)
+        this.setText('answer')
+        this.scene.time.addEvent({delay:300, callback: this.destroy, callbackScope: this})
+    }
+
+    fired() {
         this.destroy()
     }
 

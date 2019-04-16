@@ -1,7 +1,9 @@
+import { getRandomInt } from '../helpers/util.js'
 /*
 Generic enemy class that extends Phaser sprites.
 Classes for enemy types extend this class.
 */
+
 
 export default class Block extends Phaser.GameObjects.Sprite {
     constructor(config) {
@@ -36,57 +38,53 @@ export default class Block extends Phaser.GameObjects.Sprite {
 
     }
 
-    // activated() {
-    //     // Method to check if an enemy is activated, the enemy will stay put
-    //     // until activated so that starting positions is correct
-    //     if (!this.alive) {
-    //         if (this.y > 240) {
-    //             this.kill();
-    //         }
-    //         return false;
-    //     }
-    //     if (!this.beenSeen) {
-    //         // check if it's being seen now and if so, activate it
-    //         if (this.x < this.scene.cameras.main.scrollX + this.scene.sys.game.canvas.width + 32) {
-    //             this.beenSeen = true;
-    //             this.body.velocity.x = this.direction;
-    //             this.body.allowGravity = true;
-    //             return true;
-    //         }
-    //         return false;
-    //     }
-    //     return true;
-    // }
+    static createStartBlocks(noBlocks, scene) {
+      let rows = Block.getRows(200)
+      let blocks = [];
+      rows.forEach((row) => {
+          row.x.forEach((x) => {
+              blocks.push(new Block({
+                  scene: scene,
+                  key: 'block',
+                  x: x,
+                  y: row.y
+                })
+              )
+          })
+      })
+      return blocks;
 
-    // verticalHit(enemy, mario) {
-    //     // quick check if a collision between the enemy and Mario is from above.
-    //     if (!mario.alive) {
-    //         return false;
-    //     }
-    //     return mario.body.velocity.y >= 0 && (mario.body.y + mario.body.height) - enemy.body.y < 10;
-    // }
+    }
 
-    // hurtMario(enemy, mario) {
-    //     // send the enemy to mario hurt method (if mario got a star this will not end well for the enemy)
-    //     this.scene.mario.hurtBy(enemy);
-    // }
+    
 
-    // starKilled() {
-    //     // Killed by a star or hit from below with a block, later on also fire
-    //     if (!this.alive) {
-    //         return;
-    //     }
-    //     this.body.velocity.x = 0;
-    //     this.body.velocity.y = -200;
-    //     this.alive = false;
-    //     this.flipY = true;
-    //     this.scene.sound.playAudioSprite('sfx', 'smb_stomp');
-    //     this.scene.updateScore(100);
-    // }
+    static getRows(noBlocks) {
+        let rows = [];
+        let i = 0
+        while (i < noBlocks) {
+            let randomX = Block.getRandomTileX()
+            rows.forEach((row, rowIndex) => {
+                if(!row.x.includes(randomX)){
+                    row.x.push(randomX)
+                    randomX = undefined
+                    return false;
+                }
+            })
+            if (randomX){
+                rows.push({y: undefined, x: [randomX]})
+            }
+            i++    
+        }
 
-    // kill() {
-    //     // Forget about this enemy
-    //     this.scene.enemyGroup.remove(this);
-    //     this.destroy();
-    // }
+        rows.forEach((row, rowIndex) => {
+            let y = 595 - (rowIndex * 11)
+            row.y = y
+        })
+       
+        return rows
+    }
+
+    static getRandomTileX () {
+      return (getRandomInt(0,99) * 10) + 5
+    }
 }

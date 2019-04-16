@@ -40,6 +40,7 @@ class BootScene extends Phaser.Scene {
 
         this.load.bitmapFont('font', 'assets/fonts/font.png', 'assets/fonts/font.fnt');
         this.load.image('block', 'assets/images/purpleBlock.png');
+        this.load.image('bullet', 'assets/images/bullet.png');
 
         // // This json contain recorded gamep
         // this.load.json('attractMode', 'assets/json/attractMode.json');
