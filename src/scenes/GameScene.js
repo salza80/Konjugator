@@ -37,7 +37,6 @@ class GameScene extends Phaser.Scene {
           scene: this,
           x: 400,
           y: 600,
-          text: "",
           opts: { fill: "#00ff00", fontSize: 20 }
       })
       this.scoreText = new Score({
@@ -53,7 +52,7 @@ class GameScene extends Phaser.Scene {
     }
 
     fire() {
-      let t = this.inputText.text
+      let t = this.inputText.getText()
       if (t === '') { return }
       this.inputText.setText('')
       let hasHit = false
