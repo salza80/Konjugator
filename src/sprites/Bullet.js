@@ -24,9 +24,8 @@ export default class Bullet extends Phaser.GameObjects.Sprite {
     // dimensions), you should divide these arguments by the Sprite's current scale:
     //
         this.body.setSize(5 / this.scaleX, 10 / this.scaleY)
-    //
+        this.scene.sound.playAudioSprite('sfx', 'smb_fireball');
 
-        // this.body.offset.set(10, 12);
     }
 
     blowUp() {

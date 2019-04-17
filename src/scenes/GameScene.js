@@ -2,6 +2,7 @@ import Block from '../sprites/Block';
 import FallingText from '../sprites/FallingText';
 import InputText from '../sprites/InputText';
 import Bullet from '../sprites/Bullet';
+import Score from '../sprites/Score';
 import { getRandomInt } from '../helpers/util.js'
 
 class GameScene extends Phaser.Scene {
@@ -12,7 +13,7 @@ class GameScene extends Phaser.Scene {
     }
 
     preload() {
-       
+
     }
 
     create() {
@@ -37,7 +38,14 @@ class GameScene extends Phaser.Scene {
           x: 400,
           y: 600,
           text: "test",
-          opts: { fill: "#de77ae", fontSize: 20 }
+          opts: { fill: "#00ff00", fontSize: 20 }
+      })
+      this.scoreText = new Score({
+          scene: this,
+          x: 800,
+          y: 50,
+          text: "",
+          opts: { fill: "#00ff00", fontSize: 30 }
       })
       this.input.keyboard.on('keydown-' + 'ENTER', this.fire, this)
       this.timers.push(this.time.addEvent({delay: 10000, callback: this.spawnFallingText, callbackScope: this, loop: true}))
@@ -46,8 +54,9 @@ class GameScene extends Phaser.Scene {
 
     fire() {
       let t = this.inputText.text
-              this.inputText.setText('')
-
+      if (t === '') { return }
+      this.inputText.setText('')
+      let hasHit = false
       this.fallingTextGroup.getChildren().every((fallingText) => {
         if (fallingText.text === t) {
           let b = new Bullet({
@@ -58,14 +67,20 @@ class GameScene extends Phaser.Scene {
               })
           this.bullets.add(b)
           this.physics.add.overlap(b, fallingText, this.hit, null, this)
+          hasHit = true
           return false
         } 
       })
+      if (!hasHit) {
+        this.cameras.main.shake(100, 0.05);
+        this.sound.playAudioSprite('sfx', 'smb_bump');
+      }
     }
 
     hit(bullet, fallingText) {
+      this.scoreText.updateScore(fallingText.text.length)
       bullet.destroy()
-      fallingText.destroy()
+      fallingText.hit()
     }
 
     smashBlock(fallingText, block) {
@@ -76,9 +91,8 @@ class GameScene extends Phaser.Scene {
     spawnFallingText() {
       let b = new FallingText({
           scene: this,
-          x: Block.getRandomTileX(),
-          y: 0,
-          text: "Here",
+          x: FallingText.getRandomTileX(),
+          text: "Heres",
           opts: { fill: "#de77ae" }
       })
       this.fallingTextGroup.add(b, this)

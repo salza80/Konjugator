@@ -1,3 +1,4 @@
+import { getRandomInt } from '../helpers/util.js'
 /*
 Generic enemy class that extends Phaser sprites.
 Classes for enemy types extend this class.
@@ -5,7 +6,7 @@ Classes for enemy types extend this class.
 
 export default class FallingText extends Phaser.GameObjects.Text {
     constructor(config) {
-        super(config.scene, config.x, config.y, config.text, config.opts);
+        super(config.scene, config.x, 0, config.text, config.opts);
         config.scene.physics.world.enable(this);
       
 
@@ -28,75 +29,31 @@ export default class FallingText extends Phaser.GameObjects.Text {
     // position the Body relative to the Sprite's dimensions (which will differ from its texture's
     // dimensions), you should divide these arguments by the Sprite's current scale:
 
-         this.body.setSize(this.width, this.height)
+        
+        // reposition is text is off the screen
+        if (this.x + this.width > 1000 ){
+            this.setX(1000-this.width)
+        }
+        this.body.setSize(this.width, this.height)
     //
 
         // this.body.offset.set(10, 12);
     }
 
 
+    static getRandomTileX () {
+        return getRandomInt(0,100) * 10
+    }
 
     blowUp() {
         this.body.setMaxSpeed(0)
         this.setText('answer')
+        this.scene.sound.playAudioSprite('sfx', 'smb_breakblock');
         this.scene.time.addEvent({delay:300, callback: this.destroy, callbackScope: this})
     }
 
-    fired() {
+    hit() {
+        this.scene.sound.playAudioSprite('sfx', 'smb_coin');
         this.destroy()
     }
-
-    // activated() {
-    //     // Method to check if an enemy is activated, the enemy will stay put
-    //     // until activated so that starting positions is correct
-    //     if (!this.alive) {
-    //         if (this.y > 240) {
-    //             this.kill();
-    //         }
-    //         return false;
-    //     }
-    //     if (!this.beenSeen) {
-    //         // check if it's being seen now and if so, activate it
-    //         if (this.x < this.scene.cameras.main.scrollX + this.scene.sys.game.canvas.width + 32) {
-    //             this.beenSeen = true;
-    //             this.body.velocity.x = this.direction;
-    //             this.body.allowGravity = true;
-    //             return true;
-    //         }
-    //         return false;
-    //     }
-    //     return true;
-    // }
-
-    // verticalHit(enemy, mario) {
-    //     // quick check if a collision between the enemy and Mario is from above.
-    //     if (!mario.alive) {
-    //         return false;
-    //     }
-    //     return mario.body.velocity.y >= 0 && (mario.body.y + mario.body.height) - enemy.body.y < 10;
-    // }
-
-    // hurtMario(enemy, mario) {
-    //     // send the enemy to mario hurt method (if mario got a star this will not end well for the enemy)
-    //     this.scene.mario.hurtBy(enemy);
-    // }
-
-    // starKilled() {
-    //     // Killed by a star or hit from below with a block, later on also fire
-    //     if (!this.alive) {
-    //         return;
-    //     }
-    //     this.body.velocity.x = 0;
-    //     this.body.velocity.y = -200;
-    //     this.alive = false;
-    //     this.flipY = true;
-    //     this.scene.sound.playAudioSprite('sfx', 'smb_stomp');
-    //     this.scene.updateScore(100);
-    // }
-
-    // kill() {
-    //     // Forget about this enemy
-    //     this.scene.enemyGroup.remove(this);
-    //     this.destroy();
-    // }
 }

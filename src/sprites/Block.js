@@ -39,7 +39,7 @@ export default class Block extends Phaser.GameObjects.Sprite {
     }
 
     static createStartBlocks(noBlocks, scene) {
-      let rows = Block.getRows(200)
+      let rows = Block.getRows(500)
       let blocks = [];
       rows.forEach((row) => {
           row.x.forEach((x) => {
@@ -65,9 +65,8 @@ export default class Block extends Phaser.GameObjects.Sprite {
             let randomX = Block.getRandomTileX()
             rows.forEach((row, rowIndex) => {
                 if(!row.x.includes(randomX)){
-                    row.x.push(randomX)
+                    if(randomX){row.x.push(randomX)}
                     randomX = undefined
-                    return false;
                 }
             })
             if (randomX){
