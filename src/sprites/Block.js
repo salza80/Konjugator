@@ -27,7 +27,7 @@ export default class Block extends Phaser.GameObjects.Sprite {
     // position the Body relative to the Sprite's dimensions (which will differ from its texture's
     // dimensions), you should divide these arguments by the Sprite's current scale:
     //
-        // this.body.setSize(10 / this.scaleX, 10 / this.scaleY)
+        //this.body.setSize(10 / this.scaleX, 10 / this.scaleY)
     //
 
         // this.body.offset.set(10, 12);

@@ -6,7 +6,7 @@ Classes for enemy types extend this class.
 
 export default class Bullet extends Phaser.GameObjects.Sprite {
     constructor(config) {
-        super(config.scene, config.x, config.y, config.key);
+        super(config.scene, config.x, config.y, 'bullet');
         config.scene.physics.world.enable(this);
       
         // start still and wait until needed
@@ -25,11 +25,20 @@ export default class Bullet extends Phaser.GameObjects.Sprite {
     //
         this.body.setSize(5 / this.scaleX, 10 / this.scaleY)
         this.scene.sound.playAudioSprite('sfx', 'smb_fireball');
+        this.body.setCollideWorldBounds(true)
+        this.body.onWorldBounds = true;
 
+        this.body.world.on('worldbounds', this.blowUp, this)
+        // this.scene.physics.add.overlap(this, this.scene.physics.world.bounds, this.blowUp, null, this);
     }
 
-    blowUp() {
-      this.destroy()
+    blowUp(body) {
+        console.log(this)
+        if (this === body.gameObject) {
+            console.log("here")
+            console.log(body.gameObject)
+            this.destroy()
+        }
 
     }
     

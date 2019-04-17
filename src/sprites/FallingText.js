@@ -35,14 +35,21 @@ export default class FallingText extends Phaser.GameObjects.Text {
             this.setX(1000-this.width)
         }
         this.body.setSize(this.width, this.height)
+
+        this.body.setCollideWorldBounds(true)
+        this.body.onWorldBounds = true;
+
+        this.body.world.on('worldbounds', this.OutOfBounds, this)
     //
 
         // this.body.offset.set(10, 12);
     }
 
+    OutOfBounds(body) {
+        if (this === body.gameObject) {
+            this.destroy()
+        }
 
-    static getRandomTileX () {
-        return getRandomInt(0,100) * 10
     }
 
     blowUp() {
@@ -55,5 +62,9 @@ export default class FallingText extends Phaser.GameObjects.Text {
     hit() {
         this.scene.sound.playAudioSprite('sfx', 'smb_coin');
         this.destroy()
+    }
+
+    static getRandomTileX () {
+        return getRandomInt(0,100) * 10
     }
 }

@@ -37,7 +37,7 @@ class GameScene extends Phaser.Scene {
           scene: this,
           x: 400,
           y: 600,
-          text: "test",
+          text: "",
           opts: { fill: "#00ff00", fontSize: 20 }
       })
       this.scoreText = new Score({
@@ -65,8 +65,9 @@ class GameScene extends Phaser.Scene {
                 x: fallingText.x + (fallingText.width / 2),
                 y: 600
               })
-          this.bullets.add(b)
+          this.bullets.add(b, this)
           this.physics.add.overlap(b, fallingText, this.hit, null, this)
+          
           hasHit = true
           return false
         } 
@@ -86,6 +87,14 @@ class GameScene extends Phaser.Scene {
     smashBlock(fallingText, block) {
         block.blowUp()
         fallingText.blowUp()
+        if (this.tilesGroup.getLength() === 0 ) {
+          console.log('GAME OVER')
+          this.gameOver()
+        }
+    }
+
+    gameOver() {
+
     }
 
     spawnFallingText() {

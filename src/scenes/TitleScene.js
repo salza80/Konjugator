@@ -11,7 +11,6 @@ class TitleScene extends Phaser.Scene {
 
 
         this.title = this.add.sprite(this.sys.game.config.width / 2, 16 * 5);
-        // this.attractMode = this.scene.launch('GameScene');
         
 
         this.scene.bringToTop();
@@ -64,7 +63,6 @@ class TitleScene extends Phaser.Scene {
 
     startGame() {
         this.scene.stop('GameScene');
-        this.registry.set('attractMode', false);
         this.scene.start('GameScene');
     }
 
