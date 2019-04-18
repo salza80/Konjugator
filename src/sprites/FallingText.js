@@ -6,17 +6,42 @@ Classes for enemy types extend this class.
 
 export default class FallingText extends Phaser.GameObjects.Text {
     constructor(config) {
-        super(config.scene, config.x, 0, config.text, config.opts);
+        super(config.scene, 0, 0, config.text, config.opts);
         config.scene.physics.world.enable(this);
       
 
         // start still and wait until needed
         // this.body.setCollideWorldBounds(true);
-        this.body.allowGravity = true;
-        this.body.setMaxSpeed(50)
+        this.textType = config.textType ? config.textType : 'falling'
+
+        if (this.textType==='falling') {
+            this.setX(config.x)
+            this.body.allowGravity = true;
+            this.body.setMaxSpeed(50)
+        } else {
+           
+            this.body.allowGravity = false;
+            this.setText('BONUS')
+            let LeftorRight = getRandomInt(0,2)
+            if (LeftorRight === 0) {
+                this.bonusDirection = 'left'
+                this.setX(1050)
+                this.setY(getRandomInt(100, 400))
+                this.body.setVelocityX(-30)
+            } else {
+                this.bonusDirection = 'right'
+                this.setX(0)
+                this.setY(getRandomInt(50, 400))
+                this.body.setVelocityX(30)
+            }
+            this.scene.sound.playAudioSprite('sfx', 'smb_powerup_appears');
+        }
         
-        this.body.debugShowBody= true
+        this.body.debugShowBody = true
         this.body.debugBodyColor = 0x0000ff;
+
+
+
 
         // Standard sprite is 16x16 pixels with a smaller body
         // this.setSize(10, 10);
@@ -46,10 +71,21 @@ export default class FallingText extends Phaser.GameObjects.Text {
     }
 
     OutOfBounds(body) {
-        if (this === body.gameObject) {
+        if (this !== body.gameObject) { return false }
+
+        if (this.textType === 'falling' && this.y < 100) {
             this.destroy()
+            return false
         }
 
+        if (this.bonusDirection === 'left' && this.x < 500) {
+            this.destroy()
+            return false;
+        } 
+        if (this.bonusDirection === 'right' && this.x >500) {
+            this.destroy()
+            return false;
+        } 
     }
 
     blowUp() {
@@ -60,7 +96,11 @@ export default class FallingText extends Phaser.GameObjects.Text {
     }
 
     hit() {
-        this.scene.sound.playAudioSprite('sfx', 'smb_coin');
+        if (this.textType === 'falling') {
+            this.scene.sound.playAudioSprite('sfx', 'smb_coin')
+        } else {
+            this.scene.sound.playAudioSprite('sfx', 'smb_powerup')
+        }
         this.destroy()
     }
 

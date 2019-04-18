@@ -47,8 +47,10 @@ class GameScene extends Phaser.Scene {
           opts: { fill: "#00ff00", fontSize: 30 }
       })
       this.input.keyboard.on('keydown-' + 'ENTER', this.fire, this)
-      this.timers.push(this.time.addEvent({delay: 10000, callback: this.spawnFallingText, callbackScope: this, loop: true}))
+      // this.timers.push(this.time.addEvent({delay: 10000, callback: this.spawnFallingText, callbackScope: this, loop: true}))
       this.timers.push(this.time.addEvent({delay: 5000, callback: this.spawnFallingText, callbackScope: this, loop: true}))
+
+      this.timers.push(this.time.addEvent({delay: 20000, callback: this.spawnBonusText, callbackScope: this, loop: true}))
     }
 
     fire() {
@@ -56,29 +58,31 @@ class GameScene extends Phaser.Scene {
       if (t === '') { return }
       this.inputText.setText('')
       let hasHit = false
+
       this.fallingTextGroup.getChildren().every((fallingText) => {
         if (fallingText.text === t) {
           let b = new Bullet({
                 scene: this,
-                key: 'bullet',
-                x: fallingText.x + (fallingText.width / 2),
-                y: 600
+                y: 600,
+                target: fallingText
               })
           this.bullets.add(b, this)
           this.physics.add.overlap(b, fallingText, this.hit, null, this)
           
           hasHit = true
           return false
-        } 
+        }
+        return true
       })
       if (!hasHit) {
+        console.log('MISS')
         this.cameras.main.shake(100, 0.05);
         this.sound.playAudioSprite('sfx', 'smb_bump');
       }
     }
 
     hit(bullet, fallingText) {
-      this.scoreText.updateScore(fallingText.text.length)
+      this.scoreText.updateScore(fallingText)
       bullet.destroy()
       fallingText.hit()
     }
@@ -87,13 +91,13 @@ class GameScene extends Phaser.Scene {
         block.blowUp()
         fallingText.blowUp()
         if (this.tilesGroup.getLength() === 0 ) {
-          console.log('GAME OVER')
+          
           this.gameOver()
         }
     }
 
     gameOver() {
-
+      console.log('GAME OVER')
     }
 
     spawnFallingText() {
@@ -104,7 +108,19 @@ class GameScene extends Phaser.Scene {
           opts: { fill: "#de77ae" }
       })
       this.fallingTextGroup.add(b, this)
-    } 
+    }
+
+    spawnBonusText() {
+        let b = new FallingText({
+            scene: this,
+            x: FallingText.getRandomTileX(),
+            text: "Bonus",
+            textType: "bonus",
+            opts: { fill: "#ffa500", fontSize: 20 }
+        })
+        
+        this.fallingTextGroup.add(b, this)
+    }
 
 
     update(time, delta) {
