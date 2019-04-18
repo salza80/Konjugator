@@ -39,7 +39,7 @@ export default class Block extends Phaser.GameObjects.Sprite {
     }
 
     static createStartBlocks(noBlocks, scene) {
-      let rows = Block.getRows(500)
+      let rows = Block.getRows(noBlocks)
       let blocks = [];
       rows.forEach((row) => {
           row.x.forEach((x) => {

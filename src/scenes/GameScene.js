@@ -16,8 +16,11 @@ class GameScene extends Phaser.Scene {
 
     }
 
-    create() {
+    create () {
      
+     // this spawn falling text speed
+     this.fallingTextTimerFrom = 5000
+     this.fallingTextTimerTo = 15000
     
       // // Add and play the music
       this.music = this.sound.add('overworld');
@@ -30,7 +33,7 @@ class GameScene extends Phaser.Scene {
       this.inputGroup = this.add.group()
       this.bullets = this.add.group()
 
-      this.tilesGroup.addMultiple(Block.createStartBlocks(100, this), this)
+      this.tilesGroup.addMultiple(Block.createStartBlocks(250, this), this)
       this.physics.add.overlap(this.fallingTextGroup, this.tilesGroup, this.smashBlock, null, this);
 
       this.inputText = new InputText({
@@ -47,10 +50,26 @@ class GameScene extends Phaser.Scene {
           opts: { fill: "#00ff00", fontSize: 30 }
       })
       this.input.keyboard.on('keydown-' + 'ENTER', this.fire, this)
-      // this.timers.push(this.time.addEvent({delay: 10000, callback: this.spawnFallingText, callbackScope: this, loop: true}))
-      this.timers.push(this.time.addEvent({delay: 5000, callback: this.spawnFallingText, callbackScope: this, loop: true}))
+      
+      //set random word timer
+      this.startText = this.add.text(50, 200, 'Konjugiere das verb! Bist du bereit?', { fill: "#00ff00", fontSize: 30 })
+      this.countDownEvent = this.time.addEvent({delay: 1000, callback: this.countDown, callbackScope: this, repeat: 5})
 
-      this.timers.push(this.time.addEvent({delay: 20000, callback: this.spawnBonusText, callbackScope: this, loop: true}))
+    }
+
+    countDown() {
+      if (this.countDownEvent.getRepeatCount() !== 0) {
+        this.startText.setText('Konjugiere das verb! Bist du bereit?  ' + (this.countDownEvent.getRepeatCount()))
+      } else {
+        this.startText.destroy()
+        this.spawnFallingText()
+        this.setRandomTimer(this.spawnBonusText, 15000, 50000)
+      }
+      
+    }
+
+    setRandomTimer(func, fromDelay, toDelay) {
+      this.timers.push(this.time.addEvent({delay: getRandomInt(fromDelay, toDelay), callback: func, callbackScope: this, loop: false}))
     }
 
     fire() {
@@ -60,7 +79,7 @@ class GameScene extends Phaser.Scene {
       let hasHit = false
 
       this.fallingTextGroup.getChildren().every((fallingText) => {
-        if (fallingText.text === t) {
+        if (fallingText.answer === t) {
           let b = new Bullet({
                 scene: this,
                 y: 600,
@@ -75,7 +94,6 @@ class GameScene extends Phaser.Scene {
         return true
       })
       if (!hasHit) {
-        console.log('MISS')
         this.cameras.main.shake(100, 0.05);
         this.sound.playAudioSprite('sfx', 'smb_bump');
       }
@@ -97,29 +115,34 @@ class GameScene extends Phaser.Scene {
     }
 
     gameOver() {
+      this.registry.set('restartScene', true);
       console.log('GAME OVER')
+      this.music.stop()
+      this.scene.stop('GameScene');
+      this.scene.start('TitleScene');
     }
 
     spawnFallingText() {
       let b = new FallingText({
           scene: this,
+          textType: "falling",
           x: FallingText.getRandomTileX(),
-          text: "Heres",
           opts: { fill: "#de77ae" }
       })
       this.fallingTextGroup.add(b, this)
+      this.setRandomTimer(this.spawnFallingText, this.fallingTextTimerFrom, this.fallingTextTimerFrom)
     }
 
     spawnBonusText() {
         let b = new FallingText({
             scene: this,
             x: FallingText.getRandomTileX(),
-            text: "Bonus",
             textType: "bonus",
-            opts: { fill: "#ffa500", fontSize: 20 }
+            opts: { fill: "#ffa500", fontSize: 15 }
         })
         
         this.fallingTextGroup.add(b, this)
+        this.setRandomTimer(this.spawnBonusText, 8000, 20000)
     }
 
 

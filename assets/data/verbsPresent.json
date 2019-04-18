@@ -1,0 +1,452 @@
+{
+   "arbeiten": {
+      "ich": "arbeite",
+      "du": "arbeitest",
+      "er_sie_es": "arbeitet",
+      "ihr": "arbeitet",
+      "wir": "arbeiten",
+      "Sie": "arbeiten",
+      "english": "to work"
+   },
+   "beginnen": {
+      "ich": "beginne",
+      "du": "beginnst",
+      "er_sie_es": "beginnt",
+      "ihr": "beginnt",
+      "wir": "beginnen",
+      "Sie": "beginnen",
+      "english": "to begin"
+   },
+   "bekommen": {
+      "ich": "bekomme",
+      "du": "bekommst",
+      "er_sie_es": "bekommt",
+      "ihr": "bekommt",
+      "wir": "bekommen",
+      "Sie": "bekommen",
+      "english": "to get"
+   },
+   "bleiben": {
+      "ich": "bleibe",
+      "du": "bleibst",
+      "er_sie_es": "bleibt",
+      "ihr": "bleibt",
+      "wir": "bleiben",
+      "Sie": "bleiben",
+      "english": "to stay"
+   },
+   "brauchen": {
+      "ich": "brauche",
+      "du": "brauchst",
+      "er_sie_es": "braucht",
+      "ihr": "braucht",
+      "wir": "brauchen",
+      "Sie": "brauchen",
+      "english": "to need"
+   },
+   "bringen": {
+      "ich": "bringe",
+      "du": "bringst",
+      "er_sie_es": "bringt",
+      "ihr": "bringt",
+      "wir": "bringen",
+      "Sie": "bringen",
+      "english": "to bring"
+   },
+   "dürfen": {
+      "ich": "darf",
+      "du": "darfst",
+      "er_sie_es": "darf",
+      "ihr": "dürft",
+      "wir": "dürfen",
+      "Sie": "dürfen",
+      "english": "to be allowed"
+   },
+   "erklären": {
+      "ich": "erkläre",
+      "du": "erklärst",
+      "er_sie_es": "erklärt",
+      "ihr": "erklärt",
+      "wir": "erklären",
+      "Sie": "erklären",
+      "english": "to explain"
+   },
+   "fahren": {
+      "ich": "fahre",
+      "du": "fährst",
+      "er_sie_es": "fährt",
+      "ihr": "fahrt",
+      "wir": "fahren",
+      "Sie": "fahren",
+      "english": "to drive"
+   },
+   "fehlen": {
+      "ich": "fehle",
+      "du": "fehlst",
+      "er_sie_es": "fehlt",
+      "ihr": "fehlt",
+      "wir": "fehlen",
+      "Sie": "fehlen",
+      "english": "to lack\nto be missing\nto be absent"
+   },
+   "feiern": {
+      "ich": "feiere",
+      "du": "feierst",
+      "er_sie_es": "feiert",
+      "ihr": "feiert",
+      "wir": "feiern",
+      "Sie": "feiern",
+      "english": "to celebrate"
+   },
+   "finden": {
+      "ich": "finde",
+      "du": "findest",
+      "er_sie_es": "findet",
+      "ihr": "findet",
+      "wir": "finden",
+      "Sie": "finden",
+      "english": "to find"
+   },
+   "fragen": {
+      "ich": "frage",
+      "du": "fragst",
+      "er_sie_es": "fragt",
+      "ihr": "fragt",
+      "wir": "fragen",
+      "Sie": "fragen",
+      "english": "to ask"
+   },
+   "geben": {
+      "ich": "gebe",
+      "du": "gibst",
+      "er_sie_es": "gibt",
+      "ihr": "gebt",
+      "wir": "geben",
+      "Sie": "geben",
+      "english": "to give"
+   },
+   "gehen": {
+      "ich": "gehe",
+      "du": "gehst",
+      "er_sie_es": "geht",
+      "ihr": "geht",
+      "wir": "gehen",
+      "Sie": "gehen",
+      "english": "to go\nto walk"
+   },
+   "gehören": {
+      "ich": "gehöre",
+      "du": "gehörst",
+      "er_sie_es": "gehört",
+      "ihr": "gehört",
+      "wir": "gehören",
+      "Sie": "gehören",
+      "english": "to belong"
+   },
+   "gewinnen": {
+      "ich": "gewinne",
+      "du": "gewinnst",
+      "er_sie_es": "gewinnt",
+      "ihr": "gewinnt",
+      "wir": "gewinnen",
+      "Sie": "gewinnen",
+      "english": "to win"
+   },
+   "glauben": {
+      "ich": "glaube",
+      "du": "glaubst",
+      "er_sie_es": "glaubt",
+      "ihr": "glaubt",
+      "wir": "glauben",
+      "Sie": "glauben",
+      "english": "to believe"
+   },
+   "haben": {
+      "ich": "habe",
+      "du": "hast",
+      "er_sie_es": "hat",
+      "ihr": "habt",
+      "wir": "haben",
+      "Sie": "haben",
+      "english": "to have"
+   },
+   "halten": {
+      "ich": "halte",
+      "du": "hältst",
+      "er_sie_es": "hält",
+      "ihr": "haltet",
+      "wir": "halten",
+      "Sie": "halten",
+      "english": "to hold"
+   },
+   "heißen": {
+      "ich": "heiße",
+      "du": "heißt",
+      "er_sie_es": "heißt",
+      "ihr": "heißt",
+      "wir": "heißen",
+      "Sie": "heißen",
+      "english": "to be called"
+   },
+   "kennen": {
+      "ich": "kenne",
+      "du": "kennst",
+      "er_sie_es": "kennt",
+      "ihr": "kennt",
+      "wir": "kennen",
+      "Sie": "kennen",
+      "english": "to know"
+   },
+   "kommen": {
+      "ich": "komme",
+      "du": "kommst",
+      "er_sie_es": "kommt",
+      "ihr": "kommt",
+      "wir": "kommen",
+      "Sie": "kommen",
+      "english": "to come"
+   },
+   "können": {
+      "ich": "kann",
+      "du": "kannst",
+      "er_sie_es": "kann",
+      "ihr": "könnt",
+      "wir": "können",
+      "Sie": "können",
+      "english": "to can\nto be able to"
+   },
+   "laufen": {
+      "ich": "laufe",
+      "du": "läufst",
+      "er_sie_es": "läuft",
+      "ihr": "lauft",
+      "wir": "laufen",
+      "Sie": "laufen",
+      "english": "to walk"
+   },
+   "leben": {
+      "ich": "lebe",
+      "du": "lebst",
+      "er_sie_es": "lebt",
+      "ihr": "lebt",
+      "wir": "leben",
+      "Sie": "leben",
+      "english": "to live"
+   },
+   "legen": {
+      "ich": "lege",
+      "du": "legst",
+      "er_sie_es": "legt",
+      "ihr": "legt",
+      "wir": "legen",
+      "Sie": "legen",
+      "english": "to put"
+   },
+   "liegen": {
+      "ich": "liege",
+      "du": "liegst",
+      "er_sie_es": "liegt",
+      "ihr": "liegt",
+      "wir": "liegen",
+      "Sie": "liegen",
+      "english": "to lie"
+   },
+   "machen": {
+      "ich": "mache",
+      "du": "machst",
+      "er_sie_es": "macht",
+      "ihr": "macht",
+      "wir": "machen",
+      "Sie": "machen",
+      "english": "to do"
+   },
+   "mögen": {
+      "ich": "mag",
+      "du": "magst",
+      "er_sie_es": "mag",
+      "ihr": "mögt",
+      "wir": "mögen",
+      "Sie": "mögen",
+      "english": "to like"
+   },
+   "müssen": {
+      "ich": "muss",
+      "du": "musst",
+      "er_sie_es": "muss",
+      "ihr": "müsst",
+      "wir": "müssen",
+      "Sie": "müssen",
+      "english": "to must\nto have to"
+   },
+   "nehmen": {
+      "ich": "nehme",
+      "du": "nimmst",
+      "er_sie_es": "nimmt",
+      "ihr": "nehmt",
+      "wir": "nehmen",
+      "Sie": "nehmen",
+      "english": "to take"
+   },
+   "sagen": {
+      "ich": "sage",
+      "du": "sagst",
+      "er_sie_es": "sagt",
+      "ihr": "sagt",
+      "wir": "sagen",
+      "Sie": "sagen",
+      "english": "to say"
+   },
+   "scheinen": {
+      "ich": "scheine",
+      "du": "scheinst",
+      "er_sie_es": "scheint",
+      "ihr": "scheint",
+      "wir": "scheinen",
+      "Sie": "scheinen",
+      "english": "to seem"
+   },
+   "schließen": {
+      "ich": "schließe",
+      "du": "schließt",
+      "er_sie_es": "schließe",
+      "ihr": "schließe",
+      "wir": "schließen",
+      "Sie": "schließen",
+      "english": "to close"
+   },
+   "schreiben": {
+      "ich": "schreibe",
+      "du": "schreibst",
+      "er_sie_es": "schreibt",
+      "ihr": "schreibt",
+      "wir": "schreiben",
+      "Sie": "schreiben",
+      "english": "to write"
+   },
+   "sehen": {
+      "ich": "sehe",
+      "du": "siehst",
+      "er_sie_es": "sieht",
+      "ihr": "seht",
+      "wir": "sehen",
+      "Sie": "sehen",
+      "english": "to see"
+   },
+   "sein": {
+      "ich": "bin",
+      "du": "bist",
+      "er_sie_es": "ist",
+      "ihr": "seid",
+      "wir": "sind",
+      "Sie": "sind",
+      "english": "to be"
+   },
+   "sollen": {
+      "ich": "soll",
+      "du": "sollst",
+      "er_sie_es": "soll",
+      "ihr": "sollt",
+      "wir": "sollen",
+      "Sie": "sollen",
+      "english": "to should\nto ought"
+   },
+   "spielen": {
+      "ich": "spiele",
+      "du": "spielst",
+      "er_sie_es": "spielt",
+      "ihr": "spielt",
+      "wir": "spielen",
+      "Sie": "spielen",
+      "english": "to play"
+   },
+   "sprechen": {
+      "ich": "spreche",
+      "du": "sprichst",
+      "er_sie_es": "sprict",
+      "ihr": "sprecht",
+      "wir": "sprechen",
+      "Sie": "sprechen",
+      "english": "to speak"
+   },
+   "stehen": {
+      "ich": "stehe",
+      "du": "stehst",
+      "er_sie_es": "steht",
+      "ihr": "steht",
+      "wir": "stehen",
+      "Sie": "stehen",
+      "english": "to stand"
+   },
+   "stellen": {
+      "ich": "stelle",
+      "du": "stellst",
+      "er_sie_es": "stellt",
+      "ihr": "stellt",
+      "wir": "stellen",
+      "Sie": "stellen",
+      "english": "to put"
+   },
+   "suchen": {
+      "ich": "suche",
+      "du": "suchst",
+      "er_sie_es": "sucht",
+      "ihr": "sucht",
+      "wir": "suchen",
+      "Sie": "suchen",
+      "english": "to search"
+   },
+   "treffen": {
+      "ich": "treffe",
+      "du": "triffst",
+      "er_sie_es": "trifft",
+      "ihr": "trefft",
+      "wir": "treffen",
+      "Sie": "treffen",
+      "english": "to meet"
+   },
+   "tun": {
+      "ich": "tue",
+      "du": "tust",
+      "er_sie_es": "tut",
+      "ihr": "tut",
+      "wir": "tun",
+      "Sie": "tun",
+      "english": "to do"
+   },
+   "werden": {
+      "ich": "werde",
+      "du": "wirst",
+      "er_sie_es": "wird",
+      "ihr": "werdet",
+      "wir": "werden",
+      "Sie": "werden",
+      "english": "to become"
+   },
+   "wissen": {
+      "ich": "weiß",
+      "du": "weißt",
+      "er_sie_es": "weiß",
+      "ihr": "wisst",
+      "wir": "wissen",
+      "Sie": "wissen",
+      "english": "to know"
+   },
+   "wollen": {
+      "ich": "will",
+      "du": "willst",
+      "er_sie_es": "will",
+      "ihr": "wollt",
+      "wir": "wollen",
+      "Sie": "wollen",
+      "english": "to want"
+   },
+   "zahlen": {
+      "ich": "zahle",
+      "du": "zahlst",
+      "er_sie_es": "zahlt",
+      "ihr": "zahlt",
+      "wir": "zahlen",
+      "Sie": "zahlen",
+      "english": "to pay"
+   }
+}

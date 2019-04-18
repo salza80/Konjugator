@@ -62,8 +62,12 @@ class TitleScene extends Phaser.Scene {
     }
 
     startGame() {
+        if (!this.registry.get('restartScene')) {
         this.scene.stop('GameScene');
         this.scene.start('GameScene');
+        } else {
+            this.restartScene();
+        }
     }
 
     restartScene() {

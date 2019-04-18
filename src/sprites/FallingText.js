@@ -6,33 +6,41 @@ Classes for enemy types extend this class.
 
 export default class FallingText extends Phaser.GameObjects.Text {
     constructor(config) {
-        super(config.scene, 0, 0, config.text, config.opts);
+        super(config.scene, 0, 0, '', config.opts)
         config.scene.physics.world.enable(this);
-      
 
-        // start still and wait until needed
-        // this.body.setCollideWorldBounds(true);
+        // set random verb
+        var verbs = this.scene.cache.json.get('verbs')
+        let verbKeys = Object.keys(verbs)
+        this.verb = verbKeys[getRandomInt(0, verbKeys.length)]
+        let subjectKeys = Object.keys(verbs[this.verb])
+        // -1 to avoid english
+        this.subject = subjectKeys[getRandomInt(0, subjectKeys.length -1)]
+        this.answer = verbs[this.verb][this.subject]
+        this.english = verbs[this.verb]['english']
+
+        this.setText(this.subject + ' (' + this.verb + ')')
+
         this.textType = config.textType ? config.textType : 'falling'
 
         if (this.textType==='falling') {
             this.setX(config.x)
             this.body.allowGravity = true;
-            this.body.setMaxSpeed(50)
+            this.body.setMaxSpeed(35)
         } else {
-           
+           // type bonus 
             this.body.allowGravity = false;
-            this.setText('BONUS')
             let LeftorRight = getRandomInt(0,2)
             if (LeftorRight === 0) {
                 this.bonusDirection = 'left'
                 this.setX(1050)
                 this.setY(getRandomInt(100, 400))
-                this.body.setVelocityX(-30)
+                this.body.setVelocityX(-70)
             } else {
                 this.bonusDirection = 'right'
                 this.setX(0)
                 this.setY(getRandomInt(50, 400))
-                this.body.setVelocityX(30)
+                this.body.setVelocityX(70)
             }
             this.scene.sound.playAudioSprite('sfx', 'smb_powerup_appears');
         }
@@ -61,7 +69,6 @@ export default class FallingText extends Phaser.GameObjects.Text {
         }
         this.body.setSize(this.width, this.height)
 
-        this.body.setCollideWorldBounds(true)
         this.body.onWorldBounds = true;
 
         this.body.world.on('worldbounds', this.OutOfBounds, this)
@@ -90,7 +97,7 @@ export default class FallingText extends Phaser.GameObjects.Text {
 
     blowUp() {
         this.body.setMaxSpeed(0)
-        this.setText('answer')
+        this.setText(this.answer)
         this.scene.sound.playAudioSprite('sfx', 'smb_breakblock');
         this.scene.time.addEvent({delay:300, callback: this.destroy, callbackScope: this})
     }
