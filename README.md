@@ -1,6 +1,8 @@
 
 #### Phaser 3 + ES6 + Webpack
 
+Konjugator!
+
 
 
 # Setup
