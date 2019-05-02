@@ -12,6 +12,11 @@ const config = {
     parent: 'content',
     width: 1000,
     height: 700,
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },
+    autoRound: true,
     physics: {
         default: 'arcade',
         arcade: {

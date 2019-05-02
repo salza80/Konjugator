@@ -25,6 +25,10 @@ export default class FallingText extends Phaser.GameObjects.Text {
 
         if (this.textType==='falling') {
             this.setX(config.x)
+            //reposition if text is off screen
+            if (this.x + this.width > 1000 ){
+                this.setX(1000-this.width)
+            }
             this.body.allowGravity = true;
             this.body.setMaxSpeed(35)
         } else {
@@ -58,20 +62,17 @@ export default class FallingText extends Phaser.GameObjects.Text {
         
         
 
-    // If you've scaled a Sprite by altering its `width`, `height`, or `scale` and you want to
-    // position the Body relative to the Sprite's dimensions (which will differ from its texture's
-    // dimensions), you should divide these arguments by the Sprite's current scale:
+        // If you've scaled a Sprite by altering its `width`, `height`, or `scale` and you want to
+        // position the Body relative to the Sprite's dimensions (which will differ from its texture's
+        // dimensions), you should divide these arguments by the Sprite's current scale:
 
-        
-        // reposition is text is off the screen
-        if (this.x + this.width > 1000 ){
-            this.setX(1000-this.width)
-        }
+                
         this.body.setSize(this.width, this.height)
-
         this.body.onWorldBounds = true;
 
         this.body.world.on('worldbounds', this.OutOfBounds, this)
+
+
     //
 
         // this.body.offset.set(10, 12);

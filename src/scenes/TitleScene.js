@@ -36,7 +36,6 @@ class TitleScene extends Phaser.Scene {
         // let el = document.getElementsByTagName('canvas')[0];
         // el.style.width = 400 * multiplier + 'px';
         // el.style.height = 240 * multiplier + 'px';
-        this.add.text(100, 500, 'For ä,ö,ü & ß input on english keyboard use the buttons or 1, 2, 3, 4 keys respectively.', { fill: "#00ff00", fontSize: 10 })
         this.pressX = this.add.bitmapText(300, 300, 'font', 'PRESS X TO START', 15);
         this.blink = 1000;
 

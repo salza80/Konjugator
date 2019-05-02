@@ -53,6 +53,7 @@ class GameScene extends Phaser.Scene {
       
       //set random word timer
       this.startText = this.add.text(50, 200, 'Konjugiere das verb! Bist du bereit?', { fill: "#00ff00", fontSize: 30 })
+      this.keysText = this.add.text(100, 300, 'For ä,ö,ü & ß input on english keyboard use the buttons or 1, 2, 3, 4 keys respectively.', { fill: "#00ff00", fontSize: 13 })
       this.countDownEvent = this.time.addEvent({delay: 1000, callback: this.countDown, callbackScope: this, repeat: 5})
 
     }
@@ -62,10 +63,10 @@ class GameScene extends Phaser.Scene {
         this.startText.setText('Konjugiere das verb! Bist du bereit?  ' + (this.countDownEvent.getRepeatCount()))
       } else {
         this.startText.destroy()
+        this.keysText.destroy()
         this.spawnFallingText()
         this.setRandomTimer(this.spawnBonusText, 15000, 50000)
-      }
-      
+      }  
     }
 
     setRandomTimer(func, fromDelay, toDelay) {
