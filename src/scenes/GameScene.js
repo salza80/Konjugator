@@ -1,5 +1,5 @@
 import Block from '../sprites/Block';
-import FallingText from '../sprites/FallingText';
+import GameTextFactory from '../sprites/GameText';
 import InputText from '../sprites/InputText';
 import Bullet from '../sprites/Bullet';
 import Score from '../sprites/Score';
@@ -23,18 +23,18 @@ class GameScene extends Phaser.Scene {
      this.fallingTextTimerTo = 15000
     
       // // Add and play the music
-      this.music = this.sound.add('overworld');
-      this.music.play({
-          loop: true
-      });
+      // this.music = this.sound.add('overworld');
+      // this.music.play({
+      //     loop: true
+      // });
       this.timers = [];
       this.tilesGroup = this.add.group()
-      this.fallingTextGroup = this.add.group()
+      this.gameTextGroup = this.add.group({ runChildUpdate: true })
       this.inputGroup = this.add.group()
       this.bullets = this.add.group()
 
-      this.tilesGroup.addMultiple(Block.createStartBlocks(250, this), this)
-      this.physics.add.overlap(this.fallingTextGroup, this.tilesGroup, this.smashBlock, null, this);
+      this.tilesGroup.addMultiple(Block.createStartBlocks(10, this), this)
+      this.physics.add.overlap(this.gameTextGroup, this.tilesGroup, this.smashBlock, null, this);
 
       this.inputText = new InputText({
           scene: this,
@@ -64,6 +64,7 @@ class GameScene extends Phaser.Scene {
       } else {
         this.startText.destroy()
         this.keysText.destroy()
+        this.inputText.setText('')
         this.spawnFallingText()
         this.setRandomTimer(this.spawnBonusText, 15000, 50000)
       }  
@@ -79,7 +80,7 @@ class GameScene extends Phaser.Scene {
       this.inputText.setText('')
       let hasHit = false
 
-      this.fallingTextGroup.getChildren().every((fallingText) => {
+      this.gameTextGroup.getChildren().every((fallingText) => {
         if (fallingText.answer === t) {
           let b = new Bullet({
                 scene: this,
@@ -124,25 +125,23 @@ class GameScene extends Phaser.Scene {
     }
 
     spawnFallingText() {
-      let b = new FallingText({
+      let b = GameTextFactory({
           scene: this,
           textType: "falling",
-          x: FallingText.getRandomTileX(),
           opts: { fill: "#de77ae" }
       })
-      this.fallingTextGroup.add(b, this)
+      this.gameTextGroup.add(b, this)
       this.setRandomTimer(this.spawnFallingText, this.fallingTextTimerFrom, this.fallingTextTimerFrom)
     }
 
     spawnBonusText() {
-        let b = new FallingText({
+        let b = GameTextFactory({
             scene: this,
-            x: FallingText.getRandomTileX(),
             textType: "bonus",
             opts: { fill: "#ffa500", fontSize: 15 }
         })
         
-        this.fallingTextGroup.add(b, this)
+        this.gameTextGroup.add(b, this)
         this.setRandomTimer(this.spawnBonusText, 8000, 20000)
     }
 

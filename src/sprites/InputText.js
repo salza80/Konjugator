@@ -1,8 +1,3 @@
-/*
-Generic enemy class that extends Phaser sprites.
-Classes for enemy types extend this class.
-*/
-
 class InputButton extends Phaser.GameObjects.Text {
     constructor(scene, x, y, text, style, pressedFunc) {
         super(scene, x, y, text, style)
@@ -73,7 +68,7 @@ export default class InputText extends Phaser.GameObjects.Container {
     }
 
     getText() {
-        return this.textBox.text
+        return this.textBox.text.trim()
     }
 
 

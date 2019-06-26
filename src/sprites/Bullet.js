@@ -15,8 +15,8 @@ export default class Bullet extends Phaser.GameObjects.Sprite {
 
         
         // Standard sprite is 16x16 pixels with a smaller body
-        this.setSize(5, 10);
-        this.setDisplaySize(5, 10)
+        // this.setSize(5, 10);
+        // this.setDisplaySize(5, 10)
         
 
     // If you've scaled a Sprite by altering its `width`, `height`, or `scale` and you want to
