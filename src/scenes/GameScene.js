@@ -22,18 +22,18 @@ class GameScene extends Phaser.Scene {
      this.fallingTextTimerFrom = 5000
      this.fallingTextTimerTo = 15000
     
-      // // Add and play the music
-      // this.music = this.sound.add('overworld');
-      // this.music.play({
-      //     loop: true
-      // });
+      // Add and play the music
+      this.music = this.sound.add('overworld');
+      this.music.play({
+          loop: true
+      });
       this.timers = [];
       this.tilesGroup = this.add.group()
       this.gameTextGroup = this.add.group({ runChildUpdate: true })
       this.inputGroup = this.add.group()
       this.bullets = this.add.group()
 
-      this.tilesGroup.addMultiple(Block.createStartBlocks(10, this), this)
+      this.tilesGroup.addMultiple(Block.createStartBlocks(250, this), this)
       this.physics.add.overlap(this.gameTextGroup, this.tilesGroup, this.smashBlock, null, this);
 
       this.inputText = new InputText({
