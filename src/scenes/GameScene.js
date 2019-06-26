@@ -33,7 +33,7 @@ class GameScene extends Phaser.Scene {
       this.inputGroup = this.add.group()
       this.bullets = this.add.group()
 
-      this.tilesGroup.addMultiple(Block.createStartBlocks(250, this), this)
+      this.tilesGroup.addMultiple(Block.createStartBlocks(1, this), this)
       this.physics.add.overlap(this.gameTextGroup, this.tilesGroup, this.smashBlock, null, this);
 
       this.inputText = new InputText({
@@ -117,11 +117,10 @@ class GameScene extends Phaser.Scene {
     }
 
     gameOver() {
-      this.registry.set('restartScene', true);
-      console.log('GAME OVER')
+      this.registry.set('finalScore', this.scoreText.getScore());
       this.music.stop()
       this.scene.stop('GameScene');
-      this.scene.start('TitleScene');
+      this.scene.start('GameOver');
     }
 
     spawnFallingText() {

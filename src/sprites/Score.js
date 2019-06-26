@@ -24,9 +24,13 @@ export default class Score extends Phaser.GameObjects.Text {
       }, callbackScope: this, repeat: 7, loop: false, delay: 100})
     }
 
+    getScore() {
+      return this.score
+    }
+
     resetScore() {
-        this.score = 0
-        this.setText('Score: ' + this.score) 
+      this.score = 0
+      this.setText('Score: ' + this.score) 
     }
 }
 

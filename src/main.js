@@ -2,6 +2,7 @@ import 'phaser';
 import BootScene from './scenes/BootScene';
 import GameScene from './scenes/GameScene';
 import TitleScene from './scenes/TitleScene';
+import GameOverScene from './scenes/GameOverScene';
 // import UIPlugin from '../assets/plugins/rexuiplugin.min';
 
 const config = {
@@ -29,7 +30,8 @@ const config = {
     scene: [
         BootScene,
         TitleScene,
-        GameScene
+        GameScene,
+        GameOverScene
     ]
     // plugins: {
     //     scene: [{

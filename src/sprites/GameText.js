@@ -49,7 +49,8 @@ class GameText extends Phaser.GameObjects.Text {
     showAnswerAndRemove() {
       this.body.setMaxSpeed(0)
       this.setText(this.answer)
-      this.scene.time.addEvent({delay:300, callback: this.destroy, callbackScope: this})
+      this.setStyle({ fill: '#ff0'});
+      this.scene.time.addEvent({delay:600, callback: this.destroy, callbackScope: this})
     }
 
     blowUp() {
@@ -74,8 +75,6 @@ class GameText extends Phaser.GameObjects.Text {
       return getRandomInt(0,100) * 10
     }
 }
-
-
 
 class FallingText extends GameText {
   constructor(config) {
@@ -107,7 +106,7 @@ class BonusText extends GameText {
   super(config)
   this.hitSound = 'smb_powerup'
   this.body.allowGravity = false;
-    let LeftorRight = getRandomInt(0,2)
+  let LeftorRight = getRandomInt(0,2)
     if (LeftorRight === 0) {
       this.bonusDirection = 'left'
       this.setX(1050)

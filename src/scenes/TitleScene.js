@@ -16,26 +16,6 @@ class TitleScene extends Phaser.Scene {
         this.scene.bringToTop();
 
         this.registry.set('restartScene', false);
-
-        let sh = window.screen.availHeight;
-        let sw = window.screen.availWidth;
-
-        // console.log(sh)
-        // console.log(sw)
-
-        // let ch = 0;
-        // let cw = 0;
-        // let multiplier = 1;
-        // if (sh / sw > 0.6) {
-        //     // Portrait, fit width
-        //     multiplier = sw / 400;
-        // } else {
-        //     multiplier = sh / 240;
-        // }
-        // multiplier = Math.floor(multiplier);
-        // let el = document.getElementsByTagName('canvas')[0];
-        // el.style.width = 400 * multiplier + 'px';
-        // el.style.height = 240 * multiplier + 'px';
         this.pressX = this.add.bitmapText(300, 300, 'font', 'PRESS X TO START', 15);
         this.blink = 1000;
 
@@ -61,21 +41,8 @@ class TitleScene extends Phaser.Scene {
     }
 
     startGame() {
-        if (!this.registry.get('restartScene')) {
-        this.scene.stop('GameScene');
-        this.scene.start('GameScene');
-        } else {
-            this.restartScene();
-        }
-    }
-
-    restartScene() {
-        //        this.attractMode.stop();
-        this.scene.stop('GameScene');
-        this.scene.launch('GameScene');
-        this.scene.bringToTop();
-
-        this.registry.set('restartScene', false);
+      this.scene.stop('GameScene');
+      this.scene.start('GameScene');
     }
 }
 
