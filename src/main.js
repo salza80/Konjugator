@@ -42,4 +42,8 @@ const config = {
     // }
 };
 
-const game = new Phaser.Game(config); // eslint-disable-line no-unused-vars
+export const startGame = (customGameData) => {
+    const game = new Phaser.Game(config); // eslint-disable-line no-unused-vars
+    game.registry.set('custom_game_data', customGameData)
+}
+

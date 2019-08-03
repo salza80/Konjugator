@@ -43,7 +43,19 @@ class BootScene extends Phaser.Scene {
         this.load.image('bullet', 'assets/images/bullet.png');
 
         // This json containing verb conjuation in present
-        this.load.json('verbs', 'assets/data/verbsPresent.json');
+        var customConfig = this.registry.get('custom_game_data')
+        console.log(customConfig)
+        if (customConfig.words_url) {
+            this.load.json('verbs', customConfig.words_url);
+        } else if (customConfig.words) {
+            this.load.json('verbs', customConfig.words);
+        } else {
+            this.load.json('verbs', 'assets/data/verbsPresent.json');
+        }
+
+        if (customConfig.start_text) {
+            this.registry.set('startText', customConfig.start_text)
+        } else { this.registry.set('startText', 'Konjugiere das verb! Bist du bereit?') }
     }
 }
 

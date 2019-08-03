@@ -16,7 +16,7 @@ var definePlugin = new webpack.DefinePlugin({
 
 module.exports = {
   entry: {
-    app: [
+    game: [
       path.resolve(__dirname, 'src/main.js')
     ],
     //vendor: ['pixi']
@@ -42,7 +42,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       filename: 'index.html', // path.resolve(__dirname, 'build', 'index.html'),
       template: './src/index.html',
-      chunks: ['vendor', 'app'],
+      chunks: ['vendor', 'game'],
       chunksSortMode: 'manual',
       minify: {
         removeAttributeQuotes: true,
