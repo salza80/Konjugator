@@ -33,7 +33,7 @@ class GameScene extends Phaser.Scene {
       this.inputGroup = this.add.group()
       this.bullets = this.add.group()
 
-      this.tilesGroup.addMultiple(Block.createStartBlocks(1, this), this)
+      this.tilesGroup.addMultiple(Block.createStartBlocks(100, this), this)
       this.physics.add.overlap(this.gameTextGroup, this.tilesGroup, this.smashBlock, null, this);
 
       this.inputText = new InputText({
