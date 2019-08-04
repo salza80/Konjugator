@@ -1,6 +1,6 @@
 var path = require('path')
 var webpack = require('webpack')
-var { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin')
 var CopyWebpackPlugin = require('copy-webpack-plugin')
 
@@ -18,13 +18,12 @@ module.exports = {
   entry: {
     game: [
       path.resolve(__dirname, 'src/main.js')
-    ],
-    //vendor: ['pixi']
-
+    ]
   },
   output: {
     path: path.resolve(__dirname, 'build'),
     publicPath: './',
+    library: '[name]',
     filename: 'js/bundle.js'
   },
   plugins: [
@@ -42,7 +41,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       filename: 'index.html', // path.resolve(__dirname, 'build', 'index.html'),
       template: './src/index.html',
-      chunks: ['vendor', 'game'],
+      chunks: ['game'],
       chunksSortMode: 'manual',
       minify: {
         removeAttributeQuotes: true,

@@ -47,3 +47,4 @@ export const startGame = (customGameData) => {
     game.registry.set('custom_game_data', customGameData)
 }
 
+// const game = new Phaser.Game(config)
