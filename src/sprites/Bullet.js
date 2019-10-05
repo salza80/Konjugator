@@ -50,7 +50,7 @@ export default class Bullet extends Phaser.GameObjects.Sprite {
             targetPoint.x = this.target.x + this.target.width
         }
         this.rotation = Phaser.Math.Angle.BetweenPoints(currentPoint, targetPoint);
-        this.scene.physics.moveTo(this, targetPoint.x, targetPoint.y, 400)
+        this.scene.physics.moveTo(this, targetPoint.x, targetPoint.y, 500)
 
     }
 

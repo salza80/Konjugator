@@ -46,7 +46,6 @@ class BootScene extends Phaser.Scene {
         var customConfig = this.registry.get('custom_game_data')
 
         if (customConfig) {
-            console.log(customConfig)
             if (customConfig.words_url) {
                 this.load.json('verbs', customConfig.words_url);
             } else if (customConfig.words) {

@@ -9,15 +9,14 @@ class GameText extends Phaser.GameObjects.Text {
     this.hitSound = 'smb_coin'
     var verbs = this.scene.cache.json.get('verbs')
     let verbKeys = Object.keys(verbs)
-    this.verb = verbKeys[getRandomInt(0, verbKeys.length)]
+    this.verb = verbKeys[getRandomInt(0, verbKeys.length -1)]
     let subjectKeys = Object.keys(verbs[this.verb])
-    // -1 to avoid english
-    this.subject = subjectKeys[getRandomInt(0, subjectKeys.length -1)]
+    // -2 to avoid english
+    this.subject = subjectKeys[getRandomInt(0, subjectKeys.length -2)]
     this.answer = verbs[this.verb][this.subject]
     this.english = verbs[this.verb]['english']
 
     this.setText(this.subject + ' (' + this.verb + ')')
-    this.setX(this.getRandomTileX())
     
     this.body.debugShowBody = true
     this.body.debugBodyColor = 0x0000ff;
@@ -48,7 +47,7 @@ class GameText extends Phaser.GameObjects.Text {
 
     showAnswerAndRemove() {
       this.body.setMaxSpeed(0)
-      this.setText(this.answer)
+      this.setText(`${this.answer} (${this.english})`)
       this.setStyle({ fill: '#ff0'});
       this.scene.time.addEvent({delay:600, callback: this.destroy, callbackScope: this})
     }
@@ -64,23 +63,25 @@ class GameText extends Phaser.GameObjects.Text {
 
     hit() {
       this.scene.sound.playAudioSprite('sfx',  this.hitSound)
-      this.destroy()
+      this.showAnswerAndRemove()
     }
 
     getScore () {
       return this.answer.length * 2
     }
 
-    getRandomTileX () {
-      return getRandomInt(0,100) * 10
-    }
-}
+  }
 
 class FallingText extends GameText {
   constructor(config) {
     super(config)
 
-   
+    //if remaining blocks are passed, set x to a remaining block 50% of the time
+    if (config.remainingBlocks && getRandomInt(0,1) === 1) {
+      this.setX(config.remainingBlocks[getRandomInt(0, config.remainingBlocks.length - 1)])
+    } else {
+      this.setX(this.getRandomTileX())
+    }
     //reposition if text is off screen
     if (this.x + this.width > 1000 ){
       this.setX(1000-this.width)
@@ -98,6 +99,10 @@ class FallingText extends GameText {
 
   onOutOfBounds(){
     this.showAnswerAndRemove()
+  }
+
+  getRandomTileX () {
+    return getRandomInt(0,50) * 20
   }
 }
 
