@@ -112,7 +112,7 @@ class GameScene extends Phaser.Scene {
       if (this.fallingTextTimerFrom >= this.fallingTextTimerTo) {this.fallingTextTimerTo = this.fallingTextTimerFrom + 500}
       this.bonusTextTimerFrom = this.bonusTextTimerFrom - (this.bonusTextTimerFrom * PER_LEVEL_BONUS_TEXT_TIMER_CHANGE_PERCENTAGE)
       this.bonusTextTimerTo = this.bonusTextTimerTo - (this.bonusTextTimerTo * PER_LEVEL_BONUS_TEXT_TIMER_CHANGE_PERCENTAGE)
-      if (this.bonusTextTimerFrom <= this.bonusTextTimerTo) {this.bonusTextTimerTo = this.bonusTextTimerFrom + 500}
+      if (this.bonusTextTimerFrom >= this.bonusTextTimerTo) {this.bonusTextTimerTo = this.bonusTextTimerFrom + 500}
 
       this.startLevel()
     }
