@@ -11,11 +11,11 @@ const config = {
     pixelArt: true,
     roundPixels: true,
     parent: 'content',
-    width: 1000,
-    height: 700,
     scale: {
         mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 1000,
+        height: 700,
     },
     autoRound: true,
     physics: {

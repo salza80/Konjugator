@@ -27,50 +27,77 @@ class GameText extends Phaser.GameObjects.Text {
 
             
     this.body.setSize(this.width, this.height)
-    }
 
-    isOutOfBounds() {
-      if (this.y >= 750 || this.y < 0) {
-        return true
-      }
-      if (this.x >= 1050 || this.x < -50) {
-        return true
-      }
-      return false
-    }
-
-    update() {
-      if (this.isOutOfBounds()) {
-        this.onOutOfBounds()
-      }
-    }
-
-    showAnswerAndRemove() {
-      this.body.setMaxSpeed(0)
-      this.setText(`${this.answer} (${this.english})`)
-      this.setStyle({ fill: '#ff0'});
-      this.scene.time.addEvent({delay:600, callback: this.destroy, callbackScope: this})
-    }
-
-    blowUp() {
-      this.showAnswerAndRemove()
-      this.scene.sound.playAudioSprite('sfx', 'smb_breakblock');
-    }
-
-    onOutOfBounds(){
-      this.destroy()
-    }
-
-    hit() {
-      this.scene.sound.playAudioSprite('sfx',  this.hitSound)
-      this.showAnswerAndRemove()
-    }
-
-    getScore () {
-      return this.answer.length * 2
-    }
+    this.setInteractive()
+    this.on('pointerup', () => {
+      this.scene.events.emit("GameTextSelected", this);
+    });
+    this.scene.events.on('GameTextSelected', (gameText) => {
+      this.toggleSelected(gameText);
+    });
 
   }
+
+  isOutOfBounds() {
+    if (this.y >= 750 || this.y < 0) {
+      return true
+    }
+    if (this.x >= 1050 || this.x < -50) {
+      return true
+    }
+    return false
+  }
+
+  update() {
+    if (this.isOutOfBounds()) {
+      this.onOutOfBounds()
+    }
+  }
+
+  showAnswerAndRemove() {
+    this.body.setMaxSpeed(0)
+    this.setText(`${this.answer} (${this.english})`)
+    this.setStyle({ fill: '#ff0'});
+    this.scene.events.emit('GameTextRemoved', this)
+    this.scene.time.addEvent({delay:600, callback: this.destroy, callbackScope: this})
+  }
+
+  getAnswer() {
+    return this.answer
+  }
+
+  blowUp() {
+    this.showAnswerAndRemove()
+    this.scene.sound.playAudioSprite('sfx', 'smb_breakblock');
+  }
+
+  onOutOfBounds(){
+    this.scene.events.emit('GameTextRemoved', this)
+    this.destroy()
+  }
+
+  hit() {
+    this.scene.sound.playAudioSprite('sfx',  this.hitSound)
+    this.showAnswerAndRemove()
+  }
+
+  getScore () {
+    return this.answer.length * 2
+  }
+
+  toggleSelected(gameText) {
+    try {
+      if (this === gameText){
+        this.setBackgroundColor('#070a91')
+      } else {
+        this.setBackgroundColor('transparent')
+      }
+    } catch(e) {
+      console.log(e.message)
+    }
+  }
+
+}
 
 class FallingText extends GameText {
   constructor(config) {
@@ -104,6 +131,7 @@ class FallingText extends GameText {
   getRandomTileX () {
     return getRandomInt(0,50) * 20
   }
+
 }
 
 class BonusText extends GameText {

@@ -1,6 +1,7 @@
 import Block from '../sprites/Block';
 import GameTextFactory from '../sprites/GameText';
 import InputText from '../sprites/InputText';
+import MobileInputText from '../sprites/MobileInputText'
 import Bullet from '../sprites/Bullet';
 import Score from '../sprites/Score';
 import LevelText from '../sprites/LevelText';
@@ -52,12 +53,28 @@ class GameScene extends Phaser.Scene {
       this.bullets = this.add.group()
       this.physics.add.overlap(this.gameTextGroup, this.tilesGroup, this.smashBlock, null, this);
 
-      this.inputText = new InputText({
+      // this.inputText = new InputText({
+      //     scene: this,
+      //     x: 400,
+      //     y: 600,
+      //     opts: { fill: "#00ff00", fontSize: 20 }
+      // })
+      this.inputText = new MobileInputText({
           scene: this,
           x: 400,
           y: 600,
           opts: { fill: "#00ff00", fontSize: 20 }
       })
+      this.events.on('GameTextSelected', (gameText) => {
+        this.inputText.setAnswerText(gameText)
+      })
+      this.events.on('GameTextRemoved', (gameText) => {
+        this.inputText.gameTextRemoved(gameText)
+      })
+      this.events.on('correctAnswer', (gameText) => {
+        this.fire()
+      })
+
       this.scoreText = new Score({
           scene: this,
           x: 800,
@@ -81,7 +98,7 @@ class GameScene extends Phaser.Scene {
     startLevel() {
       //set random word timer
       this.startText = this.add.text(30, 200, this.registry.get('startText'), { fill: "#00ff00", fontSize: 30 })
-      this.keysText = this.add.text(100, 300, 'For ä,ö,ü & ß input on english keyboard use the buttons or 1, 2, 3, 4 keys respectively.', { fill: "#00ff00", fontSize: 13 })
+      //this.keysText = this.add.text(100, 300, 'For ä,ö,ü & ß input on english keyboard use the buttons or 1, 2, 3, 4 keys respectively.', { fill: "#00ff00", fontSize: 13 })
       this.startLevelText = this.add.text(50, 250, 'Starting Level ' + this.currentLevel +  ' in ', { fill: "#00ff00", fontSize: 30 })
       this.countDownEvent = this.time.addEvent({delay: 1000, callback: this.startLevelCallback, callbackScope: this, repeat: 5})
     }
@@ -93,7 +110,7 @@ class GameScene extends Phaser.Scene {
         this.tilesGroup.addMultiple(Block.createStartBlocks(NO_STARTING_BLOCKS, this), this)
         this.startLevelText.destroy()
         this.startText.destroy()
-        this.keysText.destroy()
+        //this.keysText.destroy()
         this.inputText.setText('')
         this.levelText.startLevel(this.currentLevel, LEVEL_TIME_SECONDS, () => this.endLevel())
         this.spawnFallingText()

@@ -1,10 +1,12 @@
-class InputButton extends Phaser.GameObjects.Text {
+export class InputButton extends Phaser.GameObjects.Text {
     constructor(scene, x, y, text, style, pressedFunc) {
         super(scene, x, y, text, style)
 
+        this.resetStyleColor = style.fill || '#4ceaee'
+
         this.setInteractive()
         this.on('pointerover', () => this.enterHoverState())
-        this.on('pointerout', () => this.enterButtonRestState())
+        this.on('pointerout', () => this.enterButtonResetState())
         this.on('pointerdown', () => this.enterButtonActiveState())
         this.on('pointerup', () => this.enterHoverState())
         this.on('pointerup', function () {pressedFunc(text)})
@@ -14,8 +16,8 @@ class InputButton extends Phaser.GameObjects.Text {
         this.setStyle({ fill: '#ff0'});
     }
 
-    enterButtonRestState() {
-        this.setStyle({ fill: '#4ceaee'});
+    enterButtonResetState() {
+        this.setStyle({ fill: this.resetStyleColor});
     }
 
     enterButtonActiveState() {
