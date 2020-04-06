@@ -16,6 +16,7 @@ const config = {
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: 1000,
         height: 700,
+        orientation: Phaser.Scale.Orientation.LANDSCAPE
     },
     autoRound: true,
     physics: {
