@@ -35,6 +35,14 @@ class GameScene extends Phaser.Scene {
 
     create () {
 
+      this.scale.on('orientationchange', function(orientation) {
+          if (orientation === Phaser.Scale.PORTRAIT) {
+            console.log(orientation)
+          } else if (orientation === Phaser.Scale.LANDSCAPE) {
+            console.log(orientation)
+          }
+      })
+
       this.fallingTextTimerFrom = LEVEL_ONE_FALLING_TEXT_TIMER_FROM
       this.fallingTextTimerTo = LEVEL_ONE_FALLING_TEXT_TIMER_TO
       this.bonusTextTimerFrom = LEVEL_ONE_BONUS_TEXT_TIMER_FROM
