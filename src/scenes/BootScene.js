@@ -41,6 +41,7 @@ class BootScene extends Phaser.Scene {
         this.load.bitmapFont('font', 'assets/fonts/font.png', 'assets/fonts/font.fnt');
         this.load.image('block', 'assets/images/purpleBlock.png');
         this.load.image('bullet', 'assets/images/bullet.png');
+        this.load.image('maximize', 'assets/images/maximize.png');
 
         // This json containing verb conjuation in present
         var customConfig = this.registry.get('custom_game_data')

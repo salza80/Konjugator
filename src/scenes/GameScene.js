@@ -83,6 +83,28 @@ class GameScene extends Phaser.Scene {
           opts: { fill: "#00ff00", fontSize: 30 }
       })
 
+      this.maximize = this.make.image({
+        x: 980,
+        y: 20,
+        key: 'maximize',
+        displaySize: {
+          x: 10,
+          y: 10
+        },
+        add: true
+      })
+      this.maximize.setDisplaySize(30,30)
+
+      this.maximize.setInteractive().on('pointerdown', () => {
+        if (this.scale.isFullscreen) {
+            this.scale.stopFullscreen();
+            // On stop fulll screen
+        } else {
+            this.scale.startFullscreen();
+            // On start fulll screen
+        }
+    });
+
       this.levelText = new LevelText({
           scene: this,
           x: 100,
