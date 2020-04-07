@@ -37,9 +37,9 @@ class GameScene extends Phaser.Scene {
 
       this.scale.on('orientationchange', function(orientation) {
           if (orientation === Phaser.Scale.PORTRAIT) {
-            console.log(orientation)
+            window.alert(orientation)
           } else if (orientation === Phaser.Scale.LANDSCAPE) {
-            console.log(orientation)
+            window.alert(orientation)
           }
       })
 

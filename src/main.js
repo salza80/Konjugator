@@ -13,7 +13,7 @@ const config = {
     parent: 'content',
     scale: {
         mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
         width: 1000,
         height: 700,
         orientation: Phaser.Scale.Orientation.LANDSCAPE
