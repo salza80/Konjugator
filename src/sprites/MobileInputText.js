@@ -2,7 +2,10 @@ import { InputButton } from './InputText.js'
 import { getRandomInt, shuffle } from '../helpers/util.js'
 
 const ALL_CHARACTERS =  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ä', 'ö', 'ü', 'ß']
-const NO_AVAILABLE_CHARACTERS = 6
+const VOWELS = ['a', 'e', 'i', 'o', 'u', 'ä', 'ö', 'ü', 'ß']
+
+const NO_AVAILABLE_CHARACTERS = 10
+const WIDTH = 1280
 
 export default class MobileInputText extends Phaser.GameObjects.Container {
     constructor(config) {
@@ -10,16 +13,29 @@ export default class MobileInputText extends Phaser.GameObjects.Container {
 
         //config.text, config.opts
         config.scene.add.existing(this);
-        this.textBox = this.scene.add.text(0, 0, ' ', config.opts)
+        this.textBox = this.scene.add.text(WIDTH / 2, 0, ' ', config.opts)
         this.add(this.textBox)
+
+        this.alphaKeys = this.scene.input.keyboard.addKeys("ONE,TWO,THREE,FOUR,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,BACKSPACE", true, false)
+        for (var key in this.alphaKeys ) {
+            this.alphaKeys[key].on('down', this.keysEntered, this)
+        }
+
+
+        // add german keys
+        this.scene.input.keyboard.addKey(186, true, false).on('down', this.keysEntered, this)
+        this.scene.input.keyboard.addKey(222, true, false).on('down', this.keysEntered, this)
+        this.scene.input.keyboard.addKey(192, true, false).on('down', this.keysEntered, this)
+        this.scene.input.keyboard.addKey(219, true, false).on('down', this.keysEntered, this)
+
+        this.scene.input.keyboard.on('keydown-' + 'ENTER', this.fire, this)
 
         this.answerText = ''
 
         let backButtonPressed = (key) => {
             this.back()
         } 
-
-        this.backButton = new InputButton(this.scene, (40 * NO_AVAILABLE_CHARACTERS), this.textBox.height + 8, 'BACK', { fill: '#fc0b03', fontSize: 25 }, backButtonPressed).setVisible(false).setActive(false)
+        this.backButton = new InputButton(this.scene, 0, this.textBox.height + 8, 'BACK', { fill: '#fc0b03', fontSize: 60 }, backButtonPressed).setVisible(false).setActive(false)
         this.add(this.backButton)
 
         let keyButtonPressed = (key) => {
@@ -27,7 +43,7 @@ export default class MobileInputText extends Phaser.GameObjects.Container {
         } 
         this.allCharacterButtons = {}
         for (var char of ALL_CHARACTERS) {
-            let b = new InputButton(this.scene, 0, this.textBox.height + 8, char, { fill: "#4ceaee", fontSize: 25 }, keyButtonPressed).setActive(false).setVisible(false)
+            let b = new InputButton(this.scene, 0, this.textBox.height + 8, char, { fill: "#4ceaee", fontSize: 60 }, keyButtonPressed).setActive(false).setVisible(false)
             this.add(b)
             this.allCharacterButtons[char] = b
         } 
@@ -43,19 +59,22 @@ export default class MobileInputText extends Phaser.GameObjects.Container {
     setAnswerText(gameText) {
         this.answerText = gameText.getAnswer()
         this.setText('')
+        this.createAvailableButtons()
     }
 
     createAvailableButtons() {
         this.clearAvailableChars()
 
-        let xButton = 0
+
+        // let xButton = 0
         let availableChars = this.getAvailableCharKeys()
+        let xButton = (WIDTH/2) - (((80 * availableChars.length) + this.backButton.width) / 2)
         for (var char of availableChars ) {
             let b = this.allCharacterButtons[char]
             b.setX(xButton).setActive(true).setVisible(true)
-            xButton = xButton + 40
+            xButton = xButton + 80
         }
-        this.backButton.setActive(true).setVisible(true).setFill('#fc0b03')
+        this.backButton.setActive(true).setVisible(true).setFill('#fc0b03').setX(xButton)
     }
 
     back() {
@@ -66,22 +85,35 @@ export default class MobileInputText extends Phaser.GameObjects.Container {
     }
 
     gameTextRemoved(gameText) {
-        if(gameText.getAnswer() === this.answerText) {
+        if (gameText.getAnswer() === this.answerText) {
+            console.log('HERE')
             this.answerText= ''
             this.setText('')
+            this.createAvailableButtons()
         }
     }
 
     getAvailableCharKeys() {
+        if (this.answerText === '') {
+            return ['ä', 'ö', 'ü', 'ß']
+        }
         let answerChars = this.answerText.split('')
         let currentTextChars = this.getText().split('')
         let availableChars = []
         for (var index in answerChars) {
-            if (currentTextChars[index] !== answerChars[index]) {
+            if (!availableChars.includes(answerChars[index])){ 
                 availableChars.push(answerChars[index])
-                break;
             }
         }
+
+        // add some random vowels
+        [...Array(3)].forEach(() => {
+            let randomChar = VOWELS[getRandomInt(0, VOWELS.length -1)]
+            if (!availableChars.includes(randomChar)){ 
+                availableChars.push(randomChar)
+            }
+        });
+
         do {
             let randomChar = ALL_CHARACTERS[getRandomInt(0, ALL_CHARACTERS.length -1)]
             if (!availableChars.includes(randomChar)){ 
@@ -96,16 +128,46 @@ export default class MobileInputText extends Phaser.GameObjects.Container {
 
     setText(text) {
         this.textBox.setText(text)
-        if (this.getText() === this.answerText) {
-            this.scene.events.emit('correctAnswer')
-            this.clearAvailableChars()
-        } else {
-            this.createAvailableButtons()
+        if (this.getText() === this.answerText && this.answerText !== '') {
+            this.fire()
         }
 
     }
 
+    fire() {
+        this.scene.events.emit('correctAnswer', this.getText())
+        this.answerText=''
+        this.setText('')
+        this.createAvailableButtons()
+    }
+
     getText() {
         return this.textBox.text.trim()
+    }
+
+    keysEntered(eventName, event) {
+        if (event) {
+            switch (event.key) {
+                case 'Backspace':
+                    this.back()
+                    break;
+                case 'Enter':
+                    break;
+                case '1': 
+                    this.setText(this.textBox.text + 'ä')
+                    break;
+                case '2': 
+                    this.setText(this.textBox.text + 'ö')
+                    break;
+                case '3': 
+                    this.setText(this.textBox.text + 'ü')
+                    break;
+                case '4': 
+                    this.setText(this.textBox.text + 'ß')
+                    break;
+                default:
+                   this.setText(this.textBox.text + event.key)
+                }
+        }
     }
 }

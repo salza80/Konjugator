@@ -37,9 +37,9 @@ class GameScene extends Phaser.Scene {
 
       this.scale.on('orientationchange', function(orientation) {
           if (orientation === Phaser.Scale.PORTRAIT) {
-            window.alert(orientation)
+            console.log(orientation)
           } else if (orientation === Phaser.Scale.LANDSCAPE) {
-            window.alert(orientation)
+            console.log(orientation)
           }
       })
 
@@ -69,7 +69,7 @@ class GameScene extends Phaser.Scene {
       // })
       this.inputText = new MobileInputText({
           scene: this,
-          x: 400,
+          x: 0,
           y: 600,
           opts: { fill: "#00ff00", fontSize: 20 }
       })
@@ -79,26 +79,22 @@ class GameScene extends Phaser.Scene {
       this.events.on('GameTextRemoved', (gameText) => {
         this.inputText.gameTextRemoved(gameText)
       })
-      this.events.on('correctAnswer', (gameText) => {
-        this.fire()
+      this.events.on('correctAnswer', (answerText) => {
+        this.fire(answerText)
       })
 
       this.scoreText = new Score({
           scene: this,
-          x: 800,
+          x: 1000,
           y: 50,
           text: "",
-          opts: { fill: "#00ff00", fontSize: 30 }
+          opts: { fill: "#00ff00", fontSize: 20 }
       })
 
       this.maximize = this.make.image({
-        x: 980,
+        x: 1250,
         y: 20,
         key: 'maximize',
-        displaySize: {
-          x: 10,
-          y: 10
-        },
         add: true
       })
       this.maximize.setDisplaySize(30,30)
@@ -121,7 +117,7 @@ class GameScene extends Phaser.Scene {
           opts: { fill: "#00ff00", fontSize: 20 }
       })
 
-      this.input.keyboard.on('keydown-' + 'ENTER', this.fire, this)
+      
       this.startLevel()
     }
 
@@ -168,10 +164,10 @@ class GameScene extends Phaser.Scene {
       this.textTimers.push(this.time.addEvent({delay: getRandomInt(fromDelay, toDelay), callback: func, callbackScope: this, loop: false}))
     }
 
-    fire() {
-      let t = this.inputText.getText()
+    fire( answerText ) {
+      let t = answerText
       if (t === '') { return }
-      this.inputText.setText('')
+
       let hasHit = false
 
       this.gameTextGroup.getChildren().every((fallingText) => {
@@ -228,7 +224,7 @@ class GameScene extends Phaser.Scene {
       let b = GameTextFactory({
           scene: this,
           textType: "falling",
-          opts: { fill: "#de77ae" },
+          opts: { fill: "#de77ae", fontSize: 30 },
           remainingBlocks 
       })
       this.gameTextGroup.add(b, this)
@@ -244,7 +240,7 @@ class GameScene extends Phaser.Scene {
         let b = GameTextFactory({
             scene: this,
             textType: "bonus",
-            opts: { fill: "#ffa500", fontSize: 15 }
+            opts: { fill: "#ffa500", fontSize: 20 }
         })
         
         this.gameTextGroup.add(b, this)

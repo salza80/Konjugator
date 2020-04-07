@@ -1,4 +1,5 @@
 import { getRandomInt } from '../helpers/util.js'
+const WIDTH = 1280
 
 class GameText extends Phaser.GameObjects.Text {
   constructor(config) {
@@ -42,7 +43,7 @@ class GameText extends Phaser.GameObjects.Text {
     if (this.y >= 750 || this.y < 0) {
       return true
     }
-    if (this.x >= 1050 || this.x < -50) {
+    if (this.x >= WIDTH + 100 || this.x < -100) {
       return true
     }
     return false
@@ -110,8 +111,8 @@ class FallingText extends GameText {
       this.setX(this.getRandomTileX())
     }
     //reposition if text is off screen
-    if (this.x + this.width > 1000 ){
-      this.setX(1000-this.width)
+    if (this.x + this.width > WIDTH ){
+      this.setX(WIDTH-this.width)
     }
     this.body.allowGravity = true;
     this.body.setMaxSpeed(35)
@@ -142,7 +143,7 @@ class BonusText extends GameText {
   let LeftorRight = getRandomInt(0,2)
     if (LeftorRight === 0) {
       this.bonusDirection = 'left'
-      this.setX(1050)
+      this.setX(WIDTH + 100)
       this.setY(getRandomInt(100, 400))
       this.body.setVelocityX(-70)
     } else {

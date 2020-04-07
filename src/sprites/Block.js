@@ -5,7 +5,7 @@ Classes for enemy types extend this class.
 */
 
 const BlockSize = 20
-const SceneWidth = 1000
+const SceneWidth = 1280
 const StartY = 600
 
 export default class Block extends Phaser.GameObjects.Sprite {

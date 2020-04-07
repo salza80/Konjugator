@@ -5,6 +5,12 @@ import TitleScene from './scenes/TitleScene';
 import GameOverScene from './scenes/GameOverScene';
 // import UIPlugin from '../assets/plugins/rexuiplugin.min';
 
+// const DPR = 2
+// export const px = (val) => (val * DPR)
+
+
+const WIDTH = 1280
+const HEIGHT = 700
 const config = {
     // For more settings see <https://github.com/photonstorm/phaser/blob/master/src/boot/Config.js>
     type: Phaser.WEBGL,
@@ -14,8 +20,8 @@ const config = {
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: 1000,
-        height: 700,
+        width: WIDTH,
+        height: HEIGHT,
         orientation: Phaser.Scale.Orientation.LANDSCAPE
     },
     autoRound: true,
@@ -25,7 +31,7 @@ const config = {
             gravity: {
                 y: 300
             },
-            debug: false
+            debug: true
         }
     },
     scene: [
