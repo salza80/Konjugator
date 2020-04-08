@@ -2,6 +2,7 @@ import Block from '../sprites/Block';
 import GameTextFactory from '../sprites/GameText';
 import InputText from '../sprites/InputText';
 import MobileInputText from '../sprites/MobileInputText'
+import InputManager from '../sprites/InputManager';
 import Bullet from '../sprites/Bullet';
 import Score from '../sprites/Score';
 import LevelText from '../sprites/LevelText';
@@ -37,9 +38,9 @@ class GameScene extends Phaser.Scene {
 
       this.scale.on('orientationchange', function(orientation) {
           if (orientation === Phaser.Scale.PORTRAIT) {
-            console.log(orientation)
+            this.scale.stopFullscreen();
           } else if (orientation === Phaser.Scale.LANDSCAPE) {
-            console.log(orientation)
+            this.scale.startFullscreen();
           }
       })
 
@@ -67,12 +68,13 @@ class GameScene extends Phaser.Scene {
       //     y: 600,
       //     opts: { fill: "#00ff00", fontSize: 20 }
       // })
-      this.inputText = new MobileInputText({
+      this.inputText = new InputManager({
           scene: this,
           x: 0,
-          y: 600,
+          y: 0,
           opts: { fill: "#00ff00", fontSize: 20 }
       })
+
       this.events.on('GameTextSelected', (gameText) => {
         this.inputText.setAnswerText(gameText)
       })

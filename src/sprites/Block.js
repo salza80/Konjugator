@@ -5,7 +5,8 @@ Classes for enemy types extend this class.
 */
 
 const BlockSize = 20
-const SceneWidth = 1280
+const SceneWidth = 1180
+const StartX = 50
 const StartY = 600
 
 export default class Block extends Phaser.GameObjects.Sprite {
@@ -30,15 +31,14 @@ export default class Block extends Phaser.GameObjects.Sprite {
   // position the Body relative to the Sprite's dimensions (which will differ from its texture's
   // dimensions), you should divide these arguments by the Sprite's current scale:
   //
-      //this.body.setSize(10 / this.scaleX, 10 / this.scaleY)
+  // this.body.setSize(10 / this.scaleX, 10 / this.scaleY)
   //
 
-      // this.body.offset.set(10, 12);
+  // this.body.offset.set(10, 12);
   }
 
   blowUp() {
     this.destroy()
-
   }
 
   static createStartBlocks(noBlocks, scene) {
@@ -74,7 +74,6 @@ export default class Block extends Phaser.GameObjects.Sprite {
         }
         i++    
     }
-
     rows.forEach((row, rowIndex) => {
       let y = (StartY - (BlockSize/2)) - (rowIndex * (BlockSize + 1))
       row.y = y
@@ -84,6 +83,6 @@ export default class Block extends Phaser.GameObjects.Sprite {
   }
 
   static getRandomTileX () {
-    return (getRandomInt(0,(SceneWidth/BlockSize)-1) * BlockSize) + (BlockSize/2)
+    return (getRandomInt(0,(SceneWidth/BlockSize)-1) * BlockSize) + (BlockSize/2) + StartX
   }
 }

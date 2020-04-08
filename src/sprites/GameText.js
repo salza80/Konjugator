@@ -1,5 +1,11 @@
 import { getRandomInt } from '../helpers/util.js'
-const WIDTH = 1280
+const WIDTH = 1180
+const BLOCK_SIZE = 20
+const SCENE_WIDTH = 1180
+const X = 50
+const BOTTOM_Y = 600
+
+
 
 class GameText extends Phaser.GameObjects.Text {
   constructor(config) {
@@ -119,7 +125,7 @@ class FallingText extends GameText {
    }
 
   isOutOfBounds() {
-    if (this.y >= 600 ) {
+    if (this.y >= BOTTOM_Y ) {
       return true
     }
     return false
@@ -130,7 +136,7 @@ class FallingText extends GameText {
   }
 
   getRandomTileX () {
-    return getRandomInt(0,50) * 20
+    return getRandomInt(X,SCENE_WIDTH/BLOCK_SIZE) * BLOCK_SIZE
   }
 
 }
@@ -144,7 +150,7 @@ class BonusText extends GameText {
     if (LeftorRight === 0) {
       this.bonusDirection = 'left'
       this.setX(WIDTH + 100)
-      this.setY(getRandomInt(100, 400))
+      this.setY(getRandomInt(50, 400))
       this.body.setVelocityX(-70)
     } else {
       this.bonusDirection = 'right'
