@@ -8,8 +8,8 @@ import Score from '../sprites/Score';
 import LevelText from '../sprites/LevelText';
 import { getRandomInt } from '../helpers/util.js';
 
-const NO_STARTING_BLOCKS = 70
-const LEVEL_TIME_SECONDS = 300
+const NO_STARTING_BLOCKS = 100
+const LEVEL_TIME_SECONDS = 60
 
 const LEVEL_ONE_FALLING_TEXT_TIMER_FROM = 5000
 const LEVEL_ONE_FALLING_TEXT_TIMER_TO = 15000
@@ -42,14 +42,6 @@ class GameScene extends Phaser.Scene {
     }
 
     create () {
-
-      this.scale.on('orientationchange', (orientation) => {
-          if (orientation === Phaser.Scale.PORTRAIT) {
-            this.scale.stopFullscreen();
-          } else if (orientation === Phaser.Scale.LANDSCAPE) {
-            this.scale.startFullscreen();
-          }
-      })
 
       this.fallingTextTimerFrom = LEVEL_ONE_FALLING_TEXT_TIMER_FROM
       this.fallingTextTimerTo = LEVEL_ONE_FALLING_TEXT_TIMER_TO
@@ -122,7 +114,7 @@ class GameScene extends Phaser.Scene {
           text: "",
           opts: { fill: "#00ff00", fontSize: 20 }
       })
-
+      this.tilesGroup.addMultiple(Block.createStartBlocks(this, NO_STARTING_BLOCKS, PLAY_WIDTH, BLOCK_SIZE, SIDE_INPUT_WIDTH), this)
       
       this.startLevel()
     }
@@ -139,7 +131,7 @@ class GameScene extends Phaser.Scene {
       if (this.countDownEvent.getRepeatCount() !== 0) {
         this.startLevelText.setText('Starting Level ' + this.currentLevel +  ' in ' + this.countDownEvent.getRepeatCount())
        } else {
-        this.tilesGroup.addMultiple(Block.createStartBlocks(this, NO_STARTING_BLOCKS, PLAY_WIDTH, BLOCK_SIZE, SIDE_INPUT_WIDTH), this)
+        
         this.startLevelText.destroy()
         this.startText.destroy()
         //this.keysText.destroy()
@@ -152,7 +144,7 @@ class GameScene extends Phaser.Scene {
 
     endLevel() {
       this.textTimers.forEach((timer) => timer.remove())
-      this.tilesGroup.clear(true,true)
+      // this.tilesGroup.clear(true,true)
       this.gameTextGroup.clear(true,true)
       this.bullets.clear(true,true)
       this.currentLevel = this.currentLevel + 1
@@ -223,7 +215,7 @@ class GameScene extends Phaser.Scene {
 
     spawnFallingText() {
       let remainingBlocks = null
-      if (this.tilesGroup.getLength() < 30) {
+      if (this.tilesGroup.getLength() < 50) {
         remainingBlocks = this.tilesGroup.getChildren().map((block) => block.x)
       }
 

@@ -54,7 +54,7 @@ class GameText extends Phaser.GameObjects.Text {
     if (this.y >= 750 || this.y < 0) {
       return true
     }
-    if (this.x >= this.gameBoundsXRight + 100 || this.x < this.gameBoundsXLeft - 100) {
+    if (this.x >= this.gameBoundsXRight + this.width + 10 || this.x < this.gameBoundsXLeft - 10 - this.width) {
       return true
     }
     return false
@@ -115,8 +115,8 @@ class FallingText extends GameText {
   constructor(config) {
     super(config)
 
-    //if remaining blocks are passed, set x to a remaining block 50% of the time
-    if (config.remainingBlocks && getRandomInt(0,1) === 1) {
+    //if remaining blocks are passed, set x to a remaining block 70% of the time
+    if (config.remainingBlocks && getRandomInt(0,10) < 8) {
       this.setX(config.remainingBlocks[getRandomInt(0, config.remainingBlocks.length - 1)])
     } else {
       this.setX(this.getRandomTileX())
@@ -126,7 +126,7 @@ class FallingText extends GameText {
       this.setX(this.gameBoundsXRight-this.width)
     }
     this.body.allowGravity = true;
-    this.body.setMaxSpeed(35)
+    this.body.setMaxSpeed(20)
    }
 
   isOutOfBounds() {
@@ -159,7 +159,7 @@ class BonusText extends GameText {
       this.body.setVelocityX(-70)
     } else {
       this.bonusDirection = 'right'
-      this.setX(0)
+      this.setX(this.gameBoundsXLeft - 100)
       this.setY(getRandomInt(50, 400))
       this.body.setVelocityX(70)
     }

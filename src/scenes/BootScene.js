@@ -64,6 +64,17 @@ class BootScene extends Phaser.Scene {
             this.registry.set('startText', 'Konjugiere das verb! Bist du bereit?') 
         }
     }
+
+    create() {
+        this.scale.on('orientationchange', (orientation) => {
+          if (orientation === Phaser.Scale.PORTRAIT) {
+            console.log('test')
+            this.scale.stopFullscreen();
+          } else if (orientation === Phaser.Scale.LANDSCAPE) {
+            this.scale.startFullscreen();
+          }
+        })
+    }
 }
 
 export default BootScene;

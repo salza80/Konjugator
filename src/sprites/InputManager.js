@@ -4,14 +4,11 @@ import { getRandomInt, shuffle } from '../helpers/util.js'
 const ALL_CHARACTERS =  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ä', 'ö', 'ü', 'ß']
 const VOWELS = ['a', 'e', 'i', 'o', 'u', 'ä', 'ö', 'ü', 'ß']
 
-const NO_AVAILABLE_CHARACTERS = 8
+const NO_AVAILABLE_CHARACTERS = 6
 
 export default class InputManager {
     constructor(config, width, height, sideWidth, showTouchInput ) {
         this.scene = config.scene
-        //config.text, config.opts
-        // config.scene.add.existing(this);
-
         this.bottomY = height - 100
         this.sideWidth = sideWidth
         this.fullWidth = width
@@ -24,7 +21,6 @@ export default class InputManager {
 
         this.setAllCharacters()
 
-
         this.textBox = this.scene.add.text(this.fullWidth / 2, this.bottomY, ' ', {fill: "#00ff00", fontSize: this.textBoxSize })
 
         this.alphaKeys = this.scene.input.keyboard.addKeys("ONE,TWO,THREE,FOUR,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,BACKSPACE", true, false)
@@ -32,8 +28,7 @@ export default class InputManager {
             this.alphaKeys[key].on('down', this.keysEntered, this)
         }
 
-
-        // add german keys
+        // add german keys for german keyboard
         this.scene.input.keyboard.addKey(186, true, false).on('down', this.keysEntered, this)
         this.scene.input.keyboard.addKey(222, true, false).on('down', this.keysEntered, this)
         this.scene.input.keyboard.addKey(192, true, false).on('down', this.keysEntered, this)
@@ -142,17 +137,17 @@ export default class InputManager {
     }
 
     showAvailableButtons() {
-        if (!this.showTouchInput) {return false}
+        if (!this.showTouchInput) { return false }
         this.clearAvailableChars()
         let topPadding = 40
-        // let buttonWidth = this.allCharacterButtons[Object.keys(this.allCharacterButtons)[0]].width
+        let buttonHeight = this.allCharacterButtons[Object.keys(this.allCharacterButtons)[0]].height
 
         let availableChars = this.getAvailableCharKeys()
-        let yIncrement = (this.fullHeight - (topPadding * 2)) / (Math.round(availableChars.length / 2) )
+        let yIncrement = this.fullHeight / (Math.round(availableChars.length / 2) + 1)
 
         let xButton1 = Math.round(this.sideWidth / 2)
         let xButton2 = this.fullWidth - Math.round(this.sideWidth / 2)
-        let yButton = topPadding
+        let yButton = yIncrement - (buttonHeight /2)
         let firstCol = true
 
         for (var char of availableChars ) {
@@ -247,15 +242,15 @@ export default class InputManager {
 
 
     setText(text) {
-
-        if (text !== '' && this.answerText !== '' ) {
+        if (text.trim() !== '' && this.answerText !== '' ) {
             if (!this.answerText.startsWith(text)) {
                 this.scene.cameras.main.shake(100, 0.05);
                 this.scene.sound.playAudioSprite('sfx', 'smb_bump');
                 return false
             }
         }
-
+        
+        if (text.trim() !== '') { this.scene.sound.playAudioSprite('sfx', 'smb_stomp') }
         this.textBox.setText(text)
         this.textBox.setX((this.fullWidth / 2) - (this.textBox.width / 2))
         if (this.getText() === this.answerText && this.answerText !== '') {

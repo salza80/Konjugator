@@ -8,6 +8,7 @@ class GameOverScene extends Phaser.Scene {
         
     }
     create() {
+
       this.scene.bringToTop();
       this.GameOverText = this.add.bitmapText(300, 300, 'font', 'GAME OVER', 30);
 
