@@ -1,8 +1,4 @@
 import { getRandomInt } from '../helpers/util.js'
-const WIDTH = 1180
-const BLOCK_SIZE = 20
-const SCENE_WIDTH = 1180
-const X = 50
 const BOTTOM_Y = 600
 
 
@@ -10,6 +6,15 @@ const BOTTOM_Y = 600
 class GameText extends Phaser.GameObjects.Text {
   constructor(config) {
     super(config.scene, 0, 0, '', config.opts)
+    this.gameWidth = config.gameWidth
+    this.blockSize = config.blockSize
+    this.offsetX = config.offsetX
+
+    this.gameBoundsXLeft = this.offsetX
+    this.gameBoundsXRight = this.offsetX + this.gameWidth
+    this.gameBoundsYTop = 0
+    this.gameBoundsYBottom = BOTTOM_Y
+
     config.scene.physics.world.enable(this);
     this.textType = config.textType
     // set random verb
@@ -49,7 +54,7 @@ class GameText extends Phaser.GameObjects.Text {
     if (this.y >= 750 || this.y < 0) {
       return true
     }
-    if (this.x >= WIDTH + 100 || this.x < -100) {
+    if (this.x >= this.gameBoundsXRight + 100 || this.x < this.gameBoundsXLeft - 100) {
       return true
     }
     return false
@@ -117,15 +122,15 @@ class FallingText extends GameText {
       this.setX(this.getRandomTileX())
     }
     //reposition if text is off screen
-    if (this.x + this.width > WIDTH ){
-      this.setX(WIDTH-this.width)
+    if (this.x + this.width > this.gameBoundsXRight ){
+      this.setX(this.gameBoundsXRight-this.width)
     }
     this.body.allowGravity = true;
     this.body.setMaxSpeed(35)
    }
 
   isOutOfBounds() {
-    if (this.y >= BOTTOM_Y ) {
+    if (this.y >= this.gameBoundsYBottom ) {
       return true
     }
     return false
@@ -136,20 +141,20 @@ class FallingText extends GameText {
   }
 
   getRandomTileX () {
-    return getRandomInt(X,SCENE_WIDTH/BLOCK_SIZE) * BLOCK_SIZE
+    return getRandomInt(0,this.gameWidth/this.blockSize) * this.blockSize + this.offsetX
   }
 
 }
 
 class BonusText extends GameText {
   constructor(config) {
-  super(config)
-  this.hitSound = 'smb_powerup'
-  this.body.allowGravity = false;
-  let LeftorRight = getRandomInt(0,2)
+    super(config)
+    this.hitSound = 'smb_powerup'
+    this.body.allowGravity = false;
+    let LeftorRight = getRandomInt(0,2)
     if (LeftorRight === 0) {
       this.bonusDirection = 'left'
-      this.setX(WIDTH + 100)
+      this.setX(this.gameBoundsXRight + 100)
       this.setY(getRandomInt(50, 400))
       this.body.setVelocityX(-70)
     } else {

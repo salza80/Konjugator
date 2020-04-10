@@ -21,6 +21,13 @@ const PER_LEVEL_BONUS_TEXT_TIMER_CHANGE_PERCENTAGE = 0.05
 
 const LEVEL_SCORE_MULTIPLIER = 2
 
+//game size settings
+
+const PLAY_WIDTH = 1060
+const SIDE_INPUT_WIDTH = 110
+const BLOCK_SIZE = 20
+const FULL_HEIGHT = 700
+
 
 
 class GameScene extends Phaser.Scene {
@@ -36,7 +43,7 @@ class GameScene extends Phaser.Scene {
 
     create () {
 
-      this.scale.on('orientationchange', function(orientation) {
+      this.scale.on('orientationchange', (orientation) => {
           if (orientation === Phaser.Scale.PORTRAIT) {
             this.scale.stopFullscreen();
           } else if (orientation === Phaser.Scale.LANDSCAPE) {
@@ -62,18 +69,14 @@ class GameScene extends Phaser.Scene {
       this.bullets = this.add.group()
       this.physics.add.overlap(this.gameTextGroup, this.tilesGroup, this.smashBlock, null, this);
 
-      // this.inputText = new InputText({
-      //     scene: this,
-      //     x: 400,
-      //     y: 600,
-      //     opts: { fill: "#00ff00", fontSize: 20 }
-      // })
+
+
       this.inputText = new InputManager({
           scene: this,
           x: 0,
           y: 0,
           opts: { fill: "#00ff00", fontSize: 20 }
-      })
+      }, 1280, 700, SIDE_INPUT_WIDTH, true)
 
       this.events.on('GameTextSelected', (gameText) => {
         this.inputText.setAnswerText(gameText)
@@ -87,7 +90,7 @@ class GameScene extends Phaser.Scene {
 
       this.scoreText = new Score({
           scene: this,
-          x: 1000,
+          x: 1280 - SIDE_INPUT_WIDTH - 150,
           y: 50,
           text: "",
           opts: { fill: "#00ff00", fontSize: 20 }
@@ -99,6 +102,7 @@ class GameScene extends Phaser.Scene {
         key: 'maximize',
         add: true
       })
+      this.maximize.setDepth(2)
       this.maximize.setDisplaySize(30,30)
 
       this.maximize.setInteractive().on('pointerdown', () => {
@@ -113,7 +117,7 @@ class GameScene extends Phaser.Scene {
 
       this.levelText = new LevelText({
           scene: this,
-          x: 100,
+          x: SIDE_INPUT_WIDTH + 20,
           y: 50,
           text: "",
           opts: { fill: "#00ff00", fontSize: 20 }
@@ -125,9 +129,9 @@ class GameScene extends Phaser.Scene {
 
     startLevel() {
       //set random word timer
-      this.startText = this.add.text(30, 200, this.registry.get('startText'), { fill: "#00ff00", fontSize: 30 })
+      this.startText = this.add.text(SIDE_INPUT_WIDTH + 100, 200, this.registry.get('startText'), { fill: "#00ff00", fontSize: 30 })
       //this.keysText = this.add.text(100, 300, 'For ä,ö,ü & ß input on english keyboard use the buttons or 1, 2, 3, 4 keys respectively.', { fill: "#00ff00", fontSize: 13 })
-      this.startLevelText = this.add.text(50, 250, 'Starting Level ' + this.currentLevel +  ' in ', { fill: "#00ff00", fontSize: 30 })
+      this.startLevelText = this.add.text(SIDE_INPUT_WIDTH + 100, 250, 'Starting Level ' + this.currentLevel +  ' in ', { fill: "#00ff00", fontSize: 30 })
       this.countDownEvent = this.time.addEvent({delay: 1000, callback: this.startLevelCallback, callbackScope: this, repeat: 5})
     }
 
@@ -135,7 +139,7 @@ class GameScene extends Phaser.Scene {
       if (this.countDownEvent.getRepeatCount() !== 0) {
         this.startLevelText.setText('Starting Level ' + this.currentLevel +  ' in ' + this.countDownEvent.getRepeatCount())
        } else {
-        this.tilesGroup.addMultiple(Block.createStartBlocks(NO_STARTING_BLOCKS, this), this)
+        this.tilesGroup.addMultiple(Block.createStartBlocks(this, NO_STARTING_BLOCKS, PLAY_WIDTH, BLOCK_SIZE, SIDE_INPUT_WIDTH), this)
         this.startLevelText.destroy()
         this.startText.destroy()
         //this.keysText.destroy()
@@ -227,7 +231,10 @@ class GameScene extends Phaser.Scene {
           scene: this,
           textType: "falling",
           opts: { fill: "#de77ae", fontSize: 30 },
-          remainingBlocks 
+          remainingBlocks,
+          gameWidth: PLAY_WIDTH,
+          blockSize: BLOCK_SIZE,
+          offsetX: SIDE_INPUT_WIDTH
       })
       this.gameTextGroup.add(b, this)
 
@@ -242,7 +249,10 @@ class GameScene extends Phaser.Scene {
         let b = GameTextFactory({
             scene: this,
             textType: "bonus",
-            opts: { fill: "#ffa500", fontSize: 20 }
+            opts: { fill: "#ffa500", fontSize: 20 },
+            gameWidth: PLAY_WIDTH,
+            blockSize: BLOCK_SIZE,
+            offsetX: SIDE_INPUT_WIDTH
         })
         
         this.gameTextGroup.add(b, this)

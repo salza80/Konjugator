@@ -41,8 +41,8 @@ export default class Block extends Phaser.GameObjects.Sprite {
     this.destroy()
   }
 
-  static createStartBlocks(noBlocks, scene) {
-    let rows = Block.getRows(noBlocks)
+  static createStartBlocks(scene, noBlocks, sceneWidth, blockSize, offsetX) {
+    let rows = Block.getRows(noBlocks, sceneWidth, blockSize, offsetX)
     let blocks = [];
     rows.forEach((row) => {
       row.x.forEach((x) => {
@@ -58,11 +58,11 @@ export default class Block extends Phaser.GameObjects.Sprite {
 
   }
 
-  static getRows(noBlocks) {
+  static getRows(noBlocks, sceneWidth, blockSize, offsetX) {
     let rows = [];
     let i = 0
     while (i < noBlocks) {
-        let randomX = Block.getRandomTileX()
+        let randomX = Block.getRandomTileX(sceneWidth, blockSize, offsetX)
         rows.forEach((row, rowIndex) => {
           if(!row.x.includes(randomX)){
             if(randomX){row.x.push(randomX)}
@@ -82,7 +82,7 @@ export default class Block extends Phaser.GameObjects.Sprite {
     return rows
   }
 
-  static getRandomTileX () {
-    return (getRandomInt(0,(SceneWidth/BlockSize)-1) * BlockSize) + (BlockSize/2) + StartX
+  static getRandomTileX (sceneWidth, blockSize, offsetX) {
+    return (getRandomInt(0,(sceneWidth/blockSize)-1) * blockSize) + (blockSize/2) + offsetX
   }
 }
