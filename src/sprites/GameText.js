@@ -6,14 +6,12 @@ const BOTTOM_Y = 600
 class GameText extends Phaser.GameObjects.Text {
   constructor(config) {
     super(config.scene, 0, 0, '', config.opts)
-    this.gameWidth = config.gameWidth
+    this.gameWidth = config.gameBoundsXRight - config.gameBoundsXLeft
     this.blockSize = config.blockSize
-    this.offsetX = config.offsetX
-
-    this.gameBoundsXLeft = this.offsetX
-    this.gameBoundsXRight = this.offsetX + this.gameWidth
-    this.gameBoundsYTop = 0
-    this.gameBoundsYBottom = BOTTOM_Y
+    this.gameBoundsXLeft = config.gameBoundsXLeft
+    this.gameBoundsXRight = config.gameBoundsXRight
+    this.gameBoundsYTop = config.gameBoundsYTop
+    this.gameBoundsYBottom = config.gameBoundsYBottom
 
     config.scene.physics.world.enable(this);
     this.textType = config.textType
@@ -41,6 +39,9 @@ class GameText extends Phaser.GameObjects.Text {
     this.body.setSize(this.width, this.height)
 
     this.setInteractive()
+
+    //hit area not working correctly
+    this.input.hitArea.setSize(this.width, this.height + 30);
     this.on('pointerup', () => {
       this.scene.events.emit("GameTextSelected", this);
     });
@@ -141,7 +142,7 @@ class FallingText extends GameText {
   }
 
   getRandomTileX () {
-    return getRandomInt(0,this.gameWidth/this.blockSize) * this.blockSize + this.offsetX
+    return getRandomInt(0,this.gameWidth/this.blockSize) * this.blockSize + this.gameBoundsXLeft
   }
 
 }

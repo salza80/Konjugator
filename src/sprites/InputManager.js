@@ -7,13 +7,13 @@ const VOWELS = ['a', 'e', 'i', 'o', 'u', 'ä', 'ö', 'ü', 'ß']
 const NO_AVAILABLE_CHARACTERS = 6
 
 export default class InputManager {
-    constructor(config, width, height, sideWidth, showTouchInput ) {
+    constructor(config) {
         this.scene = config.scene
-        this.bottomY = height - 100
-        this.sideWidth = sideWidth
-        this.fullWidth = width
-        this.fullHeight = height
-        this.showTouchInput = showTouchInput
+        this.bottomY = config.height - 100
+        this.sideWidth = config.sideWidth
+        this.fullWidth = config.width
+        this.fullHeight = config.height
+        this.showTouchInput = config.showTouchInput
 
         this.buttonSize = this.showTouchInput ? 100 : 60
         this.othButtonSize = this.showTouchInput ? 80 : 60
@@ -36,7 +36,7 @@ export default class InputManager {
 
         this.scene.input.keyboard.on('keydown-' + 'ENTER', this.fire, this)
 
-        if (showTouchInput) {
+        if (this.showTouchInput) {
             this.graphics = this.scene.add.graphics();
             this.graphics.fillStyle(0x000000, 1);
             this.graphics.setDepth(1)
@@ -121,8 +121,8 @@ export default class InputManager {
         // this.backButton.setActive(false).setVisible(false)
     }
 
-    setAnswerText(gameText) {
-        this.answerText = gameText.getAnswer()
+    setAnswerText(answerText) {
+        this.answerText = answerText
         this.setText('')
         this.showAvailableButtons()
     }
@@ -249,7 +249,7 @@ export default class InputManager {
                 return false
             }
         }
-        
+
         if (text.trim() !== '') { this.scene.sound.playAudioSprite('sfx', 'smb_stomp') }
         this.textBox.setText(text)
         this.textBox.setX((this.fullWidth / 2) - (this.textBox.width / 2))

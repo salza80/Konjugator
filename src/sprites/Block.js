@@ -41,48 +41,48 @@ export default class Block extends Phaser.GameObjects.Sprite {
     this.destroy()
   }
 
-  static createStartBlocks(scene, noBlocks, sceneWidth, blockSize, offsetX) {
-    let rows = Block.getRows(noBlocks, sceneWidth, blockSize, offsetX)
-    let blocks = [];
-    rows.forEach((row) => {
-      row.x.forEach((x) => {
-        blocks.push(new Block({
-          scene: scene,
-          key: 'block',
-          x: x,
-          y: row.y
-        }))
-      })
-    })
-    return blocks;
+  // static createStartBlocks(scene, noBlocks, sceneWidth, blockSize, offsetX) {
+  //   let rows = Block.getRows(noBlocks, sceneWidth, blockSize, offsetX)
+  //   let blocks = [];
+  //   rows.forEach((row) => {
+  //     row.x.forEach((x) => {
+  //       blocks.push(new Block({
+  //         scene: scene,
+  //         key: 'block',
+  //         x: x,
+  //         y: row.y
+  //       }))
+  //     })
+  //   })
+  //   return blocks;
 
-  }
+  // }
 
-  static getRows(noBlocks, sceneWidth, blockSize, offsetX) {
-    let rows = [];
-    let i = 0
-    while (i < noBlocks) {
-        let randomX = Block.getRandomTileX(sceneWidth, blockSize, offsetX)
-        rows.forEach((row, rowIndex) => {
-          if(!row.x.includes(randomX)){
-            if(randomX){row.x.push(randomX)}
-            randomX = undefined
-          }
-        })
-        if (randomX){
-          rows.push({y: undefined, x: [randomX]})
-        }
-        i++    
-    }
-    rows.forEach((row, rowIndex) => {
-      let y = (StartY - (BlockSize/2)) - (rowIndex * (BlockSize + 1))
-      row.y = y
-    })
+  // static getRows(noBlocks, sceneWidth, blockSize, offsetX) {
+  //   let rows = [];
+  //   let i = 0
+  //   while (i < noBlocks) {
+  //       let randomX = Block.getRandomTileX(sceneWidth, blockSize, offsetX)
+  //       rows.forEach((row, rowIndex) => {
+  //         if(!row.x.includes(randomX)){
+  //           if(randomX){row.x.push(randomX)}
+  //           randomX = undefined
+  //         }
+  //       })
+  //       if (randomX){
+  //         rows.push({y: undefined, x: [randomX]})
+  //       }
+  //       i++    
+  //   }
+  //   rows.forEach((row, rowIndex) => {
+  //     let y = (StartY - (BlockSize/2)) - (rowIndex * (BlockSize + 1))
+  //     row.y = y
+  //   })
    
-    return rows
-  }
+  //   return rows
+  // }
 
-  static getRandomTileX (sceneWidth, blockSize, offsetX) {
-    return (getRandomInt(0,(sceneWidth/blockSize)-1) * blockSize) + (blockSize/2) + offsetX
-  }
+  // static getRandomTileX (sceneWidth, blockSize, offsetX) {
+  //   return (getRandomInt(0,(sceneWidth/blockSize)-1) * blockSize) + (blockSize/2) + offsetX
+  // }
 }
