@@ -1,4 +1,3 @@
-import { InputButton } from './InputText.js'
 import InputManager from './InputManager';
 import Block from './Block';
 import GameTextFactory from './GameText';
@@ -21,9 +20,6 @@ const LEVEL_ONE_BONUS_TEXT_TIMER_TO = 20000
 const PER_LEVEL_BONUS_TEXT_TIMER_CHANGE_PERCENTAGE = 0.025
 
 const LEVEL_SCORE_MULTIPLIER = 2
-
-//game size settings
-
 
 export default class GameManager {
   constructor(config) {
@@ -85,8 +81,6 @@ export default class GameManager {
           opts: { fill: "#00ff00", fontSize: 20 }
       })
 
-      console.log(this.scoreText)
-
       this.levelText = new LevelText({
           scene: this.scene,
           x: this.gameBoundsXLeft + 20,
@@ -97,16 +91,16 @@ export default class GameManager {
 
       this.tilesGroup.addMultiple(this.createStartBlocks(this.noStartingBlocks), this.scene)
 
-			this.scene.events.on('GameTextSelected', (gameText) => {
-        this.inputManager.setAnswerText(gameText.getAnswer())
+			this.scene.events.on('GameTextSelected', (answerText) => {
+        this.inputManager.setAnswerText(answerText)
+        this.gameTextGroup.getChildren().forEach((gameText) => gameText.toggleSelected(answerText))
       })
-      this.scene.events.on('GameTextRemoved', (gameText) => {
-        this.inputManager.gameTextRemoved(gameText)
+      this.scene.events.on('GameTextRemoved', (answerText) => {
+        this.inputManager.gameTextRemoved(answerText)
       })
       this.scene.events.on('correctAnswer', (answerText) => {
         this.fire(answerText)
       })
-
   }
 
   startLevel() {
@@ -162,7 +156,7 @@ export default class GameManager {
     let hasHit = false
 
     this.gameTextGroup.getChildren().every((fallingText) => {
-      if (fallingText.answer === t) {
+      if (fallingText.getAnswer() === t) {
         let b = new Bullet({
               scene: this.scene,
               y: this.gameBoundsYBottom,
@@ -261,7 +255,8 @@ export default class GameManager {
           scene: this.scene,
           key: 'block',
           x: x,
-          y: row.y
+          y: row.y,
+          blockSize: this.blockSize
         }))
       })
     })

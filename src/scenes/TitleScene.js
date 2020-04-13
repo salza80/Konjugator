@@ -1,3 +1,5 @@
+import InputButton from '../sprites/InputButton';
+
 class TitleScene extends Phaser.Scene {
     constructor(test) {
         super({
@@ -16,14 +18,17 @@ class TitleScene extends Phaser.Scene {
         this.scene.bringToTop();
 
         this.registry.set('restartScene', false);
-        this.pressX = this.add.bitmapText(300, 300, 'font', 'PRESS X TO START', 15);
+        this.pressX = this.add.bitmapText(300, 300, 'font', 'START', 50);
         this.blink = 1000;
 
-        this.startKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+       this.pressStart = new InputButton(this, 300, 300, "START", { fill: "#4ceaee", fontSize: 50 }, this.startGame, this)
+       
 
-        this.input.on('pointerdown', () => {
-            this.startGame();
-        });
+        // this.startKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+        // this.pressX.setInteractive()
+        // this.pressX.on('pointerdown', () => {
+        //     this.startGame();
+        // });
     }
 
     update(time, delta) {
@@ -35,9 +40,9 @@ class TitleScene extends Phaser.Scene {
             this.pressX.alpha = this.pressX.alpha === 1 ? 0 : 1;
             this.blink = 500;
         }
-        if (this.startKey.isDown) {
-            this.startGame();
-        }
+        // if (this.startKey.isDown) {
+        //     this.startGame();
+        // }
     }
 
     startGame() {

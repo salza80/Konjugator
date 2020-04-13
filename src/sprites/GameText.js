@@ -1,7 +1,4 @@
 import { getRandomInt } from '../helpers/util.js'
-const BOTTOM_Y = 600
-
-
 
 class GameText extends Phaser.GameObjects.Text {
   constructor(config) {
@@ -26,7 +23,9 @@ class GameText extends Phaser.GameObjects.Text {
     this.answer = verbs[this.verb][this.subject]
     this.english = verbs[this.verb]['english']
 
-    this.setText(this.subject + ' (' + this.verb + ')')
+    this.setText(this.subject + '\n' + '(' + this.verb + ')')
+    this.setWordWrapWidth(this.width)
+    this.setAlign('center')
     
     this.body.debugShowBody = true
     this.body.debugBodyColor = 0x0000ff;
@@ -41,14 +40,10 @@ class GameText extends Phaser.GameObjects.Text {
     this.setInteractive()
 
     //hit area not working correctly
-    this.input.hitArea.setSize(this.width, this.height + 30);
+    this.input.hitArea.setSize(this.width, this.height + 100);
     this.on('pointerup', () => {
-      this.scene.events.emit("GameTextSelected", this);
+      this.scene.events.emit("GameTextSelected", this.getAnswer())
     });
-    this.scene.events.on('GameTextSelected', (gameText) => {
-      this.toggleSelected(gameText);
-    });
-
   }
 
   isOutOfBounds() {
@@ -71,8 +66,7 @@ class GameText extends Phaser.GameObjects.Text {
     this.body.setMaxSpeed(0)
     this.setText(`${this.answer} (${this.english})`)
     this.setStyle({ fill: '#ff0'});
-    this.scene.events.emit('GameTextRemoved', this)
-    this.scene.time.addEvent({delay:600, callback: this.destroy, callbackScope: this})
+    this.scene.time.addEvent({delay:700, callback: this.removeText, callbackScope: this})
   }
 
   getAnswer() {
@@ -81,11 +75,19 @@ class GameText extends Phaser.GameObjects.Text {
 
   blowUp() {
     this.showAnswerAndRemove()
-    this.scene.sound.playAudioSprite('sfx', 'smb_breakblock');
   }
 
   onOutOfBounds(){
-    this.scene.events.emit('GameTextRemoved', this)
+    this.removeText()
+  }
+
+  removeText() {
+    try{
+      this.scene.events.emit('GameTextRemoved', this.answer)
+    }
+    catch(e){
+      console.log('error')
+    }
     this.destroy()
   }
 
@@ -98,9 +100,9 @@ class GameText extends Phaser.GameObjects.Text {
     return this.answer.length * 2
   }
 
-  toggleSelected(gameText) {
+  toggleSelected(answerText) {
     try {
-      if (this === gameText){
+      if (answerText === this.getAnswer()){
         this.setBackgroundColor('#070a91')
       } else {
         this.setBackgroundColor('transparent')
@@ -131,7 +133,7 @@ class FallingText extends GameText {
    }
 
   isOutOfBounds() {
-    if (this.y >= this.gameBoundsYBottom ) {
+    if (this.y >= this.gameBoundsYBottom - this.height + 5) {
       return true
     }
     return false

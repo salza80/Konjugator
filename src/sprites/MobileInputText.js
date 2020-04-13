@@ -1,4 +1,4 @@
-import { InputButton } from './InputText.js'
+import InputButton from './InputButton.js'
 import { getRandomInt, shuffle } from '../helpers/util.js'
 
 const ALL_CHARACTERS =  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ä', 'ö', 'ü', 'ß']
@@ -32,22 +32,20 @@ export default class MobileInputText extends Phaser.GameObjects.Container {
 
         this.answerText = ''
 
-        let backButtonPressed = (key) => {
-            this.back()
-        } 
-        this.backButton = new InputButton(this.scene, 0, this.textBox.height + 8, 'BACK', { fill: '#fc0b03', fontSize: 60 }, backButtonPressed).setVisible(false).setActive(false)
+        this.backButton = new InputButton(this.scene, 0, this.textBox.height + 8, 'BACK', { fill: '#fc0b03', fontSize: 60 }, this.back(),this).setVisible(false).setActive(false)
         this.add(this.backButton)
 
-        let keyButtonPressed = (key) => {
-            this.setText(this.getText() + key)
-        } 
         this.allCharacterButtons = {}
         for (var char of ALL_CHARACTERS) {
-            let b = new InputButton(this.scene, 0, this.textBox.height + 8, char, { fill: "#4ceaee", fontSize: 60 }, keyButtonPressed).setActive(false).setVisible(false)
+            let b = new InputButton(this.scene, 0, this.textBox.height + 8, char, { fill: "#4ceaee", fontSize: 60 }, this.keyButtonPressed, this).setActive(false).setVisible(false)
             this.add(b)
             this.allCharacterButtons[char] = b
         } 
     }
+
+    keyButtonPressed(key) {
+        this.setText(this.getText() + key)
+    } 
 
     clearAvailableChars() {
         for (var char of Object.values(this.allCharacterButtons)) {

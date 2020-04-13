@@ -3,28 +3,6 @@ import GameManager from '../sprites/GameManager';
 
 import { getRandomInt } from '../helpers/util.js';
 
-const NO_STARTING_BLOCKS = 100
-const LEVEL_TIME_SECONDS = 60
-
-const LEVEL_ONE_FALLING_TEXT_TIMER_FROM = 5000
-const LEVEL_ONE_FALLING_TEXT_TIMER_TO = 15000
-const PER_LEVEL_FALLING_TEXT_TIMER_CHANGE_PERCENTAGE = 0.2
-
-const LEVEL_ONE_BONUS_TEXT_TIMER_FROM = 8000
-const LEVEL_ONE_BONUS_TEXT_TIMER_TO = 20000
-const PER_LEVEL_BONUS_TEXT_TIMER_CHANGE_PERCENTAGE = 0.05
-
-const LEVEL_SCORE_MULTIPLIER = 2
-
-//game size settings
-
-const PLAY_WIDTH = 1060
-const SIDE_INPUT_WIDTH = 110
-const BLOCK_SIZE = 20
-const FULL_HEIGHT = 700
-
-
-
 class GameScene extends Phaser.Scene {
     constructor(test) {
         super({
@@ -39,7 +17,7 @@ class GameScene extends Phaser.Scene {
     create () {
     this.maximize = this.make.image({
         x: 1250,
-        y: 20,
+        y: 25,
         key: 'maximize',
         add: true
       })

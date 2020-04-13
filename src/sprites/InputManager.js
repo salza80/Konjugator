@@ -1,4 +1,4 @@
-import { InputButton } from './InputText.js'
+import InputButton from './InputButton.js'
 import { getRandomInt, shuffle } from '../helpers/util.js'
 
 const ALL_CHARACTERS =  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ä', 'ö', 'ü', 'ß']
@@ -46,15 +46,9 @@ export default class InputManager {
 
         this.answerText = ''
 
-        let backButtonPressed = (key) => {
-            this.back()
-        } 
-        this.backButton = new InputButton(this.scene, 0, this.bottomY + this.textBox.height + 8, 'BACK', { fill: '#fc0b03', fontSize: this.buttonSize }, backButtonPressed).setVisible(false).setActive(false)
+        this.backButton = new InputButton(this.scene, 0, this.bottomY + this.textBox.height + 8, 'BACK', { fill: '#fc0b03', fontSize: this.buttonSize }, this.back, this).setVisible(false).setActive(false)
 
-        let clearButtonPressed = (key) => {
-            this.clear()
-        } 
-        this.clearButton = new InputButton(this.scene, 0, this.bottomY + this.textBox.height + 8, 'CLEAR', { fill: '#fc0b03', fontSize: this.buttonSize }, clearButtonPressed).setVisible(false).setActive(false)
+        this.clearButton = new InputButton(this.scene, 0, this.bottomY + this.textBox.height + 8, 'CLEAR', { fill: '#fc0b03', fontSize: this.buttonSize }, this.clear, this).setVisible(false).setActive(false)
         this.scene.add.existing(this.backButton);
         this.scene.add.existing(this.clearButton);
 
@@ -67,12 +61,9 @@ export default class InputManager {
             this.createGermanVowelButtons();
         }
 
-        let keyButtonPressed = (key) => {
-            this.setText(this.getText() + key)
-        } 
         this.allCharacterButtons = {}
         for (var char of this.all_chars) {
-            let b = new InputButton(this.scene, 0, this.bottomY + this.textBox.height + 8, char, { fill: "#4ceaee", fontSize: this.buttonSize }, keyButtonPressed).setActive(false).setVisible(false)
+            let b = new InputButton(this.scene, 0, this.bottomY + this.textBox.height + 8, char, { fill: "#4ceaee", fontSize: this.buttonSize }, this.keyButtonPressed, this).setActive(false).setVisible(false)
             b.setDepth(2)
             this.scene.add.existing(b);
             this.allCharacterButtons[char] = b
@@ -80,6 +71,10 @@ export default class InputManager {
 
         
     }
+
+    keyButtonPressed(key) {
+        this.setText(this.getText() + key)
+    } 
 
     setAllCharacters() {
         if (!this.showTouchInput) {
@@ -176,46 +171,13 @@ export default class InputManager {
         this.setText('')
     }
 
-    gameTextRemoved(gameText) {
-        if (gameText.getAnswer() === this.answerText) {
+    gameTextRemoved(answerText) {
+        if (answerText === this.answerText) {
             this.answerText= ''
             this.setText('')
             this.showAvailableButtons()
         }
     }
-
-    // getAvailableCharKeys() {
-    //     if (this.answerText === '') {
-    //         return []
-    //     }
-    //     let answerChars = this.answerText.split('')
-    //     let availableChars = []
-    //     for (var index in answerChars) {
-    //         if (!availableChars.includes(answerChars[index])){ 
-    //             availableChars.push(answerChars[index])
-    //         }
-    //     }
-
-    //     // add some random vowels
-    //     [...Array(3)].forEach(() => {
-    //         if (availableChars.length < NO_AVAILABLE_CHARACTERS) { 
-    //             let randomChar = VOWELS[getRandomInt(0, VOWELS.length -1)]
-    //             if (!availableChars.includes(randomChar)){ 
-    //                 availableChars.push(randomChar)
-    //             }
-    //         }
-    //     });
-
-    //     do {
-    //         let randomChar = ALL_CHARACTERS[getRandomInt(0, ALL_CHARACTERS.length -1)]
-    //         if (!availableChars.includes(randomChar)){ 
-    //             availableChars.push(randomChar)
-    //         }
-            
-    //     } while(availableChars.length < NO_AVAILABLE_CHARACTERS)
-
-    //     return shuffle(availableChars)
-    // }
 
      getAvailableCharKeys() {
         if (this.answerText === '') {
