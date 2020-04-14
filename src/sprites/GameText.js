@@ -30,19 +30,10 @@ class GameText extends Phaser.GameObjects.Text {
     this.setAlign('center')
     
     this.body.debugShowBody = true
-    this.body.debugBodyColor = 0x0000ff;
-
-    // If you've scaled a Sprite by altering its `width`, `height`, or `scale` and you want to
-    // position the Body relative to the Sprite's dimensions (which will differ from its texture's
-    // dimensions), you should divide these arguments by the Sprite's current scale:
-
-            
+    this.body.debugBodyColor = 0x0000ff;          
     this.body.setSize(this.width, this.height)
 
     this.setInteractive()
-
-    //hit area not working correctly
-    this.input.hitArea.setSize(this.width, this.height + 100);
     this.on('pointerup', () => {
       this.funcOnGameTextSelected(this.getAnswer())
     });
@@ -119,6 +110,7 @@ class GameText extends Phaser.GameObjects.Text {
 class FallingText extends GameText {
   constructor(config) {
     super(config)
+    this.fallingSpeed = config.fallingSpeed ? config.fallingSpeed : 20
 
     //if remaining blocks are passed, set x to a remaining block 70% of the time
     if (config.remainingBlocks && getRandomInt(0,10) < 8) {
@@ -131,7 +123,7 @@ class FallingText extends GameText {
       this.setX(this.gameBoundsXRight-this.width)
     }
     this.body.allowGravity = true;
-    this.body.setMaxSpeed(20)
+    this.body.setMaxSpeed(this.fallingSpeed)
    }
 
   isOutOfBounds() {

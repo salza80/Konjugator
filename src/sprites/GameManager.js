@@ -10,6 +10,10 @@ const NO_STARTING_BLOCKS = 60
 const BLOCK_SIZE = 20
 const LEVEL_TIME_SECONDS = 60
 
+const START_FALLING_SPEED_FROM = 15
+const START_FALLING_SPEED_TO = 25
+const INCREASE_FALLING_SPEED_PER_LEVEL = 2
+
 const LEVEL_ONE_FALLING_TEXT_TIMER_FROM = 6000
 const LEVEL_ONE_FALLING_TEXT_TIMER_TO = 15000
 const PER_LEVEL_FALLING_TEXT_TIMER_CHANGE_PERCENTAGE = 0.15
@@ -37,6 +41,8 @@ export default class GameManager {
 	  this.fallingTextTimerTo = LEVEL_ONE_FALLING_TEXT_TIMER_TO
 	  this.bonusTextTimerFrom = LEVEL_ONE_BONUS_TEXT_TIMER_FROM
 	  this.bonusTextTimerTo = LEVEL_ONE_BONUS_TEXT_TIMER_TO
+	  this.fallingSpeedFrom = START_FALLING_SPEED_FROM
+	  this.fallingSpeedTo = START_FALLING_SPEED_TO
 
 	  this.showTouchInput = config.showTouchInput
 	  this.sideInputWidth = this.showTouchInput ? config.sideInputWidth : 0
@@ -137,6 +143,8 @@ export default class GameManager {
   nextLevel() {
   	this.endLevel()
   	this.currentLevel = this.currentLevel + 1
+  	this.fallingSpeedFrom = this.fallingSpeedFrom + INCREASE_FALLING_SPEED_PER_LEVEL
+  	this.fallingSpeedTo = this.fallingSpeedTo + INCREASE_FALLING_SPEED_PER_LEVEL
     this.fallingTextTimerFrom = this.fallingTextTimerFrom - (this.fallingTextTimerFrom * PER_LEVEL_FALLING_TEXT_TIMER_CHANGE_PERCENTAGE)
     this.fallingTextTimerTo = this.fallingTextTimerTo - (this.fallingTextTimerTo * PER_LEVEL_FALLING_TEXT_TIMER_CHANGE_PERCENTAGE)
     if (this.fallingTextTimerFrom >= this.fallingTextTimerTo) {this.fallingTextTimerTo = this.fallingTextTimerFrom + 500}
@@ -219,6 +227,7 @@ export default class GameManager {
       opts: { fill: "#de77ae", fontSize: 30 },
       remainingBlocks,
       blockSize: this.blockSize,
+      fallingSpeed: getRandomInt(this.fallingSpeedFrom, this.fallingSpeedTo),
 			gameBoundsXLeft:this.gameBoundsXLeft,
 			gameBoundsXRight: this.gameBoundsXRight,
 			gameBoundsYTop: this.gameBoundsYTop,
