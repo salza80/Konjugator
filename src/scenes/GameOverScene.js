@@ -16,7 +16,7 @@ class GameOverScene extends Phaser.Scene {
 
       this.startKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
 
-      this.input.on('pointerdown', () => {
+      this.input.once('pointerdown', () => {
         this.startGame();
       });
     }

@@ -6,7 +6,6 @@ import Score from './Score';
 import LevelText from './LevelText';
 import { getRandomInt, shuffle } from '../helpers/util.js'
 
-
 const NO_STARTING_BLOCKS = 100
 const BLOCK_SIZE = 20
 const LEVEL_TIME_SECONDS = 60
@@ -23,7 +22,7 @@ const LEVEL_SCORE_MULTIPLIER = 2
 
 export default class GameManager {
   constructor(config) {
-  	this.scene = config.scene
+    this.scene = config.scene
   	this.x  = config.x
   	this.y = config.y
   	this.width = config.width
@@ -40,14 +39,15 @@ export default class GameManager {
 	  this.bonusTextTimerTo = LEVEL_ONE_BONUS_TEXT_TIMER_TO
 
 	  this.showTouchInput = config.showTouchInput
-	  this.sideInputWidth = config.sideInputWidth
+	  this.sideInputWidth = this.showTouchInput ? config.sideInputWidth : 0
 	  this.playWidth = config.width - (this.sideInputWidth * 2)
 
-	  this.gameBoundsXLeft = this.showTouchInput ? this.x + this.sideInputWidth : this.x
-    this.gameBoundsXRight = this.showTouchInput ? this.x + this.sideInputWidth + this.playWidth : this.x + this.playWidth
+	  this.gameBoundsXLeft = this.x + this.sideInputWidth
+    this.gameBoundsXRight = this.x + this.sideInputWidth + this.playWidth
     this.gameBoundsYTop = this.y
     this.gameBoundsYBottom = this.height - 100
 
+    this.funcOnGameOver = config.onGameOver ? config.onGameOver.bind(config.context) : () => {}
 
 	  this.inputManager = new InputManager({
         scene: this.scene,
@@ -56,7 +56,9 @@ export default class GameManager {
         height: this.height,
         width: this.width,
         sideWidth: this.sideInputWidth,
-        showTouchInput:this.showTouchInput
+        showTouchInput:this.showTouchInput,
+        onFire: this.fire,
+        context: this
       })
 
 	  this.currentLevel = 1
@@ -90,25 +92,31 @@ export default class GameManager {
       })
 
       this.tilesGroup.addMultiple(this.createStartBlocks(this.noStartingBlocks), this.scene)
+  }
 
-			this.scene.events.on('GameTextSelected', (answerText) => {
-        this.inputManager.setAnswerText(answerText)
-        this.gameTextGroup.getChildren().forEach((gameText) => gameText.toggleSelected(answerText))
-      })
-      this.scene.events.on('GameTextRemoved', (answerText) => {
-        this.inputManager.gameTextRemoved(answerText)
-      })
-      this.scene.events.on('correctAnswer', (answerText) => {
-        this.fire(answerText)
-      })
+  onGameTextRemoved(answerText) {
+  	if(this.showTouchInput) {
+  		this.inputManager.gameTextRemoved(answerText)
+  	}
+  }
+
+  onGameTextSelected(answerText) {
+  	if(this.showTouchInput) {
+ 			this.inputManager.setAnswerText(answerText)
+	  	this.gameTextGroup.getChildren().forEach((gameText) => gameText.toggleSelected(answerText))
+		}
   }
 
   startLevel() {
     //set random word timer
     this.startText = this.scene.add.text(this.gameBoundsXLeft + 100, 200, this.scene.registry.get('startText'), { fill: "#00ff00", fontSize: 30 })
-    //this.keysText = this.add.text(100, 300, 'For ä,ö,ü & ß input on english keyboard use the buttons or 1, 2, 3, 4 keys respectively.', { fill: "#00ff00", fontSize: 13 })
+    if (!this.showTouchInput) {
+    	this.keysText = this.scene.add.text(this.gameBoundsXLeft + 100, 300, 'For ä,ö,ü & ß input on english keyboard use the buttons or 1, 2, 3, 4 keys respectively.', { fill: "#00ff00", fontSize: 20 })
+    } else {
+    	this.keysText = this.scene.add.text(this.gameBoundsXLeft + 100, 300, 'Switch to landscape view', { fill: "#00ff00", fontSize: 20 })
+    }
     this.startLevelText = this.scene.add.text(this.gameBoundsXLeft + 100, 250, 'Starting Level ' + this.currentLevel +  ' in ', { fill: "#00ff00", fontSize: 30 })
-    this.countDownEvent = this.scene.time.addEvent({delay: 1000, callback: this.startLevelCallback, callbackScope: this, repeat: 5})
+    this.countDownEvent = this.scene.time.addEvent({delay: 1000, callback: this.startLevelCallback, callbackScope: this, repeat: 1})
   }
 
   startLevelCallback() {
@@ -118,7 +126,7 @@ export default class GameManager {
       
       this.startLevelText.destroy()
       this.startText.destroy()
-      //this.keysText.destroy()
+      this.keysText.destroy()
       this.inputManager.setText('')
       this.levelText.startLevel(this.currentLevel, LEVEL_TIME_SECONDS, () => this.nextLevel())
       this.spawnFallingText()
@@ -196,7 +204,7 @@ export default class GameManager {
   gameOver() {
     this.music.stop()
     this.endLevel()
-    this.scene.events.emit("GameOver", this.scoreText.getScore())
+    this.funcOnGameOver(this.scoreText.getScore())
   }
 
   spawnFallingText() {
@@ -214,7 +222,10 @@ export default class GameManager {
 			gameBoundsXLeft:this.gameBoundsXLeft,
 			gameBoundsXRight: this.gameBoundsXRight,
 			gameBoundsYTop: this.gameBoundsYTop,
-			gameBoundsYBottom: this.gameBoundsYBottom
+			gameBoundsYBottom: this.gameBoundsYBottom,
+			onGameTextSelected: this.onGameTextSelected,
+			onGameTextRemoved: this.onGameTextRemoved,
+			context: this
     })
     this.gameTextGroup.add(b, this)
 
@@ -234,7 +245,10 @@ export default class GameManager {
 			gameBoundsXLeft:this.gameBoundsXLeft,
 			gameBoundsXRight: this.gameBoundsXRight,
 			gameBoundsYTop: this.gameBoundsYTop,
-			gameBoundsYBottom: this.gameBoundsYBottom
+			gameBoundsYBottom: this.gameBoundsYBottom,
+			onGameTextSelected: this.onGameTextSelected,
+			onGameTextRemoved: this.onGameTextRemoved,
+			context: this
     })
     
     this.gameTextGroup.add(b, this)
@@ -244,7 +258,6 @@ export default class GameManager {
       this.bonusTextTimerTo
     )
   }
-
 
   createStartBlocks(noBlocks) {
     let rows = this.getRows(noBlocks)

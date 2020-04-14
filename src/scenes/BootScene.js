@@ -68,13 +68,11 @@ class BootScene extends Phaser.Scene {
     create() {
         this.scale.on('orientationchange', (orientation) => {
           if (orientation === Phaser.Scale.PORTRAIT) {
-            console.log('test')
-            this.scale.stopFullscreen();
+            if (this.scale.isFullscreen) { this.scale.stopFullscreen() }
           } else if (orientation === Phaser.Scale.LANDSCAPE) {
-            this.scale.startFullscreen();
+            if (!this.scale.isFullscreen) { this.scale.startFullscreen() }
           }
         })
     }
 }
-
 export default BootScene;

@@ -10,44 +10,28 @@ class TitleScene extends Phaser.Scene {
         
     }
     create() {
+      this.title = this.add.sprite(this.sys.game.config.width / 2, 16 * 5);
+      this.scene.bringToTop();
+
+      this.registry.set('restartScene', false);
+
+      this.pressStartMob = new InputButton(this, 300, 200, "START (mobile input)", { fill: "#4ceaee", fontSize: 50 }, this.startGameMobile, this)
+      this.add.existing(this.pressStartMob)
 
 
-        this.title = this.add.sprite(this.sys.game.config.width / 2, 16 * 5);
-        
-
-        this.scene.bringToTop();
-
-        this.registry.set('restartScene', false);
-        this.pressX = this.add.bitmapText(300, 300, 'font', 'START', 50);
-        this.blink = 1000;
-
-       this.pressStart = new InputButton(this, 300, 300, "START", { fill: "#4ceaee", fontSize: 50 }, this.startGame, this)
-       
-
-        // this.startKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
-        // this.pressX.setInteractive()
-        // this.pressX.on('pointerdown', () => {
-        //     this.startGame();
-        // });
+      this.pressStart = new InputButton(this, 300, 500, "START (keyboard input)", { fill: "#4ceaee", fontSize: 50 }, this.startGame, this)
+      this.add.existing(this.pressStart);
     }
 
     update(time, delta) {
-        if (this.registry.get('restartScene')) {
-            this.restartScene();
-        }
-        this.blink -= delta;
-        if (this.blink < 0) {
-            this.pressX.alpha = this.pressX.alpha === 1 ? 0 : 1;
-            this.blink = 500;
-        }
-        // if (this.startKey.isDown) {
-        //     this.startGame();
-        // }
+    }
+
+    startGameMobile() {
+      this.scene.start('GameScene', {showTouchInput: true})
     }
 
     startGame() {
-      this.scene.stop('GameScene');
-      this.scene.start('GameScene');
+      this.scene.start('GameScene', {showTouchInput: false});
     }
 }
 

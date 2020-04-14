@@ -4,10 +4,14 @@ import GameManager from '../sprites/GameManager';
 import { getRandomInt } from '../helpers/util.js';
 
 class GameScene extends Phaser.Scene {
-    constructor(test) {
+    constructor(showTouchInput = false) {
         super({
             key: 'GameScene'
-        });
+        }); 
+    }
+
+    init(data) {
+      this.showTouchInput = data.showTouchInput
     }
 
     preload() {
@@ -15,7 +19,7 @@ class GameScene extends Phaser.Scene {
     }
 
     create () {
-    this.maximize = this.make.image({
+      this.maximize = this.make.image({
         x: 1250,
         y: 25,
         key: 'maximize',
@@ -27,35 +31,24 @@ class GameScene extends Phaser.Scene {
       this.maximize.setInteractive().on('pointerdown', () => {
         if (this.scale.isFullscreen) {
             this.scale.stopFullscreen();
-            // On stop fulll screen
         } else {
             this.scale.startFullscreen();
-            // On start fulll screen
         }
-    });
-
-
+      });
       this.gameManager = new GameManager({
         scene: this,
         x: 0,
         y: 0,
         width: 1280,
         height: 700,
-        showTouchInput: true,
-        sideInputWidth: 110
+        showTouchInput: this.showTouchInput,
+        sideInputWidth: 110,
+        onGameOver: this.gameOver,
+        context: this
       })
-
       
-      this.events.on('GameOver', (score) => {
-        this.gameOver(score)
-      })
+      if (!this.scale.isFullscreen) { this.scale.startFullscreen() }
 
-      
-
-
-
-      
-      
       this.gameManager.startLevel()
     }
 

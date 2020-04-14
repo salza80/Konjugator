@@ -9,6 +9,8 @@ class GameText extends Phaser.GameObjects.Text {
     this.gameBoundsXRight = config.gameBoundsXRight
     this.gameBoundsYTop = config.gameBoundsYTop
     this.gameBoundsYBottom = config.gameBoundsYBottom
+    this.funcOnGameTextSelected = config.onGameTextSelected ? config.onGameTextSelected.bind(config.context) : () => {};
+    this.funcOnGameTextRemoved = config.onGameTextRemoved ? config.onGameTextRemoved.bind(config.context) : () => {}
 
     config.scene.physics.world.enable(this);
     this.textType = config.textType
@@ -42,7 +44,7 @@ class GameText extends Phaser.GameObjects.Text {
     //hit area not working correctly
     this.input.hitArea.setSize(this.width, this.height + 100);
     this.on('pointerup', () => {
-      this.scene.events.emit("GameTextSelected", this.getAnswer())
+      this.funcOnGameTextSelected(this.getAnswer())
     });
   }
 
@@ -83,10 +85,10 @@ class GameText extends Phaser.GameObjects.Text {
 
   removeText() {
     try{
-      this.scene.events.emit('GameTextRemoved', this.answer)
+      this.funcOnGameTextRemoved(this.answer)
     }
     catch(e){
-      console.log('error')
+      console.log(e.message)
     }
     this.destroy()
   }

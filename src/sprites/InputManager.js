@@ -1,29 +1,41 @@
 import InputButton from './InputButton.js'
 import { getRandomInt, shuffle } from '../helpers/util.js'
 
-const ALL_CHARACTERS =  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ä', 'ö', 'ü', 'ß']
-const VOWELS = ['a', 'e', 'i', 'o', 'u', 'ä', 'ö', 'ü', 'ß']
-
 const NO_AVAILABLE_CHARACTERS = 6
 
 export default class InputManager {
     constructor(config) {
         this.scene = config.scene
         this.bottomY = config.height - 100
-        this.sideWidth = config.sideWidth
         this.fullWidth = config.width
         this.fullHeight = config.height
         this.showTouchInput = config.showTouchInput
-
+        this.funcOnFire = config.onFire.bind(config.context)
+        this.sideWidth = this.showTouchInput ? config.sideWidth : 0
         this.buttonSize = this.showTouchInput ? 100 : 60
-        this.othButtonSize = this.showTouchInput ? 80 : 60
-        this.textBoxSize = this.showTouchInput ? 40 : 20
-
-        this.setAllCharacters()
+        this.textBoxSize = this.showTouchInput ? 80 : 30  
 
         this.textBox = this.scene.add.text(this.fullWidth / 2, this.bottomY, ' ', {fill: "#00ff00", fontSize: this.textBoxSize })
+        this.answerText = ''
 
-        this.alphaKeys = this.scene.input.keyboard.addKeys("ONE,TWO,THREE,FOUR,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,BACKSPACE", true, false)
+        if (this.showTouchInput) {
+            this.setupTouchEntry()
+        } else {
+            this.setupKeyboardEntry()
+        }       
+    }
+
+    removeKeys() {
+        'ONE,TWO,THREE,FOUR,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,BACKSPACE,ENTER'.split(',').forEach((k)=> (this.scene.input.keyboard.removeKey(k)))
+        this.scene.input.keyboard.removeKey(186)
+        this.scene.input.keyboard.removeKey(222)
+        this.scene.input.keyboard.removeKey(192)
+        this.scene.input.keyboard.removeKey(219)
+    }
+
+    setupKeyboardEntry() {
+        this.removeKeys()
+        this.alphaKeys = this.scene.input.keyboard.addKeys("ONE,TWO,THREE,FOUR,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,BACKSPACE,ENTER", true, false)
         for (var key in this.alphaKeys ) {
             this.alphaKeys[key].on('down', this.keysEntered, this)
         }
@@ -34,33 +46,29 @@ export default class InputManager {
         this.scene.input.keyboard.addKey(192, true, false).on('down', this.keysEntered, this)
         this.scene.input.keyboard.addKey(219, true, false).on('down', this.keysEntered, this)
 
-        this.scene.input.keyboard.on('keydown-' + 'ENTER', this.fire, this)
-
-        if (this.showTouchInput) {
-            this.graphics = this.scene.add.graphics();
-            this.graphics.fillStyle(0x000000, 1);
-            this.graphics.setDepth(1)
-            this.graphics.fillRect(0, 0, this.sideWidth, this.fullHeight)
-            this.graphics.fillRect(this.fullWidth - this.sideWidth, 0, this.sideWidth, this.fullHeight)
+        //add german buttons
+        this.allCharacterButtons = {}
+        let xButton = (this.fullWidth/2) - (80 * 2)
+        for (var char of ['ä', 'ö', 'ü', 'ß'] ) {
+            let b = new InputButton(this.scene, xButton, this.bottomY + this.textBox.height + 8, char, { fill: "#4ceaee", fontSize: this.buttonSize }, this.keyButtonPressed, this)
+            this.scene.add.existing(b);
+            this.allCharacterButtons[char] = b
+            xButton = xButton + 80
         }
+    }
 
-        this.answerText = ''
+    setupTouchEntry() {
+        // add black rectangles on side input area
+        this.graphics = this.scene.add.graphics();
+        this.graphics.fillStyle(0x000000, 1);
+        this.graphics.setDepth(1)
+        this.graphics.fillRect(0, 0, this.sideWidth, this.fullHeight)
+        this.graphics.fillRect(this.fullWidth - this.sideWidth, 0, this.sideWidth, this.fullHeight)
 
-        this.backButton = new InputButton(this.scene, 0, this.bottomY + this.textBox.height + 8, 'BACK', { fill: '#fc0b03', fontSize: this.buttonSize }, this.back, this).setVisible(false).setActive(false)
+        // determin all possible button characters from potential answers
+        this.setAllCharacters()
 
-        this.clearButton = new InputButton(this.scene, 0, this.bottomY + this.textBox.height + 8, 'CLEAR', { fill: '#fc0b03', fontSize: this.buttonSize }, this.clear, this).setVisible(false).setActive(false)
-        this.scene.add.existing(this.backButton);
-        this.scene.add.existing(this.clearButton);
-
-        if (this.showTouchInput) {
-            this.backButton.setActive(true).setVisible(true).setFill('#fc0b03').setX(this.fullWidth - this.backButton.width - this.sideWidth - 20).setY(this.bottomY)
-            this.clearButton.setActive(true).setVisible(true).setFill('#fc0b03').setX(this.sideWidth + 20).setY(this.bottomY)
-        }
-
-        if (!this.showTouchInput) {
-            this.createGermanVowelButtons();
-        }
-
+        // create all buttons set to invisible
         this.allCharacterButtons = {}
         for (var char of this.all_chars) {
             let b = new InputButton(this.scene, 0, this.bottomY + this.textBox.height + 8, char, { fill: "#4ceaee", fontSize: this.buttonSize }, this.keyButtonPressed, this).setActive(false).setVisible(false)
@@ -68,8 +76,13 @@ export default class InputManager {
             this.scene.add.existing(b);
             this.allCharacterButtons[char] = b
         }
+    }
 
-        
+    back() {
+        let text = this.getText()
+        if (text.length > 0) {
+            this.setText(text.substring(0, text.length - 1))
+        }
     }
 
     keyButtonPressed(key) {
@@ -77,12 +90,7 @@ export default class InputManager {
     } 
 
     setAllCharacters() {
-        if (!this.showTouchInput) {
-            this.all_chars = ALL_CHARACTERS
-            return false
-        }
         var chars = [];
-
         var verbs = this.scene.cache.json.get('verbs')
 
         for (var verb of Object.values(verbs) ) {
@@ -98,8 +106,6 @@ export default class InputManager {
             }
         }
         this.all_chars = chars
-        // answers is array of all possible answers
-
     }
 
     splitAnswer(answer) {
@@ -113,7 +119,6 @@ export default class InputManager {
         for (var char of Object.values(this.allCharacterButtons)) {
             char.setActive(false).setVisible(false).setX(0)
         }
-        // this.backButton.setActive(false).setVisible(false)
     }
 
     setAnswerText(answerText) {
@@ -122,27 +127,18 @@ export default class InputManager {
         this.showAvailableButtons()
     }
 
-    createGermanVowelButtons() {
-        let xButton = (this.fullWidth/2) - (80 * 2)
-        for (var char of ['ä', 'ö', 'ü', 'ß'] ) {
-            let b = this.allCharacterButtons[char]
-            b.setX(xButton).setActive(true).setVisible(true)
-            xButton = xButton + 80
-        }
-    }
-
     showAvailableButtons() {
         if (!this.showTouchInput) { return false }
         this.clearAvailableChars()
-        let topPadding = 40
+        let topPadding = 60
         let buttonHeight = this.allCharacterButtons[Object.keys(this.allCharacterButtons)[0]].height
 
         let availableChars = this.getAvailableCharKeys()
-        let yIncrement = this.fullHeight / (Math.round(availableChars.length / 2) + 1)
+        let yIncrement = (this.fullHeight - topPadding) / (Math.round(availableChars.length / 2) + 1)
 
         let xButton1 = Math.round(this.sideWidth / 2)
         let xButton2 = this.fullWidth - Math.round(this.sideWidth / 2)
-        let yButton = yIncrement - (buttonHeight /2)
+        let yButton = topPadding + yIncrement - (buttonHeight /2)
         let firstCol = true
 
         for (var char of availableChars ) {
@@ -160,17 +156,6 @@ export default class InputManager {
         
     }
 
-    back() {
-        let text = this.getText()
-        if (text.length > 0) {
-            this.setText(text.substring(0, text.length - 1))
-        }
-    }
-
-    clear() {
-        this.setText('')
-    }
-
     gameTextRemoved(answerText) {
         if (answerText === this.answerText) {
             this.answerText= ''
@@ -179,7 +164,7 @@ export default class InputManager {
         }
     }
 
-     getAvailableCharKeys() {
+    getAvailableCharKeys() {
         if (this.answerText === '') {
             return []
         }
@@ -222,7 +207,7 @@ export default class InputManager {
     }
 
     fire() {
-        this.scene.events.emit('correctAnswer', this.getText())
+        this.funcOnFire(this.getText())
         this.answerText=''
         this.setText('')
         this.showAvailableButtons()
@@ -239,6 +224,7 @@ export default class InputManager {
                     this.back()
                     break;
                 case 'Enter':
+                    this.fire()
                     break;
                 case '1': 
                     this.setText(this.textBox.text + 'ä')
