@@ -116,7 +116,7 @@ export default class GameManager {
     	this.keysText = this.scene.add.text(this.gameBoundsXLeft + 100, 300, 'Switch to landscape view', { fill: "#00ff00", fontSize: 20 })
     }
     this.startLevelText = this.scene.add.text(this.gameBoundsXLeft + 100, 250, 'Starting Level ' + this.currentLevel +  ' in ', { fill: "#00ff00", fontSize: 30 })
-    this.countDownEvent = this.scene.time.addEvent({delay: 1000, callback: this.startLevelCallback, callbackScope: this, repeat: 1})
+    this.countDownEvent = this.scene.time.addEvent({delay: 1000, callback: this.startLevelCallback, callbackScope: this, repeat: 5})
   }
 
   startLevelCallback() {
