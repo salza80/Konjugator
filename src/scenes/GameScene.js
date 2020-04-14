@@ -19,6 +19,17 @@ class GameScene extends Phaser.Scene {
     }
 
     create () {
+      this.scale.off('orientationchange')
+      this.scale.on('orientationchange', (orientation) => {
+        if (orientation === Phaser.Scale.PORTRAIT) {
+          if (this.scale.isFullscreen) { this.scale.stopFullscreen() }
+        } else if (orientation === Phaser.Scale.LANDSCAPE) {
+          if (!this.scale.isFullscreen) { this.scale.startFullscreen() }
+        }
+      })
+
+
+
       this.maximize = this.make.image({
         x: 1250,
         y: 25,

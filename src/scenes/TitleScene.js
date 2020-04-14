@@ -10,16 +10,27 @@ class TitleScene extends Phaser.Scene {
         
     }
     create() {
+      this.scale.off('orientationchange')
+      this.scale.on('orientationchange', (orientation) => {
+        if (orientation === Phaser.Scale.PORTRAIT) {
+          if (this.scale.isFullscreen) { this.scale.stopFullscreen() }
+        } else if (orientation === Phaser.Scale.LANDSCAPE) {
+          if (!this.scale.isFullscreen) { this.scale.startFullscreen() }
+        }
+      })
+
+
+
       this.title = this.add.sprite(this.sys.game.config.width / 2, 16 * 5);
       this.scene.bringToTop();
 
       this.registry.set('restartScene', false);
 
-      this.pressStartMob = new InputButton(this, 300, 200, "START (mobile input)", { fill: "#4ceaee", fontSize: 50 }, this.startGameMobile, this)
+      this.pressStartMob = new InputButton(this, 300, 200, "START (mobile input)", { fill: "#4ceaee", fontSize: 60 }, this.startGameMobile, this)
       this.add.existing(this.pressStartMob)
 
 
-      this.pressStart = new InputButton(this, 300, 500, "START (keyboard input)", { fill: "#4ceaee", fontSize: 50 }, this.startGame, this)
+      this.pressStart = new InputButton(this, 300, 400, "START (keyboard input)", { fill: "#4ceaee", fontSize: 60 }, this.startGame, this)
       this.add.existing(this.pressStart);
     }
 
