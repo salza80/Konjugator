@@ -6,7 +6,7 @@ import Score from './Score';
 import LevelText from './LevelText';
 import { getRandomInt, shuffle } from '../helpers/util.js'
 
-const NO_STARTING_BLOCKS = 100
+const NO_STARTING_BLOCKS = 60
 const BLOCK_SIZE = 20
 const LEVEL_TIME_SECONDS = 60
 
