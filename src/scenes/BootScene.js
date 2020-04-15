@@ -1,7 +1,7 @@
 import makeAnimations from '../helpers/animations';
 
 class BootScene extends Phaser.Scene {
-    constructor(test) {
+    constructor() {
         super({
             key: 'BootScene'
         });
@@ -48,11 +48,11 @@ class BootScene extends Phaser.Scene {
 
         if (customConfig) {
             if (customConfig.words_url) {
-                this.load.json('verbs', customConfig.words_url);
+                this.load.json('words', customConfig.words_url);
             } else if (customConfig.words) {
-                this.load.json('verbs', customConfig.words);
+                this.load.json('words', customConfig.words);
             } else {
-                this.load.json('verbs', 'assets/data/verbsPresent.json');
+                this.load.json('words', 'assets/data/verbsPresent.json');
             }
 
             if (customConfig.start_text) {
@@ -60,7 +60,7 @@ class BootScene extends Phaser.Scene {
             } { this.registry.set('startText', 'Konjugiere das verb! Bist du bereit?') }
 
         } else {
-            this.load.json('verbs', 'assets/data/verbsPresent.json'); 
+            this.load.json('words', 'assets/data/verbsPresent.json'); 
             this.registry.set('startText', 'Konjugiere das verb! Bist du bereit?') 
         }
     }

@@ -91,17 +91,13 @@ export default class InputManager {
 
     setAllCharacters() {
         var chars = [];
-        var verbs = this.scene.cache.json.get('verbs')
+        var words = this.scene.cache.json.get('words')
 
-        for (var verb of Object.values(verbs) ) {
-            for (var [p, answer] of Object.entries(verb) ) {
-                if (p !== 'english'){
-                    var charGroups = this.splitAnswer(answer)
-                    for ( var c of charGroups ) {
-                        if (!chars.includes(c)){
-                            chars.push(c)
-                        }
-                    }
+        for (var word of words ) {
+            var charGroups = this.splitAnswer(word.answer)
+            for ( var c of charGroups ) {
+                if (!chars.includes(c)){
+                    chars.push(c)
                 }
             }
         }

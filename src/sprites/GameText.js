@@ -16,16 +16,13 @@ class GameText extends Phaser.GameObjects.Text {
     this.textType = config.textType
     // set random verb
     this.hitSound = 'smb_coin'
-    var verbs = this.scene.cache.json.get('verbs')
-    let verbKeys = Object.keys(verbs)
-    this.verb = verbKeys[getRandomInt(0, verbKeys.length -1)]
-    let subjectKeys = Object.keys(verbs[this.verb])
-    // -2 to avoid english
-    this.subject = subjectKeys[getRandomInt(0, subjectKeys.length -2)]
-    this.answer = verbs[this.verb][this.subject]
-    this.english = verbs[this.verb]['english']
+    let words = this.scene.cache.json.get('words')
+    let word = words[getRandomInt(0, words.length -1)]
+    this.question = word.question
+    this.answer = word.answer
+    this.tip = word.tip
 
-    this.setText(this.subject + '\n' + '(' + this.verb + ')')
+    this.setText(this.question)
     this.setWordWrapWidth(this.width)
     this.setAlign('center')
     
@@ -57,9 +54,9 @@ class GameText extends Phaser.GameObjects.Text {
 
   showAnswerAndRemove() {
     this.body.setMaxSpeed(0)
-    this.setText(`${this.answer} (${this.english})`)
+    this.setText(`${this.answer} (${this.tip})`)
     this.setStyle({ fill: '#ff0'});
-    this.scene.time.addEvent({delay:700, callback: this.removeText, callbackScope: this})
+    this.scene.time.addEvent({delay:900, callback: this.removeText, callbackScope: this})
   }
 
   getAnswer() {

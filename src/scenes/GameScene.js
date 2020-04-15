@@ -4,7 +4,7 @@ import GameManager from '../sprites/GameManager';
 import { getRandomInt } from '../helpers/util.js';
 
 class GameScene extends Phaser.Scene {
-    constructor(showTouchInput = false) {
+    constructor() {
         super({
             key: 'GameScene'
         }); 
@@ -27,8 +27,6 @@ class GameScene extends Phaser.Scene {
           if (!this.scale.isFullscreen) { this.scale.startFullscreen() }
         }
       })
-
-
 
       this.maximize = this.make.image({
         x: 1250,

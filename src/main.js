@@ -5,10 +5,6 @@ import TitleScene from './scenes/TitleScene';
 import GameOverScene from './scenes/GameOverScene';
 // import UIPlugin from '../assets/plugins/rexuiplugin.min';
 
-// const DPR = 2
-// export const px = (val) => (val * DPR)
-
-
 const WIDTH = 1280
 const HEIGHT = 700
 const config = {
@@ -50,8 +46,10 @@ const config = {
 };
 
 export const startGame = (customGameData) => {
+    config.callbacks = {
+        preBoot: function (game) {
+            game.registry.set('custom_game_data', customGameData)
+        }
+    }
     const game = new Phaser.Game(config); // eslint-disable-line no-unused-vars
-    game.registry.set('custom_game_data', customGameData)
 }
-
-// const game = new Phaser.Game(config)
