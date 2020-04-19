@@ -1,5 +1,5 @@
 {
-  "name": "Konjugator-",
+  "name": "@salza80/Konjugator",
   "version": "0.0.1",
   "description": "",
   "author": "sally mclean",
@@ -8,6 +8,10 @@
     "dev": "webpack --mode=development",
     "deploy": "webpack  --mode=production --config webpack.production.config.js",
     "test": "eslint ./src/**/**.js"
+  },
+  "repository": "git://github.com/Konjugator.git",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   },
   "license": "MIT",
   "devDependencies": {
