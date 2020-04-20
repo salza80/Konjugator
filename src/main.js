@@ -53,5 +53,6 @@ export const startGame = (customGameData) => {
             game.registry.set('custom_game_data', customGameData)
         }
     }
-    const game = new Phaser.Game(config); // eslint-disable-line no-unused-vars
+    return new Phaser.Game(config); // eslint-disable-line no-unused-vars
 }
+    
