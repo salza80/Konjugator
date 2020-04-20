@@ -1,16 +1,20 @@
 {
-  "name": "@salza80/Konjugator",
-  "version": "0.0.1",
+  "name": "@salza80/konjugator",
+  "version": "0.0.3",
   "description": "",
   "author": "sally mclean",
-  "main": "index.js",
+  "main": "src/main.js",
   "scripts": {
     "dev": "webpack --mode=development",
     "deploy": "webpack  --mode=production --config webpack.production.config.js",
     "test": "eslint ./src/**/**.js"
   },
-  "repository": "git://github.com/Konjugator.git",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/salza80/Konjugator.git"
+  },
   "publishConfig": {
+    "type": "git",
     "registry": "https://npm.pkg.github.com/"
   },
   "license": "MIT",

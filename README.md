@@ -47,3 +47,18 @@ Run:
 ```npm run deploy```
 
 This will optimize and minimize the compiled bundle.
+
+## Import from package
+
+
+import startGame '@salza80/konjugator'
+
+After npm install copy @salza80/konjugator/assets to public/[assetpathname]
+
+set assetpath in config
+
+  game.startGame({
+    start_text: 'Konjugiere das verb! Bist du bereit?',
+    words_url: 'url to json',
+    asset_path: '[assetpathname]/'
+  }) 
