@@ -33,8 +33,14 @@
 
 </body>
 <script type=text/javascript>
-  var g = game.startGame({
-    start_text: 'Konjugiere das verb! Bist du bereit?',
-    asset_path: 'assets/'
-  }) 
+  if (window.parent.gameConfig) {
+     var gameConfig = window.parent.gameConfig
+   } else {
+     var gameConfig = {
+       start_text: 'Konjugiere das verb! Bist du bereit?',
+       asset_path: 'assets/',
+       // words: [{"question":"test","answer":"test","tip":"test"},{"question":"again","answer":"testing","tip":"again"}]
+     }
+   }
+  var g = game.startGame(gameConfig) 
 </script>

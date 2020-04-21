@@ -10,6 +10,10 @@ class BootScene extends Phaser.Scene {
          // This json containing verb conjuation in present
         var customConfig = this.registry.get('custom_game_data')
 
+        if (customConfig && customConfig.game_over_callback) {
+            this.registry.set('gameOverCallback', customConfig.game_over_callback)
+        }
+
         if (customConfig && customConfig.asset_path) {
             this.load.path = customConfig.asset_path
         } else {
@@ -54,15 +58,16 @@ class BootScene extends Phaser.Scene {
         this.load.image('maximize', 'images/maximize.png');
 
         if (customConfig) {
-            if (customConfig.words_url) {z
+            if (customConfig.words_url) {
                 this.load.json('words', customConfig.words_url);
+            } else if (customConfig.words) {
+                this.cache.json.add('words', customConfig.words)
             } else {
                 this.load.json('words', 'data/verbsPresent.json');
             }
-
             if (customConfig.start_text) {
                 this.registry.set('startText', customConfig.start_text)
-            } { this.registry.set('startText', 'Konjugiere das verb! Bist du bereit?') }
+            } else { this.registry.set('startText', 'Konjugiere das verb! Bist du bereit?') }
 
         } else {
             this.load.json('words', 'data/verbsPresent.json'); 

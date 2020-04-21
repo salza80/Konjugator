@@ -56,7 +56,7 @@ class GameScene extends Phaser.Scene {
         context: this
       })
       
-      if (!this.scale.isFullscreen) { this.scale.startFullscreen() }
+      if (!this.scale.isFullscreen && this.showTouchInput) { this.scale.startFullscreen() }
 
       this.gameManager.startLevel()
     }
