@@ -5,9 +5,9 @@ import { getRandomInt } from '../helpers/util.js';
 
 class GameScene extends Phaser.Scene {
     constructor() {
-        super({
-            key: 'GameScene'
-        }); 
+      super({
+        key: 'GameScene'
+      }); 
     }
 
     init(data) {
@@ -39,9 +39,9 @@ class GameScene extends Phaser.Scene {
 
       this.maximize.setInteractive().on('pointerdown', () => {
         if (this.scale.isFullscreen) {
-            this.scale.stopFullscreen();
+          this.scale.stopFullscreen();
         } else {
-            this.scale.startFullscreen();
+          this.scale.startFullscreen();
         }
       });
       this.gameManager = new GameManager({

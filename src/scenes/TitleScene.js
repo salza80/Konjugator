@@ -26,12 +26,20 @@ class TitleScene extends Phaser.Scene {
 
       this.registry.set('restartScene', false);
 
-      this.pressStartMob = new InputButton(this, 300, 200, "START (mobile input)", { fill: "#4ceaee", fontSize: 60 }, this.startGameMobile, this)
-      this.add.existing(this.pressStartMob)
+      let inputType = this.registry.get('inputType')
+
+      if (!inputType){
+
+        this.pressStartMob = new InputButton(this, 300, 200, "START (mobile input)", { fill: "#4ceaee", fontSize: 60 }, this.startGameMobile, this)
+        this.add.existing(this.pressStartMob)
 
 
-      this.pressStart = new InputButton(this, 300, 400, "START (keyboard input)", { fill: "#4ceaee", fontSize: 60 }, this.startGame, this)
-      this.add.existing(this.pressStart);
+        this.pressStart = new InputButton(this, 300, 400, "START (keyboard input)", { fill: "#4ceaee", fontSize: 60 }, this.startGame, this)
+        this.add.existing(this.pressStart);
+      } else {
+        this.pressStart = new InputButton(this, 300, 200, "START GAME", { fill: "#4ceaee", fontSize: 60 }, inputType.toLowerCase() === 'keyboard' ? this.startGame : this.startGameMobile, this)
+        this.add.existing(this.pressStart)
+      }
     }
 
     update(time, delta) {
