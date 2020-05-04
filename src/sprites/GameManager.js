@@ -166,13 +166,13 @@ export default class GameManager {
   }
 
   fire( answerText ) {
-    let t = answerText
+    let t = answerText.toLowerCase()
     if (t === '') { return }
 
     let hasHit = false
 
     this.gameTextGroup.getChildren().every((fallingText) => {
-      if (fallingText.getAnswer() === t) {
+      if (fallingText.getAnswer().toLowerCase() === t) {
         let b = new Bullet({
               scene: this.scene,
               y: this.gameBoundsYBottom,
