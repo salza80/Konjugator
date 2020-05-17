@@ -11,7 +11,7 @@ class GameScene extends Phaser.Scene {
     }
 
     init(data) {
-      this.showTouchInput = data.showTouchInput
+      this.inputType = data.inputType
     }
 
     preload() {
@@ -50,13 +50,13 @@ class GameScene extends Phaser.Scene {
         y: 0,
         width: 1280,
         height: 700,
-        showTouchInput: this.showTouchInput,
+        inputType: this.inputType,
         sideInputWidth: 110,
         onGameOver: this.gameOver,
         context: this
       })
       
-      if (!this.scale.isFullscreen && this.showTouchInput) { this.scale.startFullscreen() }
+      // if (!this.scale.isFullscreen && this.inputType === 'Touch') { this.scale.startFullscreen() }
 
       this.gameManager.startLevel()
     }

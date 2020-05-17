@@ -36,8 +36,11 @@ class TitleScene extends Phaser.Scene {
 
         this.pressStart = new InputButton(this, 300, 400, "START (keyboard input)", { fill: "#4ceaee", fontSize: 60 }, this.startGame, this)
         this.add.existing(this.pressStart);
+
+        this.pressStart = new InputButton(this, 300, 400, "START (speech input)", { fill: "#4ceaee", fontSize: 60 }, this.startGameMobile, this)
+        this.add.existing(this.pressStartSpeech);
       } else {
-        this.pressStart = new InputButton(this, 300, 200, "START GAME", { fill: "#4ceaee", fontSize: 60 }, inputType.toLowerCase() === 'keyboard' ? this.startGame : this.startGameMobile, this)
+        this.pressStart = new InputButton(this, 300, 200, "START GAME", { fill: "#4ceaee", fontSize: 60 }, this.startGamePreset, this)
         this.add.existing(this.pressStart)
       }
     }
@@ -45,12 +48,22 @@ class TitleScene extends Phaser.Scene {
     update(time, delta) {
     }
 
+    startGamePreset() {
+      let inputType = this.registry.get('inputType')
+      console.log(inputType)
+      this.scene.start('GameScene', {inputType: inputType});
+    }
+
     startGameMobile() {
-      this.scene.start('GameScene', {showTouchInput: true})
+      this.scene.start('GameScene', {inputType: 'Touch'})
+    }
+
+    startGameSpeech() {
+      this.scene.start('GameScene', {inputType: 'Speech'})
     }
 
     startGame() {
-      this.scene.start('GameScene', {showTouchInput: false});
+      this.scene.start('GameScene', {inputType: 'Keyboard'});
     }
 }
 

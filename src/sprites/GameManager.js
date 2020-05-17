@@ -44,8 +44,8 @@ export default class GameManager {
 	  this.fallingSpeedFrom = START_FALLING_SPEED_FROM
 	  this.fallingSpeedTo = START_FALLING_SPEED_TO
 
-	  this.showTouchInput = config.showTouchInput
-	  this.sideInputWidth = this.showTouchInput ? config.sideInputWidth : 0
+	  this.inputType = config.inputType
+	  this.sideInputWidth = this.inputType === 'Touch' ? config.sideInputWidth : 0
 	  this.playWidth = config.width - (this.sideInputWidth * 2)
 
 	  this.gameBoundsXLeft = this.x + this.sideInputWidth
@@ -62,7 +62,7 @@ export default class GameManager {
         height: this.height,
         width: this.width,
         sideWidth: this.sideInputWidth,
-        showTouchInput:this.showTouchInput,
+        inputType:this.inputType,
         onFire: this.fire,
         context: this
       })
@@ -70,10 +70,10 @@ export default class GameManager {
 	  this.currentLevel = 1
     
       // Add and play the music
-      this.music = this.scene.sound.add('overworld');
-      this.music.play({
-          loop: true
-      });
+      // this.music = this.scene.sound.add('overworld');
+      // this.music.play({
+      //     loop: true
+      // });
 
       this.textTimers = [];
       this.tilesGroup = this.scene.add.group()
@@ -101,13 +101,13 @@ export default class GameManager {
   }
 
   onGameTextRemoved(answerText) {
-  	if(this.showTouchInput) {
+  	if(this.inputType ==='Touch') {
   		this.inputManager.gameTextRemoved(answerText)
   	}
   }
 
   onGameTextSelected(answerText) {
-  	if(this.showTouchInput) {
+  	if(this.inputType === 'Touch') {
  			this.inputManager.setAnswerText(answerText)
 	  	this.gameTextGroup.getChildren().forEach((gameText) => gameText.toggleSelected(answerText))
 		}
@@ -116,7 +116,7 @@ export default class GameManager {
   startLevel() {
     //set random word timer
     this.startText = this.scene.add.text(this.gameBoundsXLeft + 100, 200, this.scene.registry.get('startText'), { fill: "#00ff00", fontSize: 30 })
-    if (!this.showTouchInput) {
+    if (this.inputType === 'Keyboard') {
     	this.keysText = this.scene.add.text(this.gameBoundsXLeft + 100, 300, 'For ä,ö,ü & ß input on english keyboard use the buttons or 1, 2, 3, 4 keys respectively.', { fill: "#00ff00", fontSize: 20 })
     } else {
     	this.keysText = this.scene.add.text(this.gameBoundsXLeft + 100, 300, 'Switch to landscape view', { fill: "#00ff00", fontSize: 20 })
@@ -165,7 +165,7 @@ export default class GameManager {
     this.textTimers.push(this.scene.time.addEvent({delay: getRandomInt(fromDelay, toDelay), callback: func, callbackScope: this, loop: false}))
   }
 
-  fire( answerText ) {
+  fire(answerText, shake = true) {
     let t = answerText.toLowerCase()
     if (t === '') { return }
 
@@ -186,10 +186,11 @@ export default class GameManager {
       }
       return true
     })
-    if (!hasHit) {
+    if (!hasHit && shake) {
       this.scene.cameras.main.shake(100, 0.05);
       this.scene.sound.playAudioSprite('sfx', 'smb_bump');
     }
+    return hasHit
   }
 
   hit(bullet, fallingText) {
@@ -210,7 +211,7 @@ export default class GameManager {
   }
 
   gameOver() {
-    this.music.stop()
+    if (this.music) {this.music.stop()}
     this.endLevel()
     this.funcOnGameOver(this.scoreText.getScore())
   }
