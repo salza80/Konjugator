@@ -8,7 +8,7 @@ import { getRandomInt, shuffle } from '../helpers/util.js'
 
 const NO_STARTING_BLOCKS = 60
 const BLOCK_SIZE = 20
-const LEVEL_TIME_SECONDS = 60
+const LEVEL_TIME_SECONDS = 90
 
 const START_FALLING_SPEED_FROM = 15
 const START_FALLING_SPEED_TO = 25
@@ -54,6 +54,16 @@ export default class GameManager {
     this.gameBoundsYBottom = this.height - 100
 
     this.funcOnGameOver = config.onGameOver ? config.onGameOver.bind(config.context) : () => {}
+
+    // setup speek synthesis (if available in browser)
+    if (window.speechSynthesis) {
+      this.synth = window.speechSynthesis
+      this.utterence = new SpeechSynthesisUtterance()
+      this.utterence.lang = 'de-DE'
+      this.utterence.onerror = () => {console.log("error")}
+    }
+
+    
 
 	  this.inputManager = new InputManager({
         scene: this.scene,
@@ -118,8 +128,10 @@ export default class GameManager {
     this.startText = this.scene.add.text(this.gameBoundsXLeft + 100, 200, this.scene.registry.get('startText'), { fill: "#00ff00", fontSize: 30 })
     if (this.inputType === 'Keyboard') {
     	this.keysText = this.scene.add.text(this.gameBoundsXLeft + 100, 300, 'For ä,ö,ü & ß input on english keyboard use the buttons or 1, 2, 3, 4 keys respectively.', { fill: "#00ff00", fontSize: 20 })
-    } else {
+    } else if (this.inputType === 'Touch') {
     	this.keysText = this.scene.add.text(this.gameBoundsXLeft + 100, 300, 'Switch to landscape view', { fill: "#00ff00", fontSize: 20 })
+    } else {
+      this.keysText = this.scene.add.text(this.gameBoundsXLeft + 100, 300, 'Press "Talk" button, and then say the answer', { fill: "#00ff00", fontSize: 20 })
     }
     this.startLevelText = this.scene.add.text(this.gameBoundsXLeft + 100, 250, 'Starting Level ' + this.currentLevel +  ' in ', { fill: "#00ff00", fontSize: 30 })
     this.countDownEvent = this.scene.time.addEvent({delay: 1000, callback: this.startLevelCallback, callbackScope: this, repeat: 5})
@@ -165,6 +177,13 @@ export default class GameManager {
     this.textTimers.push(this.scene.time.addEvent({delay: getRandomInt(fromDelay, toDelay), callback: func, callbackScope: this, loop: false}))
   }
 
+  speak(text) {
+    if (!this.synth) { return }
+    if (this.synth.speaking) { return }
+    this.utterence.text = text
+    this.synth.speak(this.utterence)
+  }
+
   fire(answerText, shake = true) {
     let t = answerText.toLowerCase()
     if (t === '') { return }
@@ -173,6 +192,7 @@ export default class GameManager {
 
     this.gameTextGroup.getChildren().every((fallingText) => {
       if (fallingText.getAnswer().toLowerCase() === t) {
+        this.speak(fallingText.getVoice())
         let b = new Bullet({
               scene: this.scene,
               y: this.gameBoundsYBottom,
@@ -182,9 +202,7 @@ export default class GameManager {
         this.scene.physics.add.overlap(b, fallingText, this.hit, null, this)
         
         hasHit = true
-        return false
       }
-      return true
     })
     if (!hasHit && shake) {
       this.scene.cameras.main.shake(100, 0.05);
@@ -202,12 +220,11 @@ export default class GameManager {
   }
 
   smashBlock(fallingText, block) {
-      block.blowUp()
-      fallingText.blowUp()
-      if (this.tilesGroup.getLength() === 0 ) {
-        
-        this.gameOver()
-      }
+    block.blowUp()
+    fallingText.blowUp()
+    if (this.tilesGroup.getLength() === 0 ) {   
+      this.gameOver()
+    }
   }
 
   gameOver() {

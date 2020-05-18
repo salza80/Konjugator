@@ -21,6 +21,7 @@ class GameText extends Phaser.GameObjects.Text {
     this.question = word.question
     this.answer = word.answer
     this.tip = word.tip
+    this.voice = word.voice
 
     this.setText(this.question)
     this.setWordWrapWidth(this.width)
@@ -52,15 +53,27 @@ class GameText extends Phaser.GameObjects.Text {
     }
   }
 
+  repositionIfOffScreen() {
+    //reposition if text is off screen
+    if (this.x + this.width > this.gameBoundsXRight ){
+      this.setX(this.gameBoundsXRight-this.width)
+    }
+  }
+
   showAnswerAndRemove() {
     this.body.setMaxSpeed(0)
     this.setText(`${this.answer} (${this.tip})`)
     this.setStyle({ fill: '#ff0'});
+    this.repositionIfOffScreen();
     this.scene.time.addEvent({delay:900, callback: this.removeText, callbackScope: this})
   }
 
   getAnswer() {
     return this.answer
+  }
+
+  getVoice() {
+    return this.voice || this.answer
   }
 
   blowUp() {
@@ -116,9 +129,7 @@ class FallingText extends GameText {
       this.setX(this.getRandomTileX())
     }
     //reposition if text is off screen
-    if (this.x + this.width > this.gameBoundsXRight ){
-      this.setX(this.gameBoundsXRight-this.width)
-    }
+    this.repositionIfOffScreen()
     this.body.allowGravity = true;
     this.body.setMaxSpeed(this.fallingSpeed)
    }

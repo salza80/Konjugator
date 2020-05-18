@@ -11,10 +11,9 @@ export default class InputManager {
     this.fullHeight = config.height
     this.inputType = config.inputType
     this.funcOnFire = config.onFire.bind(config.context)
-    this.sideWidth = this.showTouchInput ? config.sideWidth : 0
-    this.buttonSize = this.showTouchInput ? 100 : 60
-    this.textBoxSize = this.showTouchInput ? 80 : 30
-
+    this.sideWidth = this.inputType === 'Touch' ? config.sideWidth : 0
+    this.buttonSize = this.inputType === 'Touch' ? 100 : 60
+    this.textBoxSize = this.inputType === 'Touch' ? 80 : 30
     this.textBox = this.scene.add.text(this.fullWidth / 2, this.bottomY, ' ', {fill: "#00ff00", fontSize: this.textBoxSize })
     this.answerText = ''
 
@@ -128,9 +127,6 @@ export default class InputManager {
     this.graphics.fillRect(0, 0, this.sideWidth, this.fullHeight)
     this.graphics.fillRect(this.fullWidth - this.sideWidth, 0, this.sideWidth, this.fullHeight)
 
-    // determin all possible button characters from potential answers
-    this.setAllCharacters()
-
     // create all buttons set to invisible
     this.allCharacterButtons = {}
     for (var char of this.allCharacters()) {
@@ -160,6 +156,7 @@ export default class InputManager {
   }
 
   allCharacters() {
+    // determin all possible button characters from potential answers
     if (this._allChars) { return this._allChars }
     var chars = [];
     for (var answer of this.allAnswers()) {
@@ -188,9 +185,9 @@ export default class InputManager {
   }
 
   clearAvailableChars() {
-      for (var char of Object.values(this.allCharacterButtons)) {
-        char.setActive(false).setVisible(false).setX(0)
-      }
+    for (var char of Object.values(this.allCharacterButtons)) {
+      char.setActive(false).setVisible(false).setX(0)
+    }
   }
 
   setAnswerText(answerText) {
@@ -200,7 +197,7 @@ export default class InputManager {
   }
 
   showAvailableButtons() {
-    if (!this.showTouchInput) { return false }
+    if (this.inputType !== 'Touch') { return false }
     this.clearAvailableChars()
     let topPadding = 60
     let buttonHeight = this.allCharacterButtons[Object.keys(this.allCharacterButtons)[0]].height

@@ -12,7 +12,7 @@ export default class Bullet extends Phaser.GameObjects.Sprite {
         this.target = config.target
 
         if (this.target.textType === 'falling') {
-            this.body.setVelocityY(-100)
+            this.body.setVelocityY(-150)
             this.setX(this.target.x + (this.target.width / 2))
         } else {
             this.setX(500)
