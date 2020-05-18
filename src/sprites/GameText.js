@@ -159,12 +159,12 @@ class BonusText extends GameText {
     let LeftorRight = getRandomInt(0,2)
     if (LeftorRight === 0) {
       this.bonusDirection = 'left'
-      this.setX(this.gameBoundsXRight + 100)
+      this.setX(this.gameBoundsXRight + this.width)
       this.setY(getRandomInt(50, 400))
       this.body.setVelocityX(-70)
     } else {
       this.bonusDirection = 'right'
-      this.setX(this.gameBoundsXLeft - 100)
+      this.setX(this.gameBoundsXLeft - this.width)
       this.setY(getRandomInt(50, 400))
       this.body.setVelocityX(70)
     }

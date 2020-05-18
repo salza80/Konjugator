@@ -190,7 +190,7 @@ export default class GameManager {
 
     let hasHit = false
 
-    this.gameTextGroup.getChildren().every((fallingText) => {
+    this.gameTextGroup.getChildren().forEach((fallingText) => {
       if (fallingText.getAnswer().toLowerCase() === t) {
         this.speak(fallingText.getVoice())
         let b = new Bullet({
