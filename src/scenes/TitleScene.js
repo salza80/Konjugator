@@ -37,8 +37,8 @@ class TitleScene extends Phaser.Scene {
         this.pressStart = new InputButton(this, 300, 300, "START (keyboard input)", { fill: "#4ceaee", fontSize: 60 }, this.startGame, this)
         this.add.existing(this.pressStart);
 
-        this.pressStartSpeech = new InputButton(this, 300, 500, "START (speech input)", { fill: "#4ceaee", fontSize: 60 }, this.startGameSpeech, this)
-        this.add.existing(this.pressStartSpeech);
+        this.pressStartVoice = new InputButton(this, 300, 500, "START (Voice input)", { fill: "#4ceaee", fontSize: 60 }, this.startGameVoice, this)
+        this.add.existing(this.pressStartVoice);
       } else {
         this.pressStart = new InputButton(this, 300, 200, "START GAME", { fill: "#4ceaee", fontSize: 60 }, this.startGamePreset, this)
         this.add.existing(this.pressStart)
@@ -57,8 +57,8 @@ class TitleScene extends Phaser.Scene {
       this.scene.start('GameScene', {inputType: 'Touch'})
     }
 
-    startGameSpeech() {
-      this.scene.start('GameScene', {inputType: 'Speech'})
+    startGameVoice() {
+      this.scene.start('GameScene', {inputType: 'Voice'})
     }
 
     startGame() {

@@ -17,7 +17,7 @@ export default class InputManager {
     this.textBox = this.scene.add.text(this.fullWidth / 2, this.bottomY, ' ', {fill: "#00ff00", fontSize: this.textBoxSize })
     this.answerText = ''
 
-    if (this.inputType === 'Speech') {
+    if (this.inputType === 'Voice') {
       this.setupSpeechRecognitionEntry()
     } else if (this.inputType === 'Touch') {
       this.setupTouchEntry()
