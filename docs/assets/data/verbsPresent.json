@@ -200,5 +200,5 @@
    { "question" : "ihr (kennen)","answer": "kennt", "tip": "to know"},
    { "question" : "ihr (fragen)","answer": "fragt", "tip": "to ask"},
    { "question" : "ich (einsteigen)", "answer": "steige ein", "tip": "to get in"},
-   { "question" : "apple", "answer": "Apple", "tip": "apple"}
+   { "question" : "apple", "answer": "Apfel", "tip": "Apfel (apple)"}
 ]
