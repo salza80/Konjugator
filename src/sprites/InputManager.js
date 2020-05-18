@@ -9,20 +9,19 @@ export default class InputManager {
     this.bottomY = config.height - 100
     this.fullWidth = config.width
     this.fullHeight = config.height
-    this.showTouchInput = config.showTouchInput
+    this.inputType = config.inputType
     this.funcOnFire = config.onFire.bind(config.context)
-    this.sideWidth = this.showTouchInput ? config.sideWidth : 0
-    this.buttonSize = this.showTouchInput ? 100 : 60
-    this.textBoxSize = this.showTouchInput ? 80 : 30
-
+    this.sideWidth = this.inputType === 'Touch' ? config.sideWidth : 0
+    this.buttonSize = this.inputType === 'Touch' ? 100 : 60
+    this.textBoxSize = this.inputType === 'Touch' ? 80 : 30
     this.textBox = this.scene.add.text(this.fullWidth / 2, this.bottomY, ' ', {fill: "#00ff00", fontSize: this.textBoxSize })
     this.answerText = ''
 
-    if (this.showTouchInput) {
+    if (this.inputType === 'Speech') {
+      this.setupSpeechRecognitionEntry()
+    } else if (this.inputType === 'Touch') {
       this.setupTouchEntry()
-    } else {
-      this.setupKeyboardEntry()
-    }
+    } else { this.setupKeyboardEntry() }
   }
 
   removeKeys() {
@@ -31,6 +30,69 @@ export default class InputManager {
     this.scene.input.keyboard.removeKey(222)
     this.scene.input.keyboard.removeKey(192)
     this.scene.input.keyboard.removeKey(219)
+  }
+
+  setupSpeechRecognitionEntry() {
+
+    const speechButtonPressed = () => {
+      this.recognition.start()
+    }
+
+    this.speechButton = new InputButton(this.scene, this.fullWidth / 2, this.bottomY + this.textBox.height + 8, "Talk", { fill: "#4ceaee", fontSize: this.buttonSize }, speechButtonPressed, this).setActive(true).setVisible(true)
+    this.speechButton.setDepth(2)
+    this.speechButton.x = this.speechButton.x - (this.speechButton.width / 2)
+    this.scene.add.existing(this.speechButton);
+
+
+
+    let SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+    let SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
+    let SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
+    var answers = this.allAnswers()
+
+    var grammar = '#JSGF V1.0; grammar answers; public <answers> = ' + answers.join(' | ') + ' ;'
+
+    this.recognition = new SpeechRecognition();
+    this.speechRecognitionList = new SpeechGrammarList();
+    this.speechRecognitionList.addFromString(grammar,1)
+
+    this.recognition.grammars = this.speechRecognitionList;
+    this.recognition.continuous = false;
+    this.recognition.lang = 'de-DE';
+    this.recognition.interimResults = false;
+    this.recognition.maxAlternatives = 3;
+
+    this.recognition.onerror = (event) => {
+      this.speechButton.text = "Talk"
+    }
+    
+    this.recognition.onresult = (event) => {
+      this.speechButton.text = "Talk"
+      this.setText(event.results[0][0].transcript)
+      let match =  false
+      for (const result of event.results[0] ) {
+        match = this.funcOnFire(result.transcript, false)
+        if (match) {
+          this.setText(result.transcript)
+          break;
+        }
+      }
+      if (!match) {this.funcOnFire(this.getText())}
+    }
+
+    this.recognition.onaudiostart = () => {
+      this.speechButton.text = "..."
+    }
+
+    this.recognition.onspeechend = () => {
+      this.speechButton.text = "Talk"
+      this.recognition.stop();
+    }
+
+    this.recognition.onnomatch = (event) => {
+      this.speechButton.text = "Talk"
+      this.recognition.stop();
+    }
   }
 
   setupKeyboardEntry() {
@@ -65,12 +127,9 @@ export default class InputManager {
     this.graphics.fillRect(0, 0, this.sideWidth, this.fullHeight)
     this.graphics.fillRect(this.fullWidth - this.sideWidth, 0, this.sideWidth, this.fullHeight)
 
-    // determin all possible button characters from potential answers
-    this.setAllCharacters()
-
     // create all buttons set to invisible
     this.allCharacterButtons = {}
-    for (var char of this.all_chars) {
+    for (var char of this.allCharacters()) {
       let b = new InputButton(this.scene, 0, this.bottomY + this.textBox.height + 8, char, { fill: "#4ceaee", fontSize: this.buttonSize }, this.keyButtonPressed, this).setActive(false).setVisible(false)
       b.setDepth(2)
       this.scene.add.existing(b);
@@ -89,19 +148,27 @@ export default class InputManager {
     this.setText(this.getText() + key)
   }
 
-  setAllCharacters() {
-    var chars = [];
+  allAnswers() {
+    if (this._allAnswers) { return this._allAnswers}
     var words = this.scene.cache.json.get('words')
+    this._allAnswers = words.map((word)=> word.answer)
+    return this._allAnswers
+  }
 
-    for (var word of words ) {
-      var charGroups = this.splitAnswer(word.answer)
+  allCharacters() {
+    // determin all possible button characters from potential answers
+    if (this._allChars) { return this._allChars }
+    var chars = [];
+    for (var answer of this.allAnswers()) {
+      var charGroups = this.splitAnswer(answer)
       for ( var c of charGroups ) {
           if (!chars.includes(c)){
               chars.push(c)
           }
       }
     }
-    this.all_chars = chars
+    this._allChars = chars
+    return this._allChars
   }
 
   splitAnswer(answer) {
@@ -118,9 +185,9 @@ export default class InputManager {
   }
 
   clearAvailableChars() {
-      for (var char of Object.values(this.allCharacterButtons)) {
-        char.setActive(false).setVisible(false).setX(0)
-      }
+    for (var char of Object.values(this.allCharacterButtons)) {
+      char.setActive(false).setVisible(false).setX(0)
+    }
   }
 
   setAnswerText(answerText) {
@@ -130,7 +197,7 @@ export default class InputManager {
   }
 
   showAvailableButtons() {
-    if (!this.showTouchInput) { return false }
+    if (this.inputType !== 'Touch') { return false }
     this.clearAvailableChars()
     let topPadding = 60
     let buttonHeight = this.allCharacterButtons[Object.keys(this.allCharacterButtons)[0]].height
@@ -178,7 +245,7 @@ export default class InputManager {
     }
 
     do {
-      let randomChar = this.all_chars[getRandomInt(0, this.all_chars.length -1)]
+      let randomChar = this.allCharacters()[getRandomInt(0, this.allCharacters().length -1)]
       if (!availableChars.includes(randomChar)){
         availableChars.push(randomChar)
       }
