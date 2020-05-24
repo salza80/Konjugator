@@ -10,19 +10,17 @@ const NO_STARTING_BLOCKS = 60
 const BLOCK_SIZE = 20
 const LEVEL_TIME_SECONDS = 90
 
-const START_FALLING_SPEED_FROM = 15
-const START_FALLING_SPEED_TO = 25
-const INCREASE_FALLING_SPEED_PER_LEVEL = 2
+const START_FALLING_SPEED = 15
+const START_BONUS_FALLING_SPEED = 37
+const INCREASE_FALLING_SPEED_PER_LEVEL = 3
 
 const LEVEL_ONE_FALLING_TEXT_TIMER_FROM = 6000
 const LEVEL_ONE_FALLING_TEXT_TIMER_TO = 15000
-const PER_LEVEL_FALLING_TEXT_TIMER_CHANGE_PERCENTAGE = 0.15
+const PER_LEVEL_FALLING_TEXT_TIMER_CHANGE = 500
 
 const LEVEL_ONE_BONUS_TEXT_TIMER_FROM = 10000
 const LEVEL_ONE_BONUS_TEXT_TIMER_TO = 20000
-const PER_LEVEL_BONUS_TEXT_TIMER_CHANGE_PERCENTAGE = 0.025
-
-const LEVEL_SCORE_MULTIPLIER = 2
+const PER_LEVEL_BONUS_TEXT_TIMER_CHANGE = 200
 
 export default class GameManager {
   constructor(config) {
@@ -35,14 +33,13 @@ export default class GameManager {
   	this.blockSize = BLOCK_SIZE
   	this.noStartingBlocks = NO_STARTING_BLOCKS
   	this.levelTimeSeconds = LEVEL_TIME_SECONDS
-  	this.levelScoreMultiplier = LEVEL_SCORE_MULTIPLIER
 
 	 	this.fallingTextTimerFrom = LEVEL_ONE_FALLING_TEXT_TIMER_FROM
 	  this.fallingTextTimerTo = LEVEL_ONE_FALLING_TEXT_TIMER_TO
 	  this.bonusTextTimerFrom = LEVEL_ONE_BONUS_TEXT_TIMER_FROM
 	  this.bonusTextTimerTo = LEVEL_ONE_BONUS_TEXT_TIMER_TO
-	  this.fallingSpeedFrom = START_FALLING_SPEED_FROM
-	  this.fallingSpeedTo = START_FALLING_SPEED_TO
+	  this.fallingSpeed = START_FALLING_SPEED
+	  this.bonusFallingSpeed = START_BONUS_FALLING_SPEED
 
 	  this.inputType = config.inputType
 	  this.sideInputWidth = this.inputType === 'Touch' ? config.sideInputWidth : 0
@@ -88,7 +85,7 @@ export default class GameManager {
       this.textTimers = [];
       this.tilesGroup = this.scene.add.group()
       this.gameTextGroup = this.scene.add.group({ runChildUpdate: true })
-      this.bullets = this.scene.add.group()
+      this.bullets = this.scene.add.group({ runChildUpdate: true })
       this.scene.physics.add.overlap(this.gameTextGroup, this.tilesGroup, this.smashBlock, null, this);
 
       this.scoreText = new Score({
@@ -149,21 +146,22 @@ export default class GameManager {
       this.levelText.startLevel(this.currentLevel, LEVEL_TIME_SECONDS, () => this.nextLevel())
       this.spawnFallingText()
       this.setRandomTextTimer(this.spawnBonusText, 15000, 50000)
+      this.setRandomTextTimer(this.spawnBonusFallingText, 1500, 50000)
     }  
   }
 
   nextLevel() {
-  	this.endLevel()
-  	this.currentLevel = this.currentLevel + 1
-  	this.fallingSpeedFrom = this.fallingSpeedFrom + INCREASE_FALLING_SPEED_PER_LEVEL
-  	this.fallingSpeedTo = this.fallingSpeedTo + INCREASE_FALLING_SPEED_PER_LEVEL
-    this.fallingTextTimerFrom = this.fallingTextTimerFrom - (this.fallingTextTimerFrom * PER_LEVEL_FALLING_TEXT_TIMER_CHANGE_PERCENTAGE)
-    this.fallingTextTimerTo = this.fallingTextTimerTo - (this.fallingTextTimerTo * PER_LEVEL_FALLING_TEXT_TIMER_CHANGE_PERCENTAGE)
+    this.endLevel()
+    this.currentLevel = this.currentLevel + 1
+    this.fallingSpeed = this.fallingSpeed + INCREASE_FALLING_SPEED_PER_LEVEL
+    this.bonusFallingSpeed = this.bonusfallingSpeed + INCREASE_FALLING_SPEED_PER_LEVEL
+    this.fallingTextTimerFrom = this.fallingTextTimerFrom - PER_LEVEL_FALLING_TEXT_TIMER_CHANGE
+    this.fallingTextTimerTo = this.fallingTextTimerTo - PER_LEVEL_FALLING_TEXT_TIMER_CHANGE
     if (this.fallingTextTimerFrom >= this.fallingTextTimerTo) {this.fallingTextTimerTo = this.fallingTextTimerFrom + 500}
-    this.bonusTextTimerFrom = this.bonusTextTimerFrom - (this.bonusTextTimerFrom * PER_LEVEL_BONUS_TEXT_TIMER_CHANGE_PERCENTAGE)
-    this.bonusTextTimerTo = this.bonusTextTimerTo - (this.bonusTextTimerTo * PER_LEVEL_BONUS_TEXT_TIMER_CHANGE_PERCENTAGE)
+    this.bonusTextTimerFrom = this.bonusTextTimerFrom - PER_LEVEL_BONUS_TEXT_TIMER_CHANGE
+    this.bonusTextTimerTo = this.bonusTextTimerTo - PER_LEVEL_BONUS_TEXT_TIMER_CHANGE
     if (this.bonusTextTimerFrom >= this.bonusTextTimerTo) {this.bonusTextTimerTo = this.bonusTextTimerFrom + 500}
-  	this.startLevel()
+    this.startLevel()
   }
 
   endLevel() {
@@ -212,11 +210,17 @@ export default class GameManager {
   }
 
   hit(bullet, fallingText) {
+    if (!fallingText.isActive) {
+      bullet.destroy()
+      return false
+    }
     let score = fallingText.getScore()
-    score = score * (LEVEL_SCORE_MULTIPLIER * this.currentLevel)
-    this.scoreText.updateScore(score, fallingText.textType === 'bonus')
+    score = score  + Math.round(( score * (this.currentLevel / 10 )))
+    this.scoreText.updateScore(score, fallingText.textType.startsWith('bonus') )
     bullet.destroy()
     fallingText.hit()
+
+    if (this.gameTextGroup.countActive(true) <= 1 ) {this.spawnFallingText(false)}
   }
 
   smashBlock(fallingText, block) {
@@ -233,7 +237,7 @@ export default class GameManager {
     this.funcOnGameOver(this.scoreText.getScore())
   }
 
-  spawnFallingText() {
+  spawnFallingText(setTimer=true) {
     let remainingBlocks = null
     if (this.tilesGroup.getLength() < 50) {
       remainingBlocks = this.tilesGroup.getChildren().map((block) => block.x)
@@ -245,7 +249,7 @@ export default class GameManager {
       opts: { fill: "#de77ae", fontSize: 30 },
       remainingBlocks,
       blockSize: this.blockSize,
-      fallingSpeed: getRandomInt(this.fallingSpeedFrom, this.fallingSpeedTo),
+      fallingSpeed: this.fallingSpeed,
 			gameBoundsXLeft:this.gameBoundsXLeft,
 			gameBoundsXRight: this.gameBoundsXRight,
 			gameBoundsYTop: this.gameBoundsYTop,
@@ -256,10 +260,42 @@ export default class GameManager {
     })
     this.gameTextGroup.add(b, this)
 
+    if (setTimer) {
+      this.setRandomTextTimer(
+        this.spawnFallingText,
+        this.fallingTextTimerFrom,
+        this.fallingTextTimerTo
+      )
+    }
+  }
+
+  spawnBonusFallingText() {
+    let remainingBlocks = null
+    if (this.tilesGroup.getLength() < 50) {
+      remainingBlocks = this.tilesGroup.getChildren().map((block) => block.x)
+    }
+
+    let b = GameTextFactory({
+      scene: this.scene,
+      textType: "bonusfalling",
+      opts: { fill: "#F21536", fontSize: 30 },
+      remainingBlocks,
+      blockSize: this.blockSize,
+      fallingSpeed: this.bonusFallingSpeed,
+      gameBoundsXLeft:this.gameBoundsXLeft,
+      gameBoundsXRight: this.gameBoundsXRight,
+      gameBoundsYTop: this.gameBoundsYTop,
+      gameBoundsYBottom: this.gameBoundsYBottom,
+      onGameTextSelected: this.onGameTextSelected,
+      onGameTextRemoved: this.onGameTextRemoved,
+      context: this
+    })
+    this.gameTextGroup.add(b, this)
+
     this.setRandomTextTimer(
-      this.spawnFallingText,
-      this.fallingTextTimerFrom,
-      this.fallingTextTimerTo
+      this.spawnBonusFallingText,
+      this.bonusTextTimerFrom,
+      this.bonusTextTimerTo
     )
   }
 

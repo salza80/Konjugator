@@ -11,6 +11,7 @@ class GameText extends Phaser.GameObjects.Text {
     this.gameBoundsYBottom = config.gameBoundsYBottom
     this.funcOnGameTextSelected = config.onGameTextSelected ? config.onGameTextSelected.bind(config.context) : () => {};
     this.funcOnGameTextRemoved = config.onGameTextRemoved ? config.onGameTextRemoved.bind(config.context) : () => {}
+    this.isActive = true
 
     config.scene.physics.world.enable(this);
     this.textType = config.textType
@@ -62,10 +63,11 @@ class GameText extends Phaser.GameObjects.Text {
 
   showAnswerAndRemove() {
     this.body.setMaxSpeed(0)
+    this.isActive = false
     this.setText(`${this.answer} (${this.tip})`)
     this.setStyle({ fill: '#ff0'});
     this.repositionIfOffScreen();
-    this.scene.time.addEvent({delay:900, callback: this.removeText, callbackScope: this})
+    this.scene.time.addEvent({delay:1500, callback: this.removeText, callbackScope: this})
   }
 
   getAnswer() {
@@ -103,6 +105,10 @@ class GameText extends Phaser.GameObjects.Text {
     return this.answer.length * 2
   }
 
+  getRandomTileX () {
+    return getRandomInt(0,(this.gameWidth/this.blockSize) * this.blockSize + this.gameBoundsXLeft)
+  }
+
   toggleSelected(answerText) {
     try {
       if (answerText === this.getAnswer()){
@@ -122,7 +128,7 @@ class FallingText extends GameText {
     super(config)
     this.fallingSpeed = config.fallingSpeed ? config.fallingSpeed : 20
 
-    //if remaining blocks are passed, set x to a remaining block 70% of the time
+    // if remaining blocks are passed, set x to a remaining block 70% of the time
     if (config.remainingBlocks && getRandomInt(0,10) < 8) {
       this.setX(config.remainingBlocks[getRandomInt(0, config.remainingBlocks.length - 1)])
     } else {
@@ -144,9 +150,54 @@ class FallingText extends GameText {
   onOutOfBounds(){
     this.showAnswerAndRemove()
   }
+}
 
-  getRandomTileX () {
-    return getRandomInt(0,this.gameWidth/this.blockSize) * this.blockSize + this.gameBoundsXLeft
+
+class BonusFallingText extends GameText {
+  constructor(config) {
+    super(config)
+    this.hitSound = 'smb_pipe'
+    this.fallingSpeed = config.fallingSpeed ? config.fallingSpeed : 40
+
+    // if remaining blocks are passed, set x to a remaining block 40% of the time
+    if (config.remainingBlocks && getRandomInt(0,10) < 4) {
+      this.setX(config.remainingBlocks[getRandomInt(0, config.remainingBlocks.length - 1)])
+    } else {
+      this.setX(this.getRandomTileX())
+    }
+    
+    // reposition if text is off screen
+    this.repositionIfOffScreen()
+    this.body.allowGravity = true;
+    this.body.setMaxSpeed(this.fallingSpeed)
+    this.flashText()
+
+  
+    this.scene.sound.playAudioSprite('sfx', 'smb_warning');
+
+   }
+
+  isOutOfBounds() {
+    if (this.y >= this.gameBoundsYBottom - this.height + 5) {
+      return true
+    }
+    return false
+  }
+
+  onOutOfBounds(){
+    this.showAnswerAndRemove()
+  }
+
+  getScore () {
+    return (this.answer.length * 10) 
+  }
+
+  flashText () {
+    this.scene.time.addEvent({ callback: () => {
+      if (!this.isTinted) {
+        this.setTint(0.5)
+      } else { this.clearTint()}
+    }, callbackScope: this, loop: true, delay: 100})
   }
 
 }
@@ -172,13 +223,15 @@ class BonusText extends GameText {
   }
 
   getScore () {
-    return (this.answer.length * 10) 
+    return (this.answer.length * 40) 
   }
 }
 
 export default function GameTextFactory(config) {
   if (config.textType === 'bonus') { 
     return new BonusText(config)
+  } else if (config.textType === 'bonusfalling') {
+    return new BonusFallingText(config)
   } else {
     return new FallingText(config)
   }
