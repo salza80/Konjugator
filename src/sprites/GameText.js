@@ -127,6 +127,7 @@ class FallingText extends GameText {
   constructor(config) {
     super(config)
     this.fallingSpeed = config.fallingSpeed ? config.fallingSpeed : 20
+    this.y = this.gameBoundsYTop - this.height
 
     // if remaining blocks are passed, set x to a remaining block 70% of the time
     if (config.remainingBlocks && getRandomInt(0,10) < 8) {
@@ -156,6 +157,7 @@ class FallingText extends GameText {
 class BonusFallingText extends GameText {
   constructor(config) {
     super(config)
+    this.y = this.gameBoundsYTop - this.height
     this.hitSound = 'smb_pipe'
     this.fallingSpeed = config.fallingSpeed ? config.fallingSpeed : 40
 
@@ -165,14 +167,13 @@ class BonusFallingText extends GameText {
     } else {
       this.setX(this.getRandomTileX())
     }
-    
+
     // reposition if text is off screen
     this.repositionIfOffScreen()
     this.body.allowGravity = true;
     this.body.setMaxSpeed(this.fallingSpeed)
     this.flashText()
 
-  
     this.scene.sound.playAudioSprite('sfx', 'smb_warning');
 
    }
@@ -189,7 +190,7 @@ class BonusFallingText extends GameText {
   }
 
   getScore () {
-    return (this.answer.length * 10) 
+    return (this.answer.length * 10)
   }
 
   flashText () {
@@ -223,7 +224,7 @@ class BonusText extends GameText {
   }
 
   getScore () {
-    return (this.answer.length * 40) 
+    return (this.answer.length * 40)
   }
 }
 

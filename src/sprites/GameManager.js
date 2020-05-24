@@ -10,17 +10,17 @@ const NO_STARTING_BLOCKS = 60
 const BLOCK_SIZE = 20
 const LEVEL_TIME_SECONDS = 90
 
-const START_FALLING_SPEED = 15
-const START_BONUS_FALLING_SPEED = 37
-const INCREASE_FALLING_SPEED_PER_LEVEL = 3
+const START_FALLING_SPEED = 10
+const START_BONUS_FALLING_SPEED = 35
+const INCREASE_FALLING_SPEED_PER_LEVEL = 2
 
 const LEVEL_ONE_FALLING_TEXT_TIMER_FROM = 6000
-const LEVEL_ONE_FALLING_TEXT_TIMER_TO = 15000
-const PER_LEVEL_FALLING_TEXT_TIMER_CHANGE = 500
+const LEVEL_ONE_FALLING_TEXT_TIMER_TO = 20000
+const PER_LEVEL_FALLING_TEXT_TIMER_CHANGE = 400
 
-const LEVEL_ONE_BONUS_TEXT_TIMER_FROM = 10000
-const LEVEL_ONE_BONUS_TEXT_TIMER_TO = 20000
-const PER_LEVEL_BONUS_TEXT_TIMER_CHANGE = 200
+const LEVEL_ONE_BONUS_TEXT_TIMER_FROM = 15000
+const LEVEL_ONE_BONUS_TEXT_TIMER_TO = 250000
+const PER_LEVEL_BONUS_TEXT_TIMER_CHANGE = 500
 
 export default class GameManager {
   constructor(config) {
@@ -157,10 +157,8 @@ export default class GameManager {
     this.bonusFallingSpeed = this.bonusfallingSpeed + INCREASE_FALLING_SPEED_PER_LEVEL
     this.fallingTextTimerFrom = this.fallingTextTimerFrom - PER_LEVEL_FALLING_TEXT_TIMER_CHANGE
     this.fallingTextTimerTo = this.fallingTextTimerTo - PER_LEVEL_FALLING_TEXT_TIMER_CHANGE
-    if (this.fallingTextTimerFrom >= this.fallingTextTimerTo) {this.fallingTextTimerTo = this.fallingTextTimerFrom + 500}
     this.bonusTextTimerFrom = this.bonusTextTimerFrom - PER_LEVEL_BONUS_TEXT_TIMER_CHANGE
     this.bonusTextTimerTo = this.bonusTextTimerTo - PER_LEVEL_BONUS_TEXT_TIMER_CHANGE
-    if (this.bonusTextTimerFrom >= this.bonusTextTimerTo) {this.bonusTextTimerTo = this.bonusTextTimerFrom + 500}
     this.startLevel()
   }
 
