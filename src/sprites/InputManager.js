@@ -16,6 +16,7 @@ export default class InputManager {
     this.textBoxSize = this.inputType === 'Touch' ? 80 : 30
     this.textBox = this.scene.add.text(this.fullWidth / 2, this.bottomY, ' ', {fill: "#00ff00", fontSize: this.textBoxSize })
     this.answerText = ''
+    this.setupSuccess = false
 
     if (this.inputType === 'Voice') {
       this.setupSpeechRecognitionEntry()
@@ -34,6 +35,16 @@ export default class InputManager {
 
   setupSpeechRecognitionEntry() {
 
+    let SpeechRecognition = SpeechRecognition || webkitSpeechRecognition || undefined
+    let SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList || undefined
+    let SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent || undefined
+
+
+    if (!SpeechRecognition) {
+      this.scene.add.text(this.sideWidth + 50, 300, 'Speech Recognition not available! Please use updated Chrome or Edge web browser.', { fill: "#00ff00", fontSize: 20 })
+      return false
+    }
+
     const speechButtonPressed = () => {
       this.recognition.start()
     }
@@ -43,11 +54,6 @@ export default class InputManager {
     this.speechButton.x = this.speechButton.x - (this.speechButton.width / 2)
     this.scene.add.existing(this.speechButton);
 
-
-
-    let SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
-    let SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
-    let SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
     var answers = this.allAnswers()
 
     var grammar = '#JSGF V1.0; grammar answers; public <answers> = ' + answers.join(' | ') + ' ;'
@@ -93,6 +99,8 @@ export default class InputManager {
       this.speechButton.text = "Talk"
       this.recognition.stop();
     }
+
+    this.setupSuccess = true
   }
 
   setupKeyboardEntry() {
@@ -117,6 +125,8 @@ export default class InputManager {
       this.allCharacterButtons[char] = b
       xButton = xButton + 80
     }
+
+    this.setupSuccess = true
   }
 
   setupTouchEntry() {
@@ -135,6 +145,8 @@ export default class InputManager {
       this.scene.add.existing(b);
       this.allCharacterButtons[char] = b
     }
+
+    this.setupSuccess = true
   }
 
   back() {

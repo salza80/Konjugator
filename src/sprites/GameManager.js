@@ -10,17 +10,17 @@ const NO_STARTING_BLOCKS = 60
 const BLOCK_SIZE = 20
 const LEVEL_TIME_SECONDS = 90
 
-const START_FALLING_SPEED = 10
-const START_BONUS_FALLING_SPEED = 35
+const START_FALLING_SPEED = 12
+const START_BONUS_FALLING_SPEED = 38
 const INCREASE_FALLING_SPEED_PER_LEVEL = 2
 
 const LEVEL_ONE_FALLING_TEXT_TIMER_FROM = 6000
-const LEVEL_ONE_FALLING_TEXT_TIMER_TO = 20000
-const PER_LEVEL_FALLING_TEXT_TIMER_CHANGE = 400
+const LEVEL_ONE_FALLING_TEXT_TIMER_TO = 18000
+const PER_LEVEL_FALLING_TEXT_TIMER_CHANGE_PERCENTAGE = 0.10
 
-const LEVEL_ONE_BONUS_TEXT_TIMER_FROM = 15000
-const LEVEL_ONE_BONUS_TEXT_TIMER_TO = 250000
-const PER_LEVEL_BONUS_TEXT_TIMER_CHANGE = 500
+const LEVEL_ONE_BONUS_TEXT_TIMER_FROM = 10000
+const LEVEL_ONE_BONUS_TEXT_TIMER_TO = 20000
+const PER_LEVEL_BONUS_TEXT_TIMER_CHANGE_PERCENTAGE = 0.05
 
 export default class GameManager {
   constructor(config) {
@@ -121,6 +121,8 @@ export default class GameManager {
   }
 
   startLevel() {
+    // if input setup up failed, do not start game
+    if (!this.inputManager.setupSuccess) { return false }
     //set random word timer
     this.startText = this.scene.add.text(this.gameBoundsXLeft + 100, 200, this.scene.registry.get('startText'), { fill: "#00ff00", fontSize: 30 })
     if (this.inputType === 'Keyboard') {
@@ -143,7 +145,7 @@ export default class GameManager {
       this.startText.destroy()
       this.keysText.destroy()
       this.inputManager.setText('')
-      this.levelText.startLevel(this.currentLevel, LEVEL_TIME_SECONDS, () => this.nextLevel())
+      this.levelText.startLevel(this.currentLevel, this.levelTimeSeconds, () => this.nextLevel())
       this.spawnFallingText()
       this.setRandomTextTimer(this.spawnBonusText, 15000, 50000)
       this.setRandomTextTimer(this.spawnBonusFallingText, 1500, 50000)
@@ -154,11 +156,13 @@ export default class GameManager {
     this.endLevel()
     this.currentLevel = this.currentLevel + 1
     this.fallingSpeed = this.fallingSpeed + INCREASE_FALLING_SPEED_PER_LEVEL
-    this.bonusFallingSpeed = this.bonusfallingSpeed + INCREASE_FALLING_SPEED_PER_LEVEL
-    this.fallingTextTimerFrom = this.fallingTextTimerFrom - PER_LEVEL_FALLING_TEXT_TIMER_CHANGE
-    this.fallingTextTimerTo = this.fallingTextTimerTo - PER_LEVEL_FALLING_TEXT_TIMER_CHANGE
-    this.bonusTextTimerFrom = this.bonusTextTimerFrom - PER_LEVEL_BONUS_TEXT_TIMER_CHANGE
-    this.bonusTextTimerTo = this.bonusTextTimerTo - PER_LEVEL_BONUS_TEXT_TIMER_CHANGE
+    this.bonusFallingSpeed = this.bonusFallingSpeed + INCREASE_FALLING_SPEED_PER_LEVEL
+    this.fallingTextTimerFrom = this.fallingTextTimerFrom - (Math.round(this.fallingTextTimerFrom * PER_LEVEL_FALLING_TEXT_TIMER_CHANGE_PERCENTAGE))
+    this.fallingTextTimerTo = this.fallingTextTimerTo - (Math.round(this.fallingTextTimerTo * PER_LEVEL_FALLING_TEXT_TIMER_CHANGE_PERCENTAGE))
+    this.bonusTextTimerFrom = this.bonusTextTimerFrom -  (Math.round(this.bonusTextTimerFrom * PER_LEVEL_BONUS_TEXT_TIMER_CHANGE_PERCENTAGE))
+    this.bonusTextTimerTo = this.bonusTextTimerTo -  (Math.round(this.bonusTextTimerTo * PER_LEVEL_BONUS_TEXT_TIMER_CHANGE_PERCENTAGE))
+    if (this.fallingTextTimerFrom >= this.fallingTextTimerTo) { this.fallingTextTimerTo = this.fallingTextTimeFrom + 1000 }
+    if (this.bonusTextTimerFrom >= this.bonusTextTimerTo) { this.fallingTextTimerTo = this.bonusTextTimerTo + 1000 }
     this.startLevel()
   }
 
@@ -235,7 +239,7 @@ export default class GameManager {
     this.funcOnGameOver(this.scoreText.getScore())
   }
 
-  spawnFallingText(setTimer=true) {
+  spawnFallingText(setTimer = true) {
     let remainingBlocks = null
     if (this.tilesGroup.getLength() < 50) {
       remainingBlocks = this.tilesGroup.getChildren().map((block) => block.x)

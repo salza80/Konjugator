@@ -12,7 +12,7 @@ export default class Bullet extends Phaser.GameObjects.Sprite {
     this.target = config.target;
 
     if (this.target.textType !== 'bonus') {
-        this.body.setVelocityY(-150);
+        this.body.setVelocityY(-200);
         this.setX(this.target.x + (this.target.width / 2));
     } else {
         this.setX(500);
