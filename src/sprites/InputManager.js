@@ -1,5 +1,4 @@
 import InputButton from './InputButton.js'
-import { getRandomInt, shuffle } from '../helpers/util.js'
 
 const NO_AVAILABLE_CHARACTERS = 6
 
@@ -257,13 +256,13 @@ export default class InputManager {
     }
 
     do {
-      let randomChar = this.allCharacters()[getRandomInt(0, this.allCharacters().length -1)]
+      let randomChar = this.allCharacters()[Phaser.Math.RND.between(0, this.allCharacters().length -1)]
       if (!availableChars.includes(randomChar)){
         availableChars.push(randomChar)
       }
     } while(availableChars.length < NO_AVAILABLE_CHARACTERS)
 
-    return shuffle(availableChars)
+    return Phaser.Math.RND.shuffle(availableChars)
   }
 
 

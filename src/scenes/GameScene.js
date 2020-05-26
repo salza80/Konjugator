@@ -1,8 +1,6 @@
 import InputManager from '../sprites/InputManager';
 import GameManager from '../sprites/GameManager';
 
-import { getRandomInt } from '../helpers/util.js';
-
 class GameScene extends Phaser.Scene {
     constructor() {
       super({

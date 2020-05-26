@@ -1,4 +1,4 @@
-import { getRandomInt } from '../helpers/util.js'
+
 
 class GameText extends Phaser.GameObjects.Text {
   constructor(config) {
@@ -18,7 +18,7 @@ class GameText extends Phaser.GameObjects.Text {
     // set random verb
     this.hitSound = 'smb_coin'
     let words = this.scene.cache.json.get('words')
-    let word = words[getRandomInt(0, words.length -1)]
+    let word = Phaser.Math.RND.pick(words)
     this.question = word.question
     this.answer = word.answer
     this.tip = word.tip
@@ -106,7 +106,7 @@ class GameText extends Phaser.GameObjects.Text {
   }
 
   getRandomTileX () {
-    return getRandomInt(0,(this.gameWidth/this.blockSize) * this.blockSize + this.gameBoundsXLeft)
+    return Phaser.Math.RND.between(0, this.gameWidth/this.blockSize) * this.blockSize + this.gameBoundsXLeft
   }
 
   toggleSelected(answerText) {
@@ -130,8 +130,8 @@ class FallingText extends GameText {
     this.y = this.gameBoundsYTop - this.height
 
     // if remaining blocks are passed, set x to a remaining block 70% of the time
-    if (config.remainingBlocks && getRandomInt(0,10) < 8) {
-      this.setX(config.remainingBlocks[getRandomInt(0, config.remainingBlocks.length - 1)])
+    if (config.remainingBlocks && Phaser.Math.RND.between(0,10) < 8) {
+      this.setX(config.remainingBlocks[Phaser.Math.RND.between(0, config.remainingBlocks.length - 1)])
     } else {
       this.setX(this.getRandomTileX())
     }
@@ -162,8 +162,8 @@ class BonusFallingText extends GameText {
     this.fallingSpeed = config.fallingSpeed ? config.fallingSpeed : 40
 
     // if remaining blocks are passed, set x to a remaining block 40% of the time
-    if (config.remainingBlocks && getRandomInt(0,10) < 4) {
-      this.setX(config.remainingBlocks[getRandomInt(0, config.remainingBlocks.length - 1)])
+    if (config.remainingBlocks && Phaser.Math.RND.between(0,10) < 4) {
+      this.setX(config.remainingBlocks[Phaser.Math.RND.between(0, config.remainingBlocks.length - 1)])
     } else {
       this.setX(this.getRandomTileX())
     }
@@ -208,16 +208,16 @@ class BonusText extends GameText {
     super(config)
     this.hitSound = 'smb_powerup'
     this.body.allowGravity = false;
-    let LeftorRight = getRandomInt(0,2)
+    let LeftorRight = Phaser.Math.RND.between(0,2)
     if (LeftorRight === 0) {
       this.bonusDirection = 'left'
       this.setX(this.gameBoundsXRight + this.width)
-      this.setY(getRandomInt(50, 400))
+      this.setY(Phaser.Math.RND.between(50, 400))
       this.body.setVelocityX(-70)
     } else {
       this.bonusDirection = 'right'
       this.setX(this.gameBoundsXLeft - this.width)
-      this.setY(getRandomInt(50, 400))
+      this.setY(Phaser.Math.RND.between(50, 400))
       this.body.setVelocityX(70)
     }
     this.scene.sound.playAudioSprite('sfx', 'smb_powerup_appears');

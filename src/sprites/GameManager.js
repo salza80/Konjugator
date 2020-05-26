@@ -4,7 +4,6 @@ import GameTextFactory from './GameText';
 import Bullet from './Bullet';
 import Score from './Score';
 import LevelText from './LevelText';
-import { getRandomInt, shuffle } from '../helpers/util.js'
 
 const NO_STARTING_BLOCKS = 60
 const BLOCK_SIZE = 20
@@ -174,7 +173,7 @@ export default class GameManager {
   }
 
   setRandomTextTimer(func, fromDelay, toDelay) {
-    this.textTimers.push(this.scene.time.addEvent({delay: getRandomInt(fromDelay, toDelay), callback: func, callbackScope: this, loop: false}))
+    this.textTimers.push(this.scene.time.addEvent({delay: Phaser.Math.RND.between(fromDelay, toDelay), callback: func, callbackScope: this, loop: false}))
   }
 
   speak(text) {
@@ -368,7 +367,7 @@ export default class GameManager {
 
   getRandomTileX () {
 
-    return (getRandomInt(0,(this.playWidth/this.blockSize)-1) * this.blockSize) + (this.blockSize/2) + this.gameBoundsXLeft
+    return (Phaser.Math.RND.between(0,(this.playWidth/this.blockSize)-1) * this.blockSize) + (this.blockSize/2) + this.gameBoundsXLeft
   }
 
 }

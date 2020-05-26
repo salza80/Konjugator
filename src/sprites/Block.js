@@ -1,8 +1,3 @@
-import { getRandomInt } from '../helpers/util.js'
-/*
-Generic enemy class that extends Phaser sprites.
-Classes for enemy types extend this class.
-*/
 export default class Block extends Phaser.GameObjects.Sprite {
   constructor(config) {
     super(config.scene, config.x, config.y, config.key);

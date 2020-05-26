@@ -1,5 +1,4 @@
 import InputButton from './InputButton.js'
-import { getRandomInt, shuffle } from '../helpers/util.js'
 
 const ALL_CHARACTERS =  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ä', 'ö', 'ü', 'ß']
 const VOWELS = ['a', 'e', 'i', 'o', 'u', 'ä', 'ö', 'ü', 'ß']
@@ -105,21 +104,21 @@ export default class MobileInputText extends Phaser.GameObjects.Container {
 
         // add some random vowels
         [...Array(3)].forEach(() => {
-            let randomChar = VOWELS[getRandomInt(0, VOWELS.length -1)]
+            let randomChar = VOWELS[Phaser.Math.RND.between(0, VOWELS.length -1)]
             if (!availableChars.includes(randomChar)){ 
                 availableChars.push(randomChar)
             }
         });
 
         do {
-            let randomChar = ALL_CHARACTERS[getRandomInt(0, ALL_CHARACTERS.length -1)]
+            let randomChar = ALL_CHARACTERS[Phaser.Math.RND.between(0, ALL_CHARACTERS.length -1)]
             if (!availableChars.includes(randomChar)){ 
                 availableChars.push(randomChar)
             }
             
         } while(availableChars.length < NO_AVAILABLE_CHARACTERS)
 
-        return shuffle(availableChars)
+        return Phaser.Math.RND.shuffle(availableChars)
     }
 
 
