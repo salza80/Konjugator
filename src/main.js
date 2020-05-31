@@ -3,6 +3,7 @@ import BootScene from './scenes/BootScene';
 import GameScene from './scenes/GameScene';
 import TitleScene from './scenes/TitleScene';
 import GameOverScene from './scenes/GameOverScene';
+import OrientationScene from './scenes/OrientationScene';
 // import UIPlugin from '../assets/plugins/rexuiplugin.min';
 
 const WIDTH = 1280
@@ -34,7 +35,8 @@ const config = {
         BootScene,
         TitleScene,
         GameScene,
-        GameOverScene
+        GameOverScene,
+        OrientationScene
     ]
     // plugins: {
     //     scene: [{

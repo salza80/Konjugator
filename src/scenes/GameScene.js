@@ -17,14 +17,8 @@ class GameScene extends Phaser.Scene {
     }
 
     create () {
-      this.scale.off('orientationchange')
-      this.scale.on('orientationchange', (orientation) => {
-        if (orientation === Phaser.Scale.PORTRAIT) {
-          if (this.scale.isFullscreen) { this.scale.stopFullscreen() }
-        } else if (orientation === Phaser.Scale.LANDSCAPE) {
-          if (!this.scale.isFullscreen) { this.scale.startFullscreen() }
-        }
-      })
+      this.setupOrientationchange();
+     
 
       this.maximize = this.make.image({
         x: 1250,
@@ -57,6 +51,31 @@ class GameScene extends Phaser.Scene {
       // if (!this.scale.isFullscreen && this.inputType === 'Touch') { this.scale.startFullscreen() }
 
       this.gameManager.startLevel()
+    }
+
+    setupOrientationchange() {
+      this.scale.off('orientationchange')
+      this.scale.on('orientationchange', (orientation) => {
+        if (orientation === Phaser.Scale.PORTRAIT) {
+         if (this.scale.isFullscreen) {
+            this.scale.stopFullscreen()
+          }
+          if (!this.sys.game.device.os.desktop) {
+            this.checkOrientation();
+          }
+        } else if (orientation === Phaser.Scale.LANDSCAPE) {
+          if (!this.scale.isFullscreen) { this.scale.startFullscreen() }
+        }
+      })
+    }
+
+    checkOrientation() {
+      if (!this.sys.game.device.os.desktop && this.scale.orientation === Phaser.Scale.PORTRAIT) {
+        var os = this.scene.get("OrientationScene");
+        os.setupOrientationChange()
+        this.scene.run("OrientationScene", {returnScene: 'GameScene'})
+        this.scene.pause();
+      } 
     }
 
     gameOver(score) {
