@@ -1,7 +1,7 @@
 
 #### Phaser 3 + ES6 + Webpack
 
-Konjugator!
+Konjugator!  Play here: falling-text game [www.deutsche.games](https://www.deutsch.games/)
 
 
 
