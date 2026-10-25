@@ -22,7 +22,7 @@ class GameText extends Phaser.GameObjects.Text {
     let word = Phaser.Math.RND.pick(words)
     this.question = word.question
     this.answer = word.answer
-    this.tip = word.tip
+    this.tip = word.tip || ''
     this.voice = word.voice
 
     this.setText(this.question)
@@ -35,7 +35,7 @@ class GameText extends Phaser.GameObjects.Text {
 
     this.setInteractive()
     this.on('pointerup', () => {
-      this.funcOnGameTextSelected(this.getAnswer())
+      if (this.isActive) { this.funcOnGameTextSelected(this.getAnswer()) }
     });
   }
 
@@ -50,7 +50,7 @@ class GameText extends Phaser.GameObjects.Text {
   }
 
   update() {
-    if (this.isOutOfBounds()) {
+    if (this.isActive && this.isOutOfBounds()) {
       this.onOutOfBounds()
     }
   }
@@ -63,12 +63,19 @@ class GameText extends Phaser.GameObjects.Text {
   }
 
   showAnswerAndRemove() {
-    this.body.setMaxSpeed(0)
+    if (!this.isActive) { return }
+    this.body.stop()
+    this.body.enable = false
     this.isActive = false
-    this.setText(`${this.answer} (${this.tip})`)
+    this.setActive(false)
+    this.disableInteractive()
+    this.setBackgroundColor('transparent')
+    this.flashTimer?.remove()
+    this.clearTint()
+    this.setText(this.tip ? `${this.answer} (${this.tip})` : this.answer)
     this.setStyle({ fill: '#ff0'});
     this.repositionIfOffScreen();
-    this.scene.time.addEvent({delay:1500, callback: this.removeText, callbackScope: this})
+    this.removeTimer = this.scene.time.addEvent({delay:1500, callback: this.removeText, callbackScope: this})
   }
 
   getAnswer() {
@@ -88,13 +95,14 @@ class GameText extends Phaser.GameObjects.Text {
   }
 
   removeText() {
-    try{
-      this.funcOnGameTextRemoved(this.answer)
-    }
-    catch(e){
-      console.log(e.message)
-    }
     this.destroy()
+  }
+
+  preDestroy() {
+    this.removeTimer?.remove()
+    this.flashTimer?.remove()
+    this.funcOnGameTextRemoved(this.answer)
+    super.preDestroy()
   }
 
   hit() {
@@ -131,7 +139,7 @@ class FallingText extends GameText {
     this.y = this.gameBoundsYTop - this.height
 
     // if remaining blocks are passed, set x to a remaining block 70% of the time
-    if (config.remainingBlocks && Phaser.Math.RND.between(0,10) < 8) {
+    if (config.remainingBlocks?.length && Phaser.Math.RND.between(0,10) < 8) {
       this.setX(config.remainingBlocks[Phaser.Math.RND.between(0, config.remainingBlocks.length - 1)])
     } else {
       this.setX(this.getRandomTileX())
@@ -163,7 +171,7 @@ class BonusFallingText extends GameText {
     this.fallingSpeed = config.fallingSpeed ? config.fallingSpeed : 40
 
     // if remaining blocks are passed, set x to a remaining block 40% of the time
-    if (config.remainingBlocks && Phaser.Math.RND.between(0,10) < 4) {
+    if (config.remainingBlocks?.length && Phaser.Math.RND.between(0,10) < 4) {
       this.setX(config.remainingBlocks[Phaser.Math.RND.between(0, config.remainingBlocks.length - 1)])
     } else {
       this.setX(this.getRandomTileX())
@@ -195,9 +203,9 @@ class BonusFallingText extends GameText {
   }
 
   flashText () {
-    this.scene.time.addEvent({ callback: () => {
+    this.flashTimer = this.scene.time.addEvent({ callback: () => {
       if (!this.isTinted) {
-        this.setTint(0.5)
+        this.setTint(0xff8888)
       } else { this.clearTint()}
     }, callbackScope: this, loop: true, delay: 100})
   }

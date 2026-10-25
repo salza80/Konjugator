@@ -1,3 +1,5 @@
+import InputButton from '../sprites/InputButton';
+import { setupOrientation, checkOrientation } from '../helpers/orientation';
 import Phaser from 'phaser';
 import GameManager from '../sprites/GameManager';
 
@@ -18,6 +20,9 @@ class GameScene extends Phaser.Scene {
 
     create () {
       this.setupOrientationchange();
+      this.game.canvas.tabIndex = 0
+      this.game.canvas.focus({ preventScroll: true })
+      this.input.on('pointerdown', () => this.game.canvas.focus({ preventScroll: true }))
      
 
       this.maximize = this.make.image({
@@ -51,31 +56,18 @@ class GameScene extends Phaser.Scene {
       // if (!this.scale.isFullscreen && this.inputType === 'Touch') { this.scale.startFullscreen() }
 
       this.gameManager.startLevel()
+      this.add.existing(new InputButton(this, 20, 10, 'Menu', { fill: '#4ceaee', fontSize: 20 }, () => {
+        this.scene.start('TitleScene')
+      }, this).setDepth(3))
+      this.checkOrientation()
     }
 
     setupOrientationchange() {
-      this.scale.off('orientationchange')
-      this.scale.on('orientationchange', (orientation) => {
-        if (orientation === Phaser.Scale.PORTRAIT) {
-         if (this.scale.isFullscreen) {
-            this.scale.stopFullscreen()
-          }
-          if (!this.sys.game.device.os.desktop) {
-            this.checkOrientation();
-          }
-        } else if (orientation === Phaser.Scale.LANDSCAPE) {
-          if (!this.scale.isFullscreen) { this.scale.startFullscreen() }
-        }
-      })
+      setupOrientation(this)
     }
 
     checkOrientation() {
-      if (!this.sys.game.device.os.desktop && this.scale.orientation === Phaser.Scale.PORTRAIT) {
-        var os = this.scene.get("OrientationScene");
-        os.setupOrientationChange()
-        this.scene.run("OrientationScene", {returnScene: 'GameScene'})
-        this.scene.pause();
-      } 
+      checkOrientation(this)
     }
 
     gameOver(score) {

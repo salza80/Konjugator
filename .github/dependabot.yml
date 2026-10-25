@@ -1,0 +1,18 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Berlin"
+    groups:
+      npm-dependencies:
+        applies-to: "version-updates"
+        patterns:
+          - "*"
+      npm-security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"

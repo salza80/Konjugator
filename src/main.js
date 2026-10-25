@@ -4,8 +4,6 @@ import GameScene from './scenes/GameScene';
 import TitleScene from './scenes/TitleScene';
 import GameOverScene from './scenes/GameOverScene';
 import OrientationScene from './scenes/OrientationScene';
-// import UIPlugin from '../assets/plugins/rexuiplugin.min';
-
 const WIDTH = 1280
 const HEIGHT = 700
 const config = {
@@ -38,23 +36,18 @@ const config = {
         GameOverScene,
         OrientationScene
     ]
-    // plugins: {
-    //     scene: [{
-    //         key: 'rexUI',
-    //         plugin: UIPlugin,
-    //         mapping: 'rexUI'
-    //     }]
-    // }
 };
 
 
 
-export const startGame = (customGameData) => {
-    config.callbacks = {
-        preBoot: function (game) {
-            game.registry.set('custom_game_data', customGameData)
+export const startGame = (customGameData = {}) => {
+    return new Phaser.Game({
+        ...config,
+        scale: { ...config.scale },
+        callbacks: {
+            preBoot(game) {
+                game.registry.set('custom_game_data', customGameData)
+            }
         }
-    }
-    return new Phaser.Game(config);
+    })
 }
-    

@@ -23,21 +23,16 @@ class GameOverScene extends Phaser.Scene {
           }
       )}
 
-      this.startKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+      this.add.text(300, 470, 'Click or press X to return to the menu', { fill: '#4ceaee', fontSize: 24 })
+      this.input.keyboard.once('keydown-X', this.startGame, this)
 
       this.input.once('pointerdown', () => {
         this.startGame();
       });
     }
 
-    update(time, delta) {
-      if (this.startKey.isDown) {
-        this.startGame();
-      }
-    }
-
     startGame() {
-      this.scene.stop('GameOver');
+      this.input.keyboard.off('keydown-X', this.startGame, this)
       this.scene.start('TitleScene');
     }
 

@@ -53,9 +53,9 @@ export default class GameManager {
     this.funcOnGameOver = config.onGameOver ? config.onGameOver.bind(config.context) : () => {}
 
     // setup speek synthesis (if available in browser)
-    if (window.speechSynthesis) {
+    if (window.speechSynthesis && window.SpeechSynthesisUtterance) {
       this.synth = window.speechSynthesis
-      this.utterence = new SpeechSynthesisUtterance()
+      this.utterence = new window.SpeechSynthesisUtterance()
       this.utterence.lang = 'de-DE'
       this.utterence.onerror = () => {console.log("error")}
     }
@@ -74,7 +74,10 @@ export default class GameManager {
         context: this
       })
 
-	  this.currentLevel = 1
+	  this.inputType = this.inputManager.inputType
+    this.currentLevel = 1
+    this.isGameOver = false
+    this.scene.events.once('shutdown', this.destroy, this)
     
       // Add and play the music
       // this.music = this.scene.sound.add('overworld');
@@ -122,7 +125,7 @@ export default class GameManager {
 
   startLevel() {
     // if input setup up failed, do not start game
-    if (!this.inputManager.setupSuccess) { return false }
+    if (this.isGameOver || !this.inputManager.setupSuccess) { return false }
     //set random word timer
     this.startText = this.scene.add.text(this.gameBoundsXLeft + 100, 200, this.scene.registry.get('startText'), { fill: "#00ff00", fontSize: 30 })
     if (this.inputType === 'Keyboard') {
@@ -132,19 +135,21 @@ export default class GameManager {
     } else {
       this.keysText = this.scene.add.text(this.gameBoundsXLeft + 100, 300, 'Press "Talk" button, and then say the answer', { fill: "#00ff00", fontSize: 20 })
     }
-    this.startLevelText = this.scene.add.text(this.gameBoundsXLeft + 100, 250, 'Starting Level ' + this.currentLevel +  ' in ', { fill: "#00ff00", fontSize: 30 })
-    this.countDownEvent = this.scene.time.addEvent({delay: 1000, callback: this.startLevelCallback, callbackScope: this, repeat: 5})
+    this.levelRunning = false
+    this.startLevelText = this.scene.add.text(this.gameBoundsXLeft + 100, 250, 'Starting Level ' + this.currentLevel +  ' in 5', { fill: "#00ff00", fontSize: 30 })
+    this.countDownEvent = this.scene.time.addEvent({delay: 1000, callback: this.startLevelCallback, callbackScope: this, repeat: 4})
   }
 
   startLevelCallback() {
     if (this.countDownEvent.getRepeatCount() !== 0) {
-      this.startLevelText.setText('Starting Level ' + this.currentLevel +  ' in ' + this.countDownEvent.getRepeatCount())
+      this.startLevelText.setText('Starting Level ' + this.currentLevel +  ' in ' + (this.countDownEvent.getRepeatCount() + 1))
      } else {
       
       this.startLevelText.destroy()
       this.startText.destroy()
       this.keysText.destroy()
       this.inputManager.setText('')
+      this.levelRunning = true
       this.levelText.startLevel(this.currentLevel, this.levelTimeSeconds, () => this.nextLevel())
       this.spawnFallingText()
       this.setRandomTextTimer(this.spawnBonusText, 15000, 50000)
@@ -153,6 +158,7 @@ export default class GameManager {
   }
 
   nextLevel() {
+    if (this.isGameOver) { return }
     this.endLevel()
     this.currentLevel = this.currentLevel + 1
     this.fallingSpeed = this.fallingSpeed + INCREASE_FALLING_SPEED_PER_LEVEL
@@ -161,20 +167,42 @@ export default class GameManager {
     this.fallingTextTimerTo = this.fallingTextTimerTo - (Math.round(this.fallingTextTimerTo * PER_LEVEL_FALLING_TEXT_TIMER_CHANGE_PERCENTAGE))
     this.bonusTextTimerFrom = this.bonusTextTimerFrom -  (Math.round(this.bonusTextTimerFrom * PER_LEVEL_BONUS_TEXT_TIMER_CHANGE_PERCENTAGE))
     this.bonusTextTimerTo = this.bonusTextTimerTo -  (Math.round(this.bonusTextTimerTo * PER_LEVEL_BONUS_TEXT_TIMER_CHANGE_PERCENTAGE))
-    if (this.fallingTextTimerFrom >= this.fallingTextTimerTo) { this.fallingTextTimerTo = this.fallingTextTimeFrom + 1000 }
-    if (this.bonusTextTimerFrom >= this.bonusTextTimerTo) { this.fallingTextTimerTo = this.bonusTextTimerTo + 1000 }
+    this.fallingTextTimerFrom = Math.max(500, this.fallingTextTimerFrom)
+    this.fallingTextTimerTo = Math.max(this.fallingTextTimerFrom + 1000, this.fallingTextTimerTo)
+    this.bonusTextTimerFrom = Math.max(1000, this.bonusTextTimerFrom)
+    this.bonusTextTimerTo = Math.max(this.bonusTextTimerFrom + 1000, this.bonusTextTimerTo)
     this.startLevel()
   }
 
+  destroy() {
+    this.isGameOver = true
+    this.levelRunning = false
+    this.textTimers = []
+    // Phaser has already destroyed the scene's groups and timers on shutdown.
+    this.synth?.cancel()
+  }
+
   endLevel() {
+    this.levelRunning = false
+    this.countDownEvent?.remove()
+    this.levelText.stopLevel()
     this.textTimers.forEach((timer) => timer.remove())
+    this.textTimers = []
     this.inputManager.setAnswerText('')
     this.gameTextGroup.clear(true,true)
-    this.bullets.clear(true,true)    
+    this.bullets.clear(true,true)
+    for (const text of [this.startText, this.keysText, this.startLevelText]) {
+      if (text?.scene) { text.destroy() }
+    }
   }
 
   setRandomTextTimer(func, fromDelay, toDelay) {
-    this.textTimers.push(this.scene.time.addEvent({delay: Phaser.Math.RND.between(fromDelay, toDelay), callback: func, callbackScope: this, loop: false}))
+    if (!this.levelRunning || this.isGameOver) { return }
+    const timer = this.scene.time.delayedCall(Phaser.Math.RND.between(fromDelay, toDelay), () => {
+      this.textTimers = this.textTimers.filter((entry) => entry !== timer)
+      if (this.levelRunning && !this.isGameOver) { func.call(this) }
+    })
+    this.textTimers.push(timer)
   }
 
   speak(text) {
@@ -185,13 +213,16 @@ export default class GameManager {
   }
 
   fire(answerText, shake = true) {
-    let t = answerText.toLowerCase()
+    if (!this.levelRunning || this.isGameOver) { return false }
+    const normalize = (text) => text.normalize('NFC').trim().replace(/\s+/g, ' ').toLowerCase()
+    let t = normalize(answerText)
     if (t === '') { return }
 
     let hasHit = false
 
     this.gameTextGroup.getChildren().forEach((fallingText) => {
-      if (fallingText.getAnswer().toLowerCase() === t) {
+      if (fallingText.isActive && !fallingText.isTargeted && normalize(fallingText.getAnswer()) === t) {
+        fallingText.isTargeted = true
         this.speak(fallingText.getVoice())
         let b = new Bullet({
               scene: this.scene,
@@ -199,7 +230,7 @@ export default class GameManager {
               target: fallingText
             })
         this.bullets.add(b, this.scene)
-        this.scene.physics.add.overlap(b, fallingText, this.hit, null, this)
+        b.collider = this.scene.physics.add.overlap(b, fallingText, this.hit, null, this)
         
         hasHit = true
       }
@@ -222,10 +253,11 @@ export default class GameManager {
     bullet.destroy()
     fallingText.hit()
 
-    if (this.gameTextGroup.countActive(true) <= 1 ) {this.spawnFallingText(false)}
+    if (this.gameTextGroup.countActive(true) === 0 ) {this.spawnFallingText(false)}
   }
 
   smashBlock(fallingText, block) {
+    if (!fallingText.isActive || !block.active || this.isGameOver) { return }
     block.blowUp()
     fallingText.blowUp()
     if (this.tilesGroup.getLength() === 0 ) {   
@@ -234,6 +266,8 @@ export default class GameManager {
   }
 
   gameOver() {
+    if (this.isGameOver) { return }
+    this.isGameOver = true
     if (this.music) {this.music.stop()}
     this.endLevel()
     this.funcOnGameOver(this.scoreText.getScore())
@@ -347,15 +381,9 @@ export default class GameManager {
     let i = 0
     while (i < noBlocks) {
         let randomX = this.getRandomTileX()
-        rows.forEach((row, rowIndex) => {
-          if(!row.x.includes(randomX)){
-            if(randomX){row.x.push(randomX)}
-            randomX = undefined
-          }
-        })
-        if (randomX){
-          rows.push({y: undefined, x: [randomX]})
-        }
+        const row = rows.find((entry) => !entry.x.includes(randomX))
+        if (row) { row.x.push(randomX) }
+        else { rows.push({ y: undefined, x: [randomX] }) }
         i++
     }
     rows.forEach((row, rowIndex) => {

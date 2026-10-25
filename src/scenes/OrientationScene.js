@@ -1,3 +1,4 @@
+import { isPortrait } from '../helpers/orientation';
 import Phaser from 'phaser';
 import InputButton from '../sprites/InputButton';
 
@@ -8,7 +9,7 @@ class OrientationScene extends Phaser.Scene {
         });
     }
     init(data) {
-      this.returnScene = data.returnScene
+      this.returnScene = data?.returnScene || this.returnScene
     }
     preload() {
         
@@ -16,13 +17,13 @@ class OrientationScene extends Phaser.Scene {
 
     create() {
       this.cameras.main.setBackgroundColor('#000000')
-      this.events.on('resume', () => this.setupOrientationchange);
+      this.events.on('wake', this.loadContent, this)
       this.setupOrientationChange();
       this.scene.bringToTop();
     }
 
     loadContent() {
-      if (!this.sys.game.device.os.desktop && this.scale.orientation === Phaser.Scale.PORTRAIT) {
+      if (!this.sys.game.device.os.desktop && isPortrait()) {
         this.loadOrientatonWarning()
       } else
       {
@@ -32,17 +33,14 @@ class OrientationScene extends Phaser.Scene {
 
     setupOrientationChange() {
       this.loadContent()
-      this.scale.off('orientationchange')
-      this.scale.on('orientationchange', (orientation) => {
-        if (orientation === Phaser.Scale.PORTRAIT) {
-         if (this.scale.isFullscreen) {
-            this.scale.stopFullscreen()
-          }
-          this.loadContent()
-        } else if (orientation === Phaser.Scale.LANDSCAPE) {
-          this.loadContent()
-          if (!this.scale.isFullscreen) { this.scale.startFullscreen() }
-        }
+      this.orientationHandler = () => {
+        if (this.scene.isActive()) { this.loadContent() }
+      }
+      this.scale.on('orientationchange', this.orientationHandler)
+      this.scale.on('resize', this.orientationHandler)
+      this.events.once('shutdown', () => {
+        this.scale.off('orientationchange', this.orientationHandler)
+        this.scale.off('resize', this.orientationHandler)
       })
     }
 
@@ -83,8 +81,6 @@ class OrientationScene extends Phaser.Scene {
 
     continue() {
       this.checkFullScreenSwitch()
-      var rs = this.scene.get(this.returnScene);
-      rs.setupOrientationchange()
       this.scene.resume(this.returnScene);
       this.scene.sleep()
     }

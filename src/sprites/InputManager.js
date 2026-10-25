@@ -14,9 +14,10 @@ export default class InputManager {
     this.sideWidth = this.inputType === 'Touch' ? config.sideWidth : 0
     this.buttonSize = this.inputType === 'Touch' ? 100 : 60
     this.textBoxSize = this.inputType === 'Touch' ? 80 : 30
-    this.textBox = this.scene.add.text(this.fullWidth / 2, this.bottomY, ' ', {fill: "#00ff00", fontSize: this.textBoxSize })
+    this.textBox = this.scene.add.text(this.fullWidth / 2, this.bottomY, '', {fill: "#00ff00", fontSize: this.textBoxSize })
     this.answerText = ''
     this.setupSuccess = false
+    this.scene.events.once('shutdown', this.destroy, this)
 
     if (this.inputType === 'Voice') {
       this.setupSpeechRecognitionEntry()
@@ -25,12 +26,18 @@ export default class InputManager {
     } else { this.setupKeyboardEntry() }
   }
 
-  removeKeys() {
-    'ONE,TWO,THREE,FOUR,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,SPACE,BACKSPACE,ENTER'.split(',').forEach((k)=> (this.scene.input.keyboard.removeKey(k)))
-    this.scene.input.keyboard.removeKey(186)
-    this.scene.input.keyboard.removeKey(222)
-    this.scene.input.keyboard.removeKey(192)
-    this.scene.input.keyboard.removeKey(219)
+  destroy() {
+    this.destroyed = true
+    this.scene.game.canvas.removeEventListener('keydown', this.keyboardHandler)
+    if (this.recognition) {
+      this.recognition.onresult = null
+      this.recognition.onerror = null
+      this.recognition.onend = null
+      this.recognition.onaudiostart = null
+      this.recognition.onspeechend = null
+      this.recognition.onnomatch = null
+      this.recognition.abort()
+    }
   }
 
   setupSpeechRecognitionEntry() {
@@ -40,12 +47,23 @@ export default class InputManager {
 
 
     if (!SpeechRecognition) {
-      this.scene.add.text(this.sideWidth + 50, 300, 'Speech Recognition not available! Please use updated Chrome or Edge web browser.', { fill: "#00ff00", fontSize: 20 })
-      return false
+      this.inputType = 'Keyboard'
+      this.setupKeyboardEntry()
+      this.scene.add.text(100, 110, 'Voice input is unavailable in this browser. Keyboard input is enabled.', { fill: '#ff0', fontSize: 20 })
+      return
     }
 
     const speechButtonPressed = () => {
-      this.recognition.start()
+      if (this.listening) { return }
+      try {
+        this.voiceShot = false
+        this.recognition.start()
+        this.listening = true
+        this.speechButton.setText('Listening…')
+      } catch {
+        this.listening = false
+        this.speechButton.setText('Try again')
+      }
     }
 
     this.speechButton = new InputButton(this.scene, this.fullWidth / 2, this.bottomY + this.textBox.height + 8, "Talk", { fill: "#4ceaee", fontSize: this.buttonSize }, speechButtonPressed, this).setActive(true).setVisible(true)
@@ -65,25 +83,44 @@ export default class InputManager {
     }
     this.recognition.continuous = false;
     this.recognition.lang = 'de-DE';
-    this.recognition.interimResults = false;
+    this.recognition.interimResults = true;
     this.recognition.maxAlternatives = 3;
 
     this.recognition.onerror = (event) => {
-      this.speechButton.text = "Talk"
+      this.listening = false
+      this.speechButton.setText(event.error === 'not-allowed' ? 'Microphone blocked' : 'Try again')
     }
     
     this.recognition.onresult = (event) => {
-      this.speechButton.text = "Talk"
-      this.setText(event.results[0][0].transcript)
-      let match =  false
-      for (const result of event.results[0] ) {
-        match = this.funcOnFire(result.transcript, false)
-        if (match) {
-          this.setText(result.transcript)
-          break;
+      if (this.voiceShot || this.destroyed || !this.scene.scene.isActive()) { return }
+      for (let index = event.resultIndex; index < event.results.length; index++) {
+        const result = event.results[index]
+        if (!result.length) { continue }
+        const prefix = Array.from(event.results).slice(0, index).map((part) => part[0].transcript).join(' ')
+        const transcript = (alternative) => `${prefix} ${alternative.transcript}`.trim()
+        this.setText(transcript(result[0]))
+        // Interim alternatives may change: only use the leading exact match.
+        const alternatives = result.isFinal ? Array.from(result) : [result[0]]
+        for (const alternative of alternatives) {
+          const answer = transcript(alternative)
+          if (this.funcOnFire(answer, false)) {
+            this.voiceShot = true
+            this.setText(answer)
+            this.speechButton.setText('Stopping…')
+            this.recognition.stop()
+            return
+          }
         }
+        // Wait for the final result before reporting an incorrect answer.
+        if (result.isFinal) { this.funcOnFire(this.getText()) }
       }
-      if (!match) {this.funcOnFire(this.getText())}
+    }
+
+    this.recognition.onend = () => {
+      this.listening = false
+      if (this.speechButton.text === 'Listening…' || this.speechButton.text === '...' || this.speechButton.text === 'Stopping…') {
+        this.speechButton.setText('Talk')
+      }
     }
 
     this.recognition.onaudiostart = () => {
@@ -104,17 +141,11 @@ export default class InputManager {
   }
 
   setupKeyboardEntry() {
-    this.removeKeys()
-    this.alphaKeys = this.scene.input.keyboard.addKeys("ONE,TWO,THREE,FOUR,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,SPACE,BACKSPACE,ENTER", true, false)
-    for (var key in this.alphaKeys ) {
-      this.alphaKeys[key].on('down', this.keysEntered, this)
+    // Listen once to each DOM event; rapid keys can be replayed by Phaser's frame queue.
+    this.keyboardHandler = (event) => {
+      if (this.scene.scene.isActive()) { this.keysEntered(event) }
     }
-
-    // add german keys for german keyboard
-    this.scene.input.keyboard.addKey(186, true, false).on('down', this.keysEntered, this)
-    this.scene.input.keyboard.addKey(222, true, false).on('down', this.keysEntered, this)
-    this.scene.input.keyboard.addKey(192, true, false).on('down', this.keysEntered, this)
-    this.scene.input.keyboard.addKey(219, true, false).on('down', this.keysEntered, this)
+    this.scene.game.canvas.addEventListener('keydown', this.keyboardHandler)
 
     //add german buttons
     this.allCharacterButtons = {}
@@ -189,11 +220,11 @@ export default class InputManager {
     var max_chars = 2
     var match = `.{1,${max_chars}}`;
     var re = new RegExp(match,"g");
-    return ans.match(re)
+    return ans.match(re) || []
   }
 
   removeAllSpaces(text) {
-    return text.replace(/ /g,'')
+    return text.replace(/\s/g, '')
   }
 
   clearAvailableChars() {
@@ -203,6 +234,7 @@ export default class InputManager {
   }
 
   setAnswerText(answerText) {
+    if (this.destroyed || !this.textBox.scene) { return }
     this.answerText = answerText
     this.setText('')
     this.showAvailableButtons()
@@ -212,7 +244,9 @@ export default class InputManager {
     if (this.inputType !== 'Touch') { return false }
     this.clearAvailableChars()
     let topPadding = 60
-    let buttonHeight = this.allCharacterButtons[Object.keys(this.allCharacterButtons)[0]].height
+    const firstButton = Object.values(this.allCharacterButtons)[0]
+    if (!firstButton) { return }
+    let buttonHeight = firstButton.height
 
     let availableChars = this.getAvailableCharKeys()
     let yIncrement = (this.fullHeight - topPadding) / (Math.round(availableChars.length / 2) + 1)
@@ -237,6 +271,7 @@ export default class InputManager {
   }
 
   gameTextRemoved(answerText) {
+    if (this.destroyed || !this.textBox.scene) { return }
     if (answerText === this.answerText) {
       this.answerText= ''
       this.setText('')
@@ -256,29 +291,29 @@ export default class InputManager {
       }
     }
 
-    do {
-      let randomChar = this.allCharacters()[Phaser.Math.RND.between(0, this.allCharacters().length -1)]
-      if (!availableChars.includes(randomChar)){
-        availableChars.push(randomChar)
-      }
-    } while(availableChars.length < NO_AVAILABLE_CHARACTERS)
+    const distractors = Phaser.Math.RND.shuffle(this.allCharacters().filter((char) => !availableChars.includes(char)))
+    availableChars.push(...distractors.slice(0, Math.max(0, NO_AVAILABLE_CHARACTERS - availableChars.length)))
 
     return Phaser.Math.RND.shuffle(availableChars)
   }
 
 
   setText(text) {
-    if (text.trim() !== '' && this.answerText !== '' ) {
-      if (!this.answerText.trim().startsWith(text)) {
-        this.scene.cameras.main.shake(100, 0.05);
-        this.scene.sound.playAudioSprite('sfx', 'smb_bump');
+    if (this.inputType === 'Touch' && this.answerText !== '') {
+      const compact = this.removeAllSpaces(text)
+      if (!this.removeAllSpaces(this.answerText).startsWith(compact)) {
+        this.scene.cameras.main.shake(100, 0.05)
+        this.scene.sound.playAudioSprite('sfx', 'smb_bump')
         return false
       }
-
-      if (this.answerText.charAt(text.length) == ' ') {
-        //add space if next character in answer is a space
-        this.textBox.setText(text + ' ')
-      } else { this.textBox.setText(text) }
+      let count = 0
+      let end = 0
+      while (end < this.answerText.length && count < compact.length) {
+        if (!/\s/.test(this.answerText[end])) { count++ }
+        end++
+      }
+      while (end < this.answerText.length && /\s/.test(this.answerText[end])) { end++ }
+      this.textBox.setText(this.answerText.slice(0, end))
     } else {
       this.textBox.setText(text)
     }
@@ -303,30 +338,20 @@ export default class InputManager {
     return this.textBox.text
   }
 
-  keysEntered(eventName, event) {
-    if (event) {
-      switch (event.key) {
-        case 'Backspace':
-          this.back()
-          break;
-        case 'Enter':
-          this.fire()
-          break;
-        case '1':
-          this.setText(this.textBox.text + 'ä')
-          break;
-        case '2':
-          this.setText(this.textBox.text + 'ö')
-          break;
-        case '3':
-          this.setText(this.textBox.text + 'ü')
-          break;
-        case '4':
-          this.setText(this.textBox.text + 'ß')
-          break;
-        default:
-          this.setText(this.textBox.text + event.key)
-      }
+  keysEntered(event) {
+    if (event.ctrlKey || event.metaKey || event.altKey) { return }
+    if (event.key === 'Backspace') {
+      event.preventDefault()
+      this.back()
+    } else if (event.key === 'Enter') {
+      event.preventDefault()
+      this.fire()
+    } else if (/^[a-zäöüß ]$/i.test(event.key)) {
+      event.preventDefault()
+      this.setText(this.getText() + event.key)
+    } else if ('1234'.includes(event.key) && event.key.length === 1) {
+      event.preventDefault()
+      this.setText(this.getText() + ['ä', 'ö', 'ü', 'ß'][Number(event.key) - 1])
     }
   }
 }

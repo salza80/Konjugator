@@ -1,3 +1,4 @@
+import { setupOrientation, checkOrientation } from '../helpers/orientation';
 import Phaser from 'phaser';
 import InputButton from '../sprites/InputButton';
 
@@ -14,7 +15,7 @@ class TitleScene extends Phaser.Scene {
     create() {
       this.setupOrientationchange();
 
-      this.title = this.add.sprite(this.sys.game.config.width / 2, 16 * 5);
+
       this.scene.bringToTop();
 
       this.registry.set('restartScene', false);
@@ -47,28 +48,11 @@ class TitleScene extends Phaser.Scene {
     }
 
     setupOrientationchange() {
-      this.scale.off('orientationchange')
-      this.scale.on('orientationchange', (orientation) => {
-        if (orientation === Phaser.Scale.PORTRAIT) {
-         if (this.scale.isFullscreen) {
-            this.scale.stopFullscreen()
-          }
-          if (!this.sys.game.device.os.desktop) {
-            this.checkOrientation();
-          }
-        } else if (orientation === Phaser.Scale.LANDSCAPE) {
-          if (!this.scale.isFullscreen) { this.scale.startFullscreen() }
-        }
-      })
+      setupOrientation(this)
     }
 
     checkOrientation() {
-      if (!this.sys.game.device.os.desktop && this.scale.orientation === Phaser.Scale.PORTRAIT) {
-        var os = this.scene.get("OrientationScene");
-        os.setupOrientationChange()
-        this.scene.run("OrientationScene", {returnScene: 'TitleScene'})
-        this.scene.pause();
-      } 
+      checkOrientation(this)
     }
 
     checkFullScreenSwitch() {

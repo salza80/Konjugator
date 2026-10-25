@@ -35,11 +35,22 @@ export default class Bullet extends Phaser.GameObjects.Sprite {
 
   }
 
+  preDestroy() {
+    this.body?.world?.off('worldbounds', this.OutOfBounds, this)
+    this.collider?.destroy()
+    if (this.target?.isActive) { this.target.isTargeted = false }
+    super.preDestroy()
+  }
+
   blowUp() {
     this.destroy()
   }
 
   update() {
+    if (!this.target.scene || !this.target.isActive) {
+      this.destroy()
+      return
+    }
     if (this.target.textType === 'bonus') {
       this.moveToTarget()
     }

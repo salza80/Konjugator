@@ -18,11 +18,18 @@ export default class Score extends Phaser.GameObjects.Text {
   }
 
   flashScore () {
-    this.scene.time.addEvent({ callback: () => {
+    this.flashTimer?.remove()
+    this.clearTint()
+    this.flashTimer = this.scene.time.addEvent({ callback: () => {
       if (!this.isTinted) {
-        this.setTint(0.5)
+        this.setTint(0xff8888)
       } else { this.clearTint()}
     }, callbackScope: this, repeat: 7, loop: false, delay: 100})
+  }
+
+  preDestroy() {
+    this.flashTimer?.remove()
+    super.preDestroy()
   }
 
   getScore() {
