@@ -7,23 +7,17 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "npm run typecheck && vite build && npm run build:lib",
-    "deploy": "npm run build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest --passWithNoTests",
     "lint": "eslint src vite*.ts",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
     "build:lib": "vite build --config vite.library.config.ts && tsc -p tsconfig.lib.json",
-    "prepack": "npm run build",
     "check": "npm run lint && npm run build"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/salza80/Konjugator.git"
-  },
-  "publishConfig": {
-    "type": "git",
-    "registry": "https://npm.pkg.github.com/"
   },
   "license": "MIT",
   "devDependencies": {
@@ -55,5 +49,6 @@
   "files": [
     "dist/lib",
     "public/assets"
-  ]
+  ],
+  "private": true
 }

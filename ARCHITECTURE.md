@@ -70,6 +70,8 @@ mutable gameplay state does not live in the Phaser registry.
 library with declarations. The site bundles Phaser; the library imports it
 from the package's runtime dependency. TypeScript, Vite, Vitest and ESLint are
 development tools. Node is only needed for development/building.
+The project is private and cannot be published with `npm publish`. Library
+output supports local embedding; there is no package publishing configuration.
 
 `public/` contains maintained static files; `dist/` is generated and ignored.
 There is no automated deployment workflow. CI validates without deploying.

@@ -25,7 +25,6 @@ Static files live in `public/`; game assets are served at `assets/`.
 - `npm run build`: type-check, build the site and generate the typed library.
 - `npm run build:lib`: build the library and its declarations only.
 - `npm run preview`: serve the built site locally.
-- `npm run deploy`: build alias; does not publish anything.
 - `npm test` / `npm run test:watch`: Vitest commands reserved for the later test suite.
 
 No tests have been added yet. Vitest explicitly allows an empty suite.
@@ -35,6 +34,10 @@ GitHub Actions runs `npm ci` and `npm run check` on pushes and pull requests,
 using the Node version in `.nvmrc`. Tests are not part of this workflow yet.
 Browser source uses `tsconfig.json`; Vite configuration uses
 `tsconfig.node.json` so Node globals are not exposed to game code.
+
+The project is marked `private` to prevent npm/GitHub Packages publishing.
+The library build remains available for local embedding; there is no package
+publishing configuration or packaging lifecycle hook.
 
 ## Deployment
 
@@ -57,10 +60,10 @@ The standalone page starts from `src/bootstrap.ts`. A same-origin parent can
 provide `window.gameConfig`; see the working example at `/embed.html`
 (`public/embed.html`). Cross-origin frames use default configuration.
 
-The package exports a typed `startGame` API:
+For local source integration, `src/main.ts` exports a typed `startGame` API:
 
 ```ts
-import { startGame, type GameConfig } from '@salza80/konjugator';
+import { startGame, type GameConfig } from './src/main';
 
 const config: GameConfig = {
   start_text: 'Konjugiere das Verb! Bist du bereit?',
