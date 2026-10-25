@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Embed Konjugator</title>
+    <style>
+      body { margin: 0; background: #111; color: white; font-family: sans-serif; }
+      iframe { display: block; border: 0; width: 100%; height: min(80vh, 700px); }
+    </style>
+  </head>
+  <body>
+    <script>
+      window.gameConfig = {
+        start_text: 'Konjugiere das Verb! Bist du bereit?',
+        asset_path: 'assets/',
+        input_type: 'Keyboard',
+        game_over_callback: ({ score }) => {
+          document.getElementById('result').textContent = `Final score: ${score}`;
+        }
+      };
+    </script>
+    <iframe src="./index.html" title="Konjugator game" allow="microphone; fullscreen" allowfullscreen></iframe>
+    <p id="result">Finish a game to see its score here.</p>
+  </body>
+</html>
