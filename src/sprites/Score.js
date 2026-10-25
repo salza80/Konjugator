@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 
 export default class Score extends Phaser.GameObjects.Text {
   constructor(config) {

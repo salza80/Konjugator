@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 export default class InputButton extends Phaser.GameObjects.Text {
     constructor(scene, x, y, text, style, pressedFunc, context) {
         super(scene, x, y, text, style)

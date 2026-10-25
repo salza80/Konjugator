@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import InputManager from './InputManager';
 import Block from './Block';
 import GameTextFactory from './GameText';

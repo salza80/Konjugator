@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import InputButton from './InputButton.js'
 
 const ALL_CHARACTERS =  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ä', 'ö', 'ü', 'ß']
@@ -94,7 +95,7 @@ export default class MobileInputText extends Phaser.GameObjects.Container {
             return ['ä', 'ö', 'ü', 'ß']
         }
         let answerChars = this.answerText.split('')
-        let currentTextChars = this.getText().split('')
+        let _currentTextChars = this.getText().split('')
         let availableChars = []
         for (var index in answerChars) {
             if (!availableChars.includes(answerChars[index])){ 

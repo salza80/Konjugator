@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import makeAnimations from '../helpers/animations';
 
 class BootScene extends Phaser.Scene {

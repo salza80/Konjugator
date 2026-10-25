@@ -1,4 +1,4 @@
-import 'phaser';
+import Phaser from 'phaser';
 import BootScene from './scenes/BootScene';
 import GameScene from './scenes/GameScene';
 import TitleScene from './scenes/TitleScene';
@@ -19,7 +19,7 @@ const config = {
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: WIDTH,
         height: HEIGHT,
-        orientation: Phaser.Scale.Orientation.LANDSCAPE
+        orientation: Phaser.Scale.LANDSCAPE
     },
     autoRound: true,
     physics: {
@@ -55,6 +55,6 @@ export const startGame = (customGameData) => {
             game.registry.set('custom_game_data', customGameData)
         }
     }
-    return new Phaser.Game(config); // eslint-disable-line no-unused-vars
+    return new Phaser.Game(config);
 }
     

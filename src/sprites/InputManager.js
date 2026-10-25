@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import InputButton from './InputButton.js'
 
 const NO_AVAILABLE_CHARACTERS = 6
@@ -34,9 +35,8 @@ export default class InputManager {
 
   setupSpeechRecognitionEntry() {
 
-    let SpeechRecognition = SpeechRecognition || webkitSpeechRecognition || undefined
-    let SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList || undefined
-    let SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent || undefined
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList
 
 
     if (!SpeechRecognition) {
@@ -58,10 +58,11 @@ export default class InputManager {
     var grammar = '#JSGF V1.0; grammar answers; public <answers> = ' + answers.join(' | ') + ' ;'
 
     this.recognition = new SpeechRecognition();
-    this.speechRecognitionList = new SpeechGrammarList();
-    this.speechRecognitionList.addFromString(grammar,1)
-
-    this.recognition.grammars = this.speechRecognitionList;
+    if (SpeechGrammarList) {
+      this.speechRecognitionList = new SpeechGrammarList();
+      this.speechRecognitionList.addFromString(grammar, 1);
+      this.recognition.grammars = this.speechRecognitionList;
+    }
     this.recognition.continuous = false;
     this.recognition.lang = 'de-DE';
     this.recognition.interimResults = false;

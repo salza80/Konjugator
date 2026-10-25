@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 
 export default class LevelText extends Phaser.GameObjects.Text {
   constructor(config) {

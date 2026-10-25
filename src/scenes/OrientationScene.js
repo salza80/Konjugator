@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import InputButton from '../sprites/InputButton';
 
 class OrientationScene extends Phaser.Scene {

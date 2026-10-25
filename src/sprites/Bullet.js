@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 export default class Bullet extends Phaser.GameObjects.Sprite {
   constructor(config) {
     super(config.scene, 0, config.y, 'bullet');
@@ -20,8 +21,8 @@ export default class Bullet extends Phaser.GameObjects.Sprite {
   }
 
   moveToTarget() {
-    let currentPoint = new Phaser.Geom.Point(this.x,this.y);
-    let targetPoint = new Phaser.Geom.Point((this.target.x + this.target.width/2), this.target.y);
+    let currentPoint = new Phaser.Math.Vector2(this.x,this.y);
+    let targetPoint = new Phaser.Math.Vector2((this.target.x + this.target.width/2), this.target.y);
     this.rotation = Phaser.Math.Angle.BetweenPoints(currentPoint, targetPoint);
     this.scene.physics.moveTo(this, targetPoint.x, targetPoint.y, 500);
 

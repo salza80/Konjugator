@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 
 
 class GameText extends Phaser.GameObjects.Text {

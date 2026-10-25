@@ -1,4 +1,4 @@
-import InputManager from '../sprites/InputManager';
+import Phaser from 'phaser';
 import GameManager from '../sprites/GameManager';
 
 class GameScene extends Phaser.Scene {
