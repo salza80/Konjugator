@@ -12,9 +12,10 @@
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest --passWithNoTests",
     "lint": "eslint src vite*.ts",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
     "build:lib": "vite build --config vite.library.config.ts && tsc -p tsconfig.lib.json",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "check": "npm run lint && npm run build"
   },
   "repository": {
     "type": "git",
