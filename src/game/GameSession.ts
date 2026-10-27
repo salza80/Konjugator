@@ -32,6 +32,8 @@ export default class GameSession {
   private readonly difficulty: DifficultyController;
   private disposed = false;
   private countdown: number = GAME.initialCountdownSeconds;
+  private elapsedMs = 0;
+  private readonly tickClock = (_time: number, delta: number): void => { this.elapsedMs += delta * this.scene.time.timeScale; };
 
   constructor(private readonly scene: Phaser.Scene, words: readonly Word[], private readonly bounds: Playfield,
     private mode: InputMode, private readonly hud: GameHud, private readonly onGameOver: (result: SessionResult) => void,
@@ -41,14 +43,27 @@ export default class GameSession {
     this.difficulty = new DifficultyController(options.difficulty, mode);
     this.blockGroup = scene.add.group();
     this.bullets = scene.add.group();
-    this.spawner = new SpawnController(scene, words, bounds, () => [...this.blocks].map((block) => block.x),
-      (target) => this.input?.select?.(target), (target) => {
+    scene.events.on('update', this.tickClock);
+    hud.onCorrectionShown((word) => this.progress.review.expose(word, this.elapsedMs));
+    this.spawner = new SpawnController({
+      scene, words, bounds, difficulty: this.difficulty, review: this.progress.review, now: () => this.elapsedMs,
+      blockColumns: () => [...this.blocks].map((block) => block.x),
+      onSelect: (target) => this.input?.select?.(target),
+      onRemove: (target) => {
         if (!this.disposed) {
           this.input?.remove?.(target);
           this.advanceLevelIfReady();
         }
-      }, (target) => this.missedWord(target),
-      sessionMode.kind === 'practice' ? () => this.progress.remainingWords : undefined, this.difficulty);
+      },
+      onMiss: (target) => this.missedWord(target),
+      onReviewWait: () => {
+        if (sessionMode.kind === 'practice') hud.showPractice(this.progress.practiceCompleted, this.progress.practiceTotal, true);
+      },
+      onSpawn: () => {
+        if (sessionMode.kind === 'practice') hud.showPractice(this.progress.practiceCompleted, this.progress.practiceTotal);
+      },
+      practiceWords: sessionMode.kind === 'practice' ? () => this.progress.remainingWords : undefined,
+    });
     for (const position of blockPositions(options.startingHealth, bounds, GAME.blockSize, () => Phaser.Math.RND.frac())) {
       const block = new Block(scene, position.x, position.y);
       this.blocks.add(block);
@@ -135,9 +150,9 @@ export default class GameSession {
     const first = targets[0];
     if (first) {
       this.difficulty.record(true);
-      const award = this.progress.accept(targets);
+      const award = this.progress.accept(targets, this.elapsedMs);
       for (const target of targets) {
-        target.resolve(true, target === first ? award.total : undefined);
+        target.resolve(true, target === first ? award.total : undefined, award.assisted);
         this.input?.remove?.(target);
         this.bullets.add(new Bullet(this.scene, this.bounds.bottom, target, (this.bounds.left + this.bounds.right) / 2));
       }
@@ -150,7 +165,7 @@ export default class GameSession {
         award.targetBonus ? `+${award.targetBonus} target` : '',
         award.streakBonus ? `+${award.streakBonus} streak` : '',
       ].filter(Boolean);
-      this.hud.showFeedback(`Correct! ${first.word.answer}  +${award.total}${bonuses.length ? ` (${bonuses.join(', ')})` : ''}`, 'success');
+      this.hud.showFeedback(`${award.assisted ? 'Correct with help' : award.recovered ? 'Recovered!' : 'Correct!'} ${first.word.answer}  +${award.total}${bonuses.length ? ` (${bonuses.join(', ')})` : ''}`, 'success');
       if (this.progress.mode.kind === 'practice') {
         this.hud.showPractice(this.progress.practiceCompleted, this.progress.practiceTotal);
       }
@@ -166,7 +181,7 @@ export default class GameSession {
     if (this.disposed || this.phase !== 'playing') return;
     const candidates = new Map((word ? [word] : this.spawner.playableTargets.map((target) => target.word))
       .map((candidate) => [wordKey(candidate), candidate]));
-    const reset = this.progress.reject([...candidates.values()]);
+    const reset = this.progress.reject([...candidates.values()], this.elapsedMs);
     this.difficulty.record(false);
     this.hud.showStreak(this.streak, 0);
     const candidate = candidates.size === 1 ? candidates.values().next().value : undefined;
@@ -177,7 +192,7 @@ export default class GameSession {
 
   private missedWord(target: WordTarget): void {
     if (this.disposed || this.phase !== 'playing') return;
-    this.progress.miss(target.word, target.kind);
+    this.progress.miss(target.word, target.kind, this.elapsedMs);
     this.input?.remove?.(target);
     this.hud.showCorrection(target.word, target.kind === 'bonus' ? 'bonus' : 'missed');
     if (target.kind === 'bonus') return;
@@ -188,7 +203,7 @@ export default class GameSession {
 
   private miss(target: WordTarget, block: Block): void {
     if (this.phase !== 'playing' || target.state !== 'active' || !this.blocks.has(block)) return;
-    this.progress.miss(target.word, target.kind);
+    this.progress.miss(target.word, target.kind, this.elapsedMs);
     this.difficulty.record(false);
     this.hud.showStreak(this.streak, 0);
     this.blocks.delete(block);
@@ -227,6 +242,8 @@ export default class GameSession {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
+    this.scene.events.off('update', this.tickClock);
+    this.hud.onCorrectionShown();
     this.timer?.remove();
     this.spawner.dispose();
     this.input?.dispose();

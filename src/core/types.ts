@@ -27,6 +27,9 @@ export interface GameResult {
 export interface SessionResult extends GameResult {
   correctAnswers: number;
   incorrectAnswers: number;
+  unassistedAnswers: number;
+  assistedAnswers: number;
+  recoveredWords: number;
   missedWords: number;
   bestStreak: number;
   mistakes: readonly Word[];

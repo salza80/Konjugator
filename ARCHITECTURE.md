@@ -98,8 +98,9 @@ The session delegates accounting and immutable result snapshots to this model.
 objects. Wrong touch choices supply their selected word. Wrong free-form
 answers record visible candidates because no question is selected. Misses and
 unanswered targets at game over enter review without adding accuracy attempts.
-Orange escapes enter review without resetting streaks. Successful practice
-answers remove words from the remaining map; the session ends when progress reports completion.
+Orange escapes enter review without resetting streaks. Unassisted practice
+answers remove words from the remaining map; assisted answers score but remain
+for later recall. The session ends when progress reports completion.
 When practice ends, remaining words are merged into the deduplicated review
 snapshot, preserving unspawned items if the base is lost. This does not add
 incorrect attempts or change the number of completed practice words.
@@ -107,6 +108,17 @@ The spawner's optional practice-word provider exposes only remaining items,
 limits the field to one normal word and disables timed wave progression. Misses
 schedule another attempt through the same cancellable field-refill timer.
 Practice summaries stay internal; the host still receives only `{ score }`.
+
+`core/ReviewQueue.ts` inserts targeted retries between fresh bag selections.
+It spaces failures by three presentations where possible and at least 6.4
+seconds after correction exposure, using session time accumulated only during
+active scene updates. A tiny pool uses the time delay without requiring missing
+intervening words. HUD correction-display callbacks mark help actually shown,
+including queued corrections. Active duplicates cannot clear that assistance.
+Only later unassisted answers clear review/practice entries; results separately
+count assisted and unassisted submissions and distinct recovered words.
+The spawner receives named callbacks/policies, maintains one cancellable refill
+or recall-wait timer, and retains a deferred special through recall waits.
 
 SessionProgress is the accounting source of truth; the session owns runtime coordination. HUD text is never read back as gameplay
 state. Word selection happens in the spawner, using validated data supplied by

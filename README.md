@@ -172,8 +172,12 @@ Targets appear fully within their play areas. Partly exited targets cannot be
 answered or selected.
 
 Word selection uses a shuffled bag of distinct question/answer pairs, shared by
-normal and special targets. Every pair gets a turn before the bag refills, and
-coverage carries across levels. Active duplicates and immediate repeats are
+normal and special targets. Fresh selection covers each pair before reshuffling,
+and coverage carries across levels. Missed or corrected items also enter a spaced
+review queue: they return after three other presentations where possible, with
+at least 6.4 seconds of active-scene time after help. Tiny pools wait for that
+delay instead of stalling. A later unassisted answer removes the item from review.
+Active duplicates and immediate repeats are
 avoided when alternatives are available. If remaining bag entries are active,
 spawning waits rather than repeating already-covered alternatives; tiny pools
 can repeat when every available pair is already active. A new game gets a fresh
@@ -224,9 +228,12 @@ Empty input and unmatched interim voice results do not add review words.
 Missing an optional orange target adds it to review without breaking a streak.
 
 Practice presents one normal word at a time, with no escalating waves or level
-timer. A missed word remains available to retry. Progress advances only when a
-word is answered correctly, and practice finishes once every review word has
-been answered correctly (or the base is lost). Score, accuracy and streaks start
+timer. A missed word remains available to retry. Answers given while a correction
+is showing score normally and are labelled as assisted, but remain in practice
+for a later recall. Progress advances when the word is answered without the
+correction; practice finishes once every review word has been recalled (or the
+base is lost). Results separate unassisted answers from answers with correction.
+Score, accuracy and streaks start
 fresh. If the base is lost, every unfinished practice word stays in the next
 review list, including words that have not appeared yet, alongside mistakes
 recorded during that practice round. Play Again and Menu always retain the

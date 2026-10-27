@@ -68,9 +68,9 @@ export default class GameHud {
     this.level.setText(`Level ${level} · ${seconds}s`);
   }
 
-  showPractice(completed: number, total: number): void {
+  showPractice(completed: number, total: number, waiting = false): void {
     this.level.setText(`Practice: ${completed}/${total}`);
-    this.wave.setText('One word at a time').setVisible(true);
+    this.wave.setText(waiting ? 'Recall after this break' : 'Recall without help').setVisible(true);
   }
 
   showLevelClosing(level: number, seconds: number, remaining: number): void {
@@ -117,6 +117,8 @@ export default class GameHud {
   }
 
   get lastCorrection(): Word | undefined { return this.feedback.lastCorrection; }
+
+  onCorrectionShown(listener?: (word: Word) => void): void { this.feedback.onDisplay = listener; }
 
   showInputMode(mode: InputMode): void { this.help.setText(HELP[mode]); }
 

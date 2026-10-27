@@ -1,6 +1,7 @@
 import type { GameConfig, GameOptions, InputMode, Playfield } from './core/types';
 import { SESSION_PRESETS } from './core/sessionPresets';
 import { DIFFICULTIES } from './core/DifficultyController';
+import { CORRECTION_MS } from './core/ReviewQueue';
 
 export const GAME = {
   width: 1280,
@@ -14,7 +15,7 @@ export const GAME = {
   initialCountdownSeconds: 5,
   levelCountdownSeconds: 2,
   answerDisplayMs: 1500,
-  correctionDisplayMs: 3200,
+  correctionDisplayMs: CORRECTION_MS,
   feedbackDisplayMs: 2200,
   shotDisplayMs: 240,
   horizontalWordSpeed: 70,

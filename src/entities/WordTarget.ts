@@ -113,7 +113,7 @@ export default class WordTarget extends Phaser.GameObjects.Text {
     if (this.state !== 'resolved') this.setBackgroundColor(selected ? COLORS.selected : 'transparent');
   }
 
-  resolve(hit: boolean, points?: number): void {
+  resolve(hit: boolean, points?: number, assisted = false): void {
     if (this.state === 'resolved') return;
     const feedbackWidth = this.displayWidth + TARGET_LAYOUT.gap / 2;
     if (hit) this.scene.sound.playAudioSprite('sfx', WORD_VARIANTS[this.kind].hitSound);
@@ -123,7 +123,7 @@ export default class WordTarget extends Phaser.GameObjects.Text {
     this.setActive(false).disableInteractive().setCrop().setBackgroundColor('transparent');
     this.flash?.remove();
     this.clearTint();
-    const label = hit ? `✓ ${this.word.answer}${points === undefined ? '' : `  +${points}`}`
+    const label = hit ? `✓ ${this.word.answer}${points === undefined ? '' : `  +${points}`}${assisted ? '\nTry again later' : ''}`
       : `Missed\n${this.word.question}\nAnswer: ${this.word.answer}`;
     this.setText(this.word.tip ? `${label}\nHint: ${this.word.tip}` : label);
     this.setColor(hit ? COLORS.success : '#e9f1f7');

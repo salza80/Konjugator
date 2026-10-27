@@ -21,6 +21,7 @@ export default class FeedbackBanner {
   private current?: Correction;
   private timer?: Phaser.Time.TimerEvent;
   lastCorrection?: Word;
+  onDisplay?: (word: Word) => void;
 
   constructor(private readonly scene: Phaser.Scene, center: number, private readonly width: number) {
     this.heading = scene.add.text(center, 88, '', { align: 'center' }).setOrigin(0.5, 0).setDepth(11);
@@ -63,6 +64,7 @@ export default class FeedbackBanner {
   private display(correction: Correction): void {
     this.timer?.remove();
     this.current = correction;
+    this.onDisplay?.(correction.word);
     this.heading.setText(`${HEADINGS[correction.kind]}: ${correction.word.question}`)
       .setColor(correction.kind === 'retry' || correction.kind === 'bonus' ? '#ffcf70' : COLORS.error);
     fitText(this.heading, this.width, 20, 18);

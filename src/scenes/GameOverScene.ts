@@ -36,10 +36,11 @@ export default class GameOverScene extends Phaser.Scene {
     this.add.text(center + 260, 270, 'MISSED WORDS', { ...style, fontSize: 18 }).setOrigin(0.5, 0);
     this.add.text(center + 260, 303, summary.missedWords.toString(), { ...style, fontSize: 44 }).setOrigin(0.5, 0);
     const attemptSummary = attempts
-      ? `${summary.correctAnswers} correct · ${summary.incorrectAnswers} incorrect`
+      ? `${summary.unassistedAnswers} unassisted · ${summary.assistedAnswers} with correction · ${summary.incorrectAnswers} incorrect`
       : 'No answers submitted.';
-    this.add.text(center, 367, `${attemptSummary}${lastCorrection ? ` · ${reviewCount} review ${reviewCount === 1 ? 'word' : 'words'}` : ''}`,
+    const attemptsLabel = this.add.text(center, 367, `${attemptSummary}${lastCorrection ? ` · ${reviewCount} review ${reviewCount === 1 ? 'word' : 'words'}` : ''}`,
       { ...style, fontSize: 20 }).setOrigin(0.5, 0);
+    fitText(attemptsLabel, 820, 26, 20);
     const total = summary.practiceTotal || summary.roundGoal;
     if (total) {
       const completed = summary.practiceTotal ? summary.practiceCompleted : summary.correctAnswers;
