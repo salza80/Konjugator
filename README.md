@@ -125,6 +125,14 @@ quick to answer.
 
 ## Pacing
 
+Optional `difficulty` is `relaxed`, `standard` (default), or `challenge`.
+Touch and voice get slower travel and fewer simultaneous questions; longer
+answers get additional travel time without changing points. Every eight
+submitted answers or normal misses can gently adjust pressure, capped between
+85% and 110% of the preset. Changes apply at wave boundaries rather than
+speeding up a word immediately after an answer. Practice stays gentle, with
+one question and no escalation. Pausing freezes all pacing clocks.
+
 Each 90-second level follows five waves, shown in the HUD:
 
 | Time into level | Wave | Level-one active-word limit |

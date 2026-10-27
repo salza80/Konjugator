@@ -55,12 +55,12 @@ export default class WordTarget extends Phaser.GameObjects.Text {
       { x: this.x, y: this.y, width: this.displayWidth, height: this.displayHeight });
   }
 
-  start(x: number, y: number, speed: number, fromRight = false): void {
+  start(x: number, y: number, speed: number, fromRight = false, horizontalSpeed: number = GAME.horizontalWordSpeed): void {
     this.setPosition(x, y).setVisible(true);
     this.scene.physics.world.enable(this);
     this.body.setSize(this.width, this.height).reset(x, y);
     if (this.kind === 'bonus') {
-      this.body.setAllowGravity(false).setVelocityX(fromRight ? -GAME.horizontalWordSpeed : GAME.horizontalWordSpeed);
+      this.body.setAllowGravity(false).setVelocityX(fromRight ? -horizontalSpeed : horizontalSpeed);
       this.scene.sound.playAudioSprite('sfx', 'smb_powerup_appears');
     } else {
       this.body.setAllowGravity(true).setMaxSpeed(speed);
@@ -103,8 +103,10 @@ export default class WordTarget extends Phaser.GameObjects.Text {
       Math.max(0, bottom - top) * resolution);
   }
 
-  setFallSpeed(speed: number): void {
-    if (this.state === 'active' && this.kind !== 'bonus') this.body.setMaxSpeed(speed);
+  setSpeed(speed: number, horizontalSpeed: number): void {
+    if (this.state !== 'active') return;
+    if (this.kind === 'bonus') this.body.setVelocityX(Math.sign(this.body.velocity.x) * horizontalSpeed);
+    else this.body.setMaxSpeed(speed);
   }
 
   select(selected: boolean): void {

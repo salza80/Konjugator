@@ -10,6 +10,7 @@ import PauseScene from './scenes/PauseScene';
 
 export type { GameConfig, GameResult, InputMode, Word } from './core/types';
 export type { SessionPreset } from './core/sessionPresets';
+export type { Difficulty } from './core/DifficultyController';
 
 export function startGame(customConfig: GameConfig = {}): Phaser.Game {
   const options = normalizeConfig(customConfig);

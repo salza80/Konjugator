@@ -5,6 +5,8 @@ import type { WavePacing } from '../core/pacing';
 import type { Playfield, Word, WordKind } from '../core/types';
 import { freeColumn, TARGET_LAYOUT } from '../core/targetLayout';
 import WordBag from '../core/WordBag';
+import DifficultyController from '../core/DifficultyController';
+import { GAME } from '../config';
 import WordTarget from '../entities/WordTarget';
 
 export default class SpawnController {
@@ -14,7 +16,7 @@ export default class SpawnController {
   private level = 1;
   private elapsed = 0;
   private nextRegularAt = 0;
-  private pacing: WavePacing = pacingFor(1, 0);
+  private pacing: ReturnType<DifficultyController['pacing']> = { ...pacingFor(1, 0), movementFactor: 1 };
   private refill?: Phaser.Time.TimerEvent;
   private pendingSpecial?: Exclude<WordKind, 'falling'>;
   private readonly wordBag = new WordBag(() => Phaser.Math.RND.frac());
@@ -22,7 +24,8 @@ export default class SpawnController {
   constructor(private readonly scene: Phaser.Scene, private readonly words: readonly Word[], private readonly bounds: Playfield,
     private readonly blockColumns: () => number[], private readonly onSelect: (target: WordTarget) => void,
     private readonly onRemove: (target: WordTarget) => void, private readonly onMiss: (target: WordTarget) => void,
-    private readonly practiceWords?: () => readonly Word[]) {
+    private readonly practiceWords?: () => readonly Word[],
+    private readonly difficulty = new DifficultyController()) {
     this.group = scene.add.group({ runChildUpdate: true });
   }
 
@@ -31,7 +34,7 @@ export default class SpawnController {
     this.running = true;
     this.level = level;
     this.elapsed = 0;
-    this.pacing = this.practiceWords ? { ...pacingFor(1, 0), maxTargets: 1 } : pacingFor(level, 0);
+    this.pacing = this.difficulty.pacing(level, 0, !!this.practiceWords);
     this.spawn('falling');
     this.nextRegularAt = this.pacing.interval;
   }
@@ -41,10 +44,11 @@ export default class SpawnController {
     if (!this.running || this.practiceWords) return;
     const previousElapsed = this.elapsed;
     this.elapsed = elapsed;
-    const pacing = pacingFor(this.level, elapsed);
+    const pacing = this.difficulty.pacing(this.level, elapsed);
     if (pacing.index !== this.pacing.index) {
       this.pacing = pacing;
-      for (const target of this.activeTargets) target.setFallSpeed(this.speedFor(target.kind));
+      for (const target of this.activeTargets) target.setSpeed(this.speedFor(target.kind, target.word),
+        GAME.horizontalWordSpeed * this.pacing.movementFactor * this.difficulty.answerAllowance(target.word));
       this.nextRegularAt = elapsed + pacing.interval;
     }
     for (const special of SPECIAL_TARGETS) {
@@ -56,8 +60,8 @@ export default class SpawnController {
     }
   }
 
-  private speedFor(kind: WordKind): number {
-    return this.pacing.fallingSpeed * (kind === 'bonusfalling' ? 1.5 : 1);
+  private speedFor(kind: WordKind, word: Word): number {
+    return this.pacing.fallingSpeed * (kind === 'bonusfalling' ? 1.5 : 1) * this.difficulty.answerAllowance(word);
   }
 
   spawn(kind: WordKind): WordTarget | undefined {
@@ -103,7 +107,8 @@ export default class SpawnController {
       target.destroy();
       return;
     }
-    target.start(x, playBounds.top + (kind === 'bonus' ? 8 : 0), this.speedFor(kind), fromRight);
+    target.start(x, playBounds.top + (kind === 'bonus' ? 8 : 0), this.speedFor(kind, word), fromRight,
+      GAME.horizontalWordSpeed * this.pacing.movementFactor * this.difficulty.answerAllowance(word));
     this.wordBag.recordSpawn(word);
     this.targets.add(target);
     this.group.add(target);

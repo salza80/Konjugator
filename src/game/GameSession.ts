@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME } from '../config';
 import { normalizeAnswer } from '../core/answers';
 import SessionProgress from '../core/SessionProgress';
+import DifficultyController from '../core/DifficultyController';
 import { wordKey } from '../core/words';
 import { blockPositions } from '../core/rules';
 import type { GameOptions, InputMode, Playfield, SessionMode, SessionPhase, SessionResult, Word } from '../core/types';
@@ -28,6 +29,7 @@ export default class GameSession {
   private timer?: Phaser.Time.TimerEvent;
   private input?: PlayerInput;
   private readonly audio: GameAudio;
+  private readonly difficulty: DifficultyController;
   private disposed = false;
   private countdown: number = GAME.initialCountdownSeconds;
 
@@ -36,6 +38,7 @@ export default class GameSession {
     sessionMode: SessionMode, private readonly options: GameOptions) {
     this.audio = gameAudio(scene.game);
     this.progress = new SessionProgress(sessionMode);
+    this.difficulty = new DifficultyController(options.difficulty, mode);
     this.blockGroup = scene.add.group();
     this.bullets = scene.add.group();
     this.spawner = new SpawnController(scene, words, bounds, () => [...this.blocks].map((block) => block.x),
@@ -45,7 +48,7 @@ export default class GameSession {
           this.advanceLevelIfReady();
         }
       }, (target) => this.missedWord(target),
-      sessionMode.kind === 'practice' ? () => this.progress.remainingWords : undefined);
+      sessionMode.kind === 'practice' ? () => this.progress.remainingWords : undefined, this.difficulty);
     for (const position of blockPositions(options.startingHealth, bounds, GAME.blockSize, () => Phaser.Math.RND.frac())) {
       const block = new Block(scene, position.x, position.y);
       this.blocks.add(block);
@@ -63,6 +66,7 @@ export default class GameSession {
     this.input?.dispose();
     this.input = input;
     this.mode = mode;
+    this.difficulty.setInputMode(mode);
   }
 
   resume(): void { this.input?.resume?.(); }
@@ -130,6 +134,7 @@ export default class GameSession {
     const targets = this.spawner.playableTargets.filter((target) => normalizeAnswer(target.word.answer) === normalized);
     const first = targets[0];
     if (first) {
+      this.difficulty.record(true);
       const award = this.progress.accept(targets);
       for (const target of targets) {
         target.resolve(true, target === first ? award.total : undefined);
@@ -162,6 +167,7 @@ export default class GameSession {
     const candidates = new Map((word ? [word] : this.spawner.playableTargets.map((target) => target.word))
       .map((candidate) => [wordKey(candidate), candidate]));
     const reset = this.progress.reject([...candidates.values()]);
+    this.difficulty.record(false);
     this.hud.showStreak(this.streak, 0);
     const candidate = candidates.size === 1 ? candidates.values().next().value : undefined;
     if (candidate) this.hud.showCorrection(candidate, 'retry');
@@ -175,6 +181,7 @@ export default class GameSession {
     this.input?.remove?.(target);
     this.hud.showCorrection(target.word, target.kind === 'bonus' ? 'bonus' : 'missed');
     if (target.kind === 'bonus') return;
+    this.difficulty.record(false);
     this.hud.showStreak(this.streak, 0);
     if (this.progress.mode.kind === 'practice') this.spawner.onFieldCleared();
   }
@@ -182,6 +189,7 @@ export default class GameSession {
   private miss(target: WordTarget, block: Block): void {
     if (this.phase !== 'playing' || target.state !== 'active' || !this.blocks.has(block)) return;
     this.progress.miss(target.word, target.kind);
+    this.difficulty.record(false);
     this.hud.showStreak(this.streak, 0);
     this.blocks.delete(block);
     block.breakApart();

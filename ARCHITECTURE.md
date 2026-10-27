@@ -75,6 +75,12 @@ express ownership without a global event bus.
    Result-screen keyboard listeners are removed on shutdown. Missed targets
    and ignored input do not count as attempts.
 
+`core/DifficultyController.ts` owns difficulty presets, input/answer-length
+allowances and a bounded recent-performance adjustment. The spawner snapshots
+the policy at level starts and wave boundaries, applying one consistent factor
+to falling and horizontal movement. Empty input and optional bonus misses do
+not influence adaptation. Practice always uses its gentle, single-word policy.
+
 Scoring is calculated in `core/rules.ts`: 10 base points per accepted answer,
 plus the highest matching target bonus (0/5/10) and a streak bonus of
 `min(streak - 1, 5)`. One submission advances the streak once, even if it clears

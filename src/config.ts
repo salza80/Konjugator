@@ -1,5 +1,6 @@
 import type { GameConfig, GameOptions, InputMode, Playfield } from './core/types';
 import { SESSION_PRESETS } from './core/sessionPresets';
+import { DIFFICULTIES } from './core/DifficultyController';
 
 export const GAME = {
   width: 1280,
@@ -42,6 +43,7 @@ export function normalizeConfig(config: GameConfig): GameOptions {
     roundGoal: Number.isSafeInteger(config.round_goal) && (config.round_goal ?? 0) > 0 ? config.round_goal ?? preset.roundGoal : preset.roundGoal,
     sessionPreset,
     startingHealth: preset.health,
+    difficulty: DIFFICULTIES.includes(config.difficulty ?? 'standard') ? config.difficulty ?? 'standard' : 'standard',
     onGameOver: typeof config.game_over_callback === 'function' ? config.game_over_callback : null,
   };
 }

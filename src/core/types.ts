@@ -1,4 +1,5 @@
 import type { SessionPreset } from './sessionPresets';
+import type { Difficulty } from './DifficultyController';
 
 export type InputMode = 'Keyboard' | 'Touch' | 'Voice';
 export type WordKind = 'falling' | 'bonusfalling' | 'bonus';
@@ -44,6 +45,7 @@ export interface GameConfig {
   words_url?: string;
   /** Quick uses a 15-answer goal and 12 health; omission retains survival. */
   session_preset?: SessionPreset;
+  difficulty?: Difficulty;
   /** Correct submitted answers needed to win; overrides the preset goal. */
   round_goal?: number;
   game_over_callback?: (result: GameResult) => void;
@@ -59,6 +61,7 @@ export interface GameOptions {
   roundGoal: number;
   sessionPreset: SessionPreset;
   startingHealth: number;
+  difficulty: Difficulty;
   onGameOver: ((result: GameResult) => void) | null;
 }
 
