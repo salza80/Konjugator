@@ -158,18 +158,20 @@ separate top band. Target entities apply positions chosen by the spawner and
 crop their text to the play area in both Canvas and WebGL; they never choose
 random columns themselves. A shared play-area containment check
 governs answer eligibility, touch selection and review attribution. Placement, floor detection, visibility checks and cosmetic shots use
-display dimensions, including when text is scaled. Resolved answers and hints,
-answer entry and HUD feedback use the same fitting helper with separate bounds.
+display dimensions, including when text is scaled. Resolved answer labels,
+answer entry and HUD feedback use bounded fitting with separate display areas.
 
 `ui/FeedbackBanner.ts` owns the HUD's status and correction rendering. A correction
-has a question line and a separately styled answer line. A bounded, deduplicated
+has a question line, a separately styled answer line and a readable, single-line
+hint preview. `ui/HintPanel.ts` pages complete hints in the pause overlay; opening
+that correction notifies the same assistance tracker as the HUD. A bounded, deduplicated
 queue handles bursts of misses; ordinary success messages cannot replace a
 correction before its reading time finishes. System notices may interrupt and
 then return to it. The scene clock pauses both the banner and resolved-target
 timers. Success targets remain for 1.5 seconds; missed targets (including escaped
-bonuses) show question, answer and optional hint for 3.2 seconds. Local labels
-stay within their original word lanes so simultaneous misses do not expand
-across neighbouring labels. HUD corrections give the full labelled answer and
+bonuses) show a compact answer label for 3.2 seconds. Local cards reserve
+answer-length-aware width for readability, remain behind active questions, and omit repeated
+prompts and hints. HUD corrections give the full labelled answer and
 survive later-level countdowns without extending them. Misses immediately clear
 touch selection; they do not change the existing accounting rules.
 
@@ -181,14 +183,18 @@ the final correction after scene shutdown. Public configuration, `SessionResult`
 accounting and the `{ score }` callback are unchanged.
 
 `ui/TouchChoicePanel.ts` owns touch-choice layout and paging in 192-unit side
-panels. It reuses six 168×104 tiles rather than allocating one text button per
+panels. It reuses six 168×82 tiles rather than allocating one text button per
 character in the dataset. `TouchButton` separates its fixed hit rectangle from
 its fitted label, provides pressed feedback and requires a press/release on the
 same tile. Up to six choices appear per page; 88-unit navigation buttons expose
 remaining choices without reducing tile sizes. `TouchInput` owns selection and
 partial answers, so paging never changes scoring or progress. Retapping the
 selected question leaves progress intact. Word hit areas extend halfway into
-the shared layout gap without changing physics bodies or answer eligibility.
+the horizontal layout gap and grow to at least 82 units where their playfield band allows, without changing
+physics bodies or answer eligibility. The 210-unit HUD reserves room for large
+secondary controls and correction text. `ActionButton` shares an 88-unit height
+for pause, sound, fullscreen, reading and results controls; Menu is in the pause
+overlay. Text buttons require a press and release on the same target.
 
 ## Lifecycle
 

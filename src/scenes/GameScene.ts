@@ -11,7 +11,7 @@ import { supportsSpeechRecognition } from '../platform/speech';
 import { canvasShortcuts, hasGameFocus } from '../platform/keyboard';
 import { onSceneEnd } from '../platform/lifecycle';
 import GameHud from '../ui/GameHud';
-import InputButton from '../ui/InputButton';
+import ActionButton from '../ui/ActionButton';
 import SoundButton from '../ui/SoundButton';
 import { recordRun } from '../platform/records';
 
@@ -42,7 +42,7 @@ export default class GameScene extends Phaser.Scene {
       const focusOverlay = hasGameFocus(this.game) && document.hasFocus();
       this.session.pause();
       this.scene.pause();
-      this.scene.launch('PauseScene', { focusOverlay });
+      this.scene.launch('PauseScene', { focusOverlay, ready: this.ready, readingWord: hud.revealReadingWord() });
     };
     setupOrientation(this, pauseGame);
 
@@ -79,16 +79,13 @@ export default class GameScene extends Phaser.Scene {
     }
     this.session.attachInput(input);
 
-    this.add.image(GAME.width - 30, 25, 'maximize').setDisplaySize(50, 50).setDepth(12)
-      .setInteractive({ useHandCursor: true }).on('pointerdown', () => {
-        if (this.scale.isFullscreen) this.scale.stopFullscreen();
-        else this.scale.startFullscreen();
-      });
-    new InputButton(this, 20, 10, 'Menu', () => {
-      this.scene.start('TitleScene', { options: this.ready.options, words: this.ready.words });
-    }, 20).setDepth(12);
-    new InputButton(this, 20, 88, 'Pause', pauseGame, 20).setDepth(12);
-    new SoundButton(this, 20, 54).setDepth(12);
+    new ActionButton(this, GAME.width - 112, 10, '', () => {
+      if (this.scale.isFullscreen) this.scale.stopFullscreen();
+      else this.scale.startFullscreen();
+    }, 96).setDepth(12);
+    this.add.image(GAME.width - 64, 54, 'maximize').setDisplaySize(50, 50).setDepth(13);
+    new ActionButton(this, 16, 10, 'Pause', pauseGame, 180).setDepth(12);
+    new SoundButton(this, 16, 110).setDepth(12);
 
     const onPause = (): void => this.session.pause();
     const onResume = (): void => { pauseRequested = false; this.session.resume(); };

@@ -236,7 +236,7 @@ storage falls back to memory. Records do not change the score-only callback.
 
 ## Practising mistakes
 
-Choose Practise My Mistakes (or press P) on the results screen to retry that
+Choose Practise Mistakes (or press P) on the results screen to retry that
 game's review words. The option is disabled when no review words were recorded.
 Words are deduplicated by question and answer, retaining their original hints
 and voice text. No review history is saved beyond the current game flow.
@@ -286,14 +286,16 @@ Incorrect entries do not damage the base, and keyboard answers remain editable
 until accepted. Low health is labelled as well as coloured.
 
 Corrections pair the original question with a clearly labelled correct answer.
-Missed words and their optional hints remain in the playfield for 3.2 seconds;
-successful answer labels keep their shorter 1.5-second display. The HUD shows
-the question above a larger green correct answer, distinguishing base hits,
+Missed words leave a compact answer label in the playfield for 3.2 seconds;
+successful labels keep their shorter 1.5-second display. The HUD shows
+the question above a larger green correct answer and a readable hint preview, distinguishing base hits,
 missed falling words and missed optional bonuses. Several misses queue up so
 their corrections can be read in turn; repeated entries are combined and the
 queue is bounded to six pending items. Correct answers still score immediately
 while a correction is visible. Corrections use the pausable
-scene clock and can continue through the short level countdown.
+scene clock and can continue through the short level countdown. Pause shows
+the most recently displayed word and the complete hint, with pages for long hints. Reading
+it counts as assistance when deciding whether a later answer is independent recall.
 
 Wrong touch choices show the answer for the selected question. Keyboard and
 voice errors show it when there is only one distinct visible question;
@@ -308,12 +310,16 @@ buttons and F1–F4 insert ä, ö, ü and ß; 1–4 remain aliases only when the
 answers contain none of those digits. Results shortcuts only act while the
 game has focus, so host-page typing cannot trigger replay or navigation. Touch
 players tap a question, then build its answer using large tiles in the side
-panels; the whole tile responds. Questions select on press with a padded hit area.
+panels; the whole tile responds. Questions select on press with taller hit areas,
+at least 82 units high where their playfield band allows. Horizontal padding
+stays inside the gaps between word lanes.
 Tapping the same question again preserves the partial answer. Spaces are inserted
 automatically. Tiles stay in fixed positions for that question, with up to six
 choices per page. Longer answers use Back/More controls instead of shrinking the
 tiles. Paging preserves the partial answer and does not count as an attempt.
-Sliding off a tile cancels its press. Menu leaves the current game. After game over, choose Play Again
+Sliding off a tile or secondary button cancels its press. Pause, sound,
+fullscreen and results actions have large controls; the 210-unit HUD keeps
+status and corrections separate. Menu in the pause overlay leaves the current game. After game over, choose Play Again
 or press Enter to replay; choose Menu or press X to return to the start screen.
 
 Choose Pause or press Escape to pause, then choose Continue, Enter, Space or Escape to resume.

@@ -7,7 +7,7 @@ export const GAME = {
   width: 1280,
   height: 700,
   bottomSpace: 100,
-  hudHeight: 140,
+  hudHeight: 210,
   touchSideWidth: 192,
   blockSize: 20,
   levelSeconds: 90,

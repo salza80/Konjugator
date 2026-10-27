@@ -3,7 +3,7 @@ import { GAME } from '../config';
 import type { Playfield } from '../core/types';
 import TouchButton from './TouchButton';
 
-const LAYOUT = { pageSize: 6, padding: 12, gap: 12, keyHeight: 104, pagerHeight: 88 } as const;
+const LAYOUT = { pageSize: 6, padding: 12, gap: 8, keyHeight: 82, pagerHeight: 88 } as const;
 
 /** Keeps character choices large and in stable positions for the selected question. */
 export default class TouchChoicePanel {

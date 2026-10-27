@@ -183,7 +183,7 @@ export default class GameSession {
         award.targetBonus ? `+${award.targetBonus} target` : '',
         award.streakBonus ? `+${award.streakBonus} streak` : '',
       ].filter(Boolean);
-      this.config.hud.showFeedback(`${award.assisted ? 'Correct with help' : award.recovered ? 'Recovered!' : 'Correct!'} ${first.word.answer}  +${award.total}${bonuses.length ? ` (${bonuses.join(', ')})` : ''}`, 'success');
+      this.config.hud.showFeedback(`${award.assisted ? 'Correct with help' : award.recovered ? 'Recovered!' : 'Correct!'} ${first.word.answer}  +${award.total}${bonuses.length ? ` (${bonuses.join(', ')})` : ''}`, 'success', first.word);
       if (this.progress.mode.kind === 'practice') {
         this.config.hud.showPractice(this.progress.practiceCompleted, this.progress.practiceTotal);
       }
@@ -227,7 +227,7 @@ export default class GameSession {
     }
     this.difficulty.record(false);
     this.config.hud.showStreak(this.streak, 0);
-    const center = target.x + target.displayWidth / 2;
+    const center = target.impactX;
     const block = hitBlock ?? [...this.blocks].sort((a, b) =>
       Math.abs(a.x - center) - Math.abs(b.x - center) || a.y - b.y)[0];
     if (block) {
