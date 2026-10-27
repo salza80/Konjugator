@@ -13,4 +13,4 @@ try {
 } catch {
   // Cross-origin parents cannot supply configuration through window properties.
 }
-startGame(config ?? { asset_path: `${import.meta.env.BASE_URL}assets/` });
+startGame(config ?? { asset_path: `${import.meta.env.BASE_URL}assets/`, session_preset: 'quick' });

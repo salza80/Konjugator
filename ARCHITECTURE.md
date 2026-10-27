@@ -219,7 +219,11 @@ code uses normalized `GameOptions`. Scene handoffs use explicit interfaces;
 mutable gameplay state does not live in the Phaser registry.
 
 Optional `round_goal` normalizes to a positive safe integer (zero internally
-means survival mode). The session counts correct submissions toward this goal
+means survival mode). `core/sessionPresets.ts` defines opt-in quick sessions
+(15 answers, 12 health) and compatible survival defaults (no goal, 60 health).
+The standalone adapter and embed example opt into quick sessions; existing
+hosts retain survival. An explicit positive goal overrides the preset goal.
+The session counts correct submissions toward this goal
 and ends successfully when it is reached; matching duplicate targets count once.
 Success clears leftover targets without recording them as mistakes. Internal
 results include the goal and completion flag for the HUD/results screen; the

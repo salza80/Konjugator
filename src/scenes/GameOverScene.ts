@@ -24,7 +24,9 @@ export default class GameOverScene extends Phaser.Scene {
     const title = summary.practiceTotal
       ? summary.practiceCompleted === summary.practiceTotal ? 'PRACTICE COMPLETE' : 'PRACTICE OVER'
       : summary.roundCompleted ? 'ROUND COMPLETE' : 'GAME OVER';
-    this.add.text(center, 85, title, { ...style, fontSize: 40 }).setOrigin(0.5, 0);
+    this.add.text(center, 85, title, { ...style, fontSize: 40,
+      color: summary.roundCompleted || (summary.practiceTotal > 0 && summary.practiceCompleted === summary.practiceTotal)
+        ? COLORS.success : style.color }).setOrigin(0.5, 0);
     this.add.text(center, 151, 'FINAL SCORE', { ...style, fontSize: 18 }).setOrigin(0.5, 0);
     this.add.text(center, 180, summary.score.toString(), { ...style, color: COLORS.success, fontSize: 54 }).setOrigin(0.5, 0);
     this.add.text(center - 260, 270, 'ACCURACY', { ...style, fontSize: 18 }).setOrigin(0.5, 0);

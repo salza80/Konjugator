@@ -51,7 +51,7 @@ export default class GameScene extends Phaser.Scene {
         lastCorrection: hud.lastCorrection,
       };
       this.scene.start('GameOver', result);
-    }, sessionMode);
+    }, sessionMode, this.ready.options);
     const digitShortcuts = !sessionWords.some((word) => /[1-4]/.test(word.answer));
     let input: PlayerInput;
     if (mode === 'Touch') {

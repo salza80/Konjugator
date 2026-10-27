@@ -4,7 +4,7 @@ import { normalizeAnswer } from '../core/answers';
 import SessionProgress from '../core/SessionProgress';
 import { wordKey } from '../core/words';
 import { blockPositions } from '../core/rules';
-import type { InputMode, Playfield, SessionMode, SessionPhase, SessionResult, Word } from '../core/types';
+import type { GameOptions, InputMode, Playfield, SessionMode, SessionPhase, SessionResult, Word } from '../core/types';
 import Block from '../entities/Block';
 import Bullet from '../entities/Bullet';
 import WordTarget from '../entities/WordTarget';
@@ -33,7 +33,7 @@ export default class GameSession {
 
   constructor(private readonly scene: Phaser.Scene, words: readonly Word[], private readonly bounds: Playfield,
     private mode: InputMode, private readonly hud: GameHud, private readonly onGameOver: (result: SessionResult) => void,
-    sessionMode: SessionMode) {
+    sessionMode: SessionMode, private readonly options: GameOptions) {
     this.audio = gameAudio(scene.game);
     this.progress = new SessionProgress(sessionMode);
     this.blockGroup = scene.add.group();
@@ -46,12 +46,12 @@ export default class GameSession {
         }
       }, (target) => this.missedWord(target),
       sessionMode.kind === 'practice' ? () => this.progress.remainingWords : undefined);
-    for (const position of blockPositions(GAME.startingBlocks, bounds, GAME.blockSize, () => Phaser.Math.RND.frac())) {
+    for (const position of blockPositions(options.startingHealth, bounds, GAME.blockSize, () => Phaser.Math.RND.frac())) {
       const block = new Block(scene, position.x, position.y);
       this.blocks.add(block);
       this.blockGroup.add(block);
     }
-    this.hud.showHealth(this.blocks.size, GAME.startingBlocks);
+    this.hud.showHealth(this.blocks.size, options.startingHealth);
     this.hud.showStreak(this.streak, 0);
     this.hud.showRoundGoal(0, this.progress.roundGoal);
     scene.physics.add.overlap(this.spawner.group, this.blockGroup, (target, block) => {
@@ -115,7 +115,7 @@ export default class GameSession {
   }
 
   private advanceLevelIfReady(): void {
-    if (this.disposed || this.phase !== 'playing' || !this.scene.scene.isActive()
+    if (this.disposed || this.phase !== 'playing' || !this.scene.sys.isActive()
       || this.progress.mode.kind === 'practice' || this.secondsRemaining > GAME.levelSpawnGraceSeconds
       || this.spawner.targets.size > 0) return;
     // Keep existing words playable and let their answer labels finish, then skip idle closing time.
@@ -187,7 +187,7 @@ export default class GameSession {
     block.breakApart();
     target.resolve(false);
     this.input?.remove?.(target);
-    this.hud.showHealth(this.blocks.size, GAME.startingBlocks);
+    this.hud.showHealth(this.blocks.size, this.options.startingHealth);
     this.hud.showCorrection(target.word, 'damage');
     if (!this.blocks.size) this.finishGame();
     else if (this.progress.mode.kind === 'practice') this.spawner.onFieldCleared();

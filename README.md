@@ -69,6 +69,7 @@ const config: GameConfig = {
   start_text: 'Konjugiere das Verb! Bist du bereit?',
   asset_path: 'assets/',
   input_type: 'Keyboard',
+  session_preset: 'quick', // Recommended short session: 15 answers, 12 health.
   round_goal: 10, // Optional: finish after 10 correct answers.
   game_over_callback: ({ score }) => console.log(score),
 };
@@ -91,12 +92,18 @@ Optional configuration includes `words` (question/answer objects, with optional
 to the game document, independently of `asset_path`. Loading and validation
 failures show a retry screen.
 
+Set `session_preset: 'quick'` for a short, winnable session: 15 correct answers
+and 12 health. The standalone page and embed example use this preset. Existing
+hosts that omit it retain survival with 60 health. `session_preset: 'survival'`
+selects that behaviour explicitly. A positive `round_goal` overrides the preset's
+goal while retaining its health budget.
+
 Set `round_goal` to a positive integer to finish a normal round successfully
 after that many correct submitted answers. The HUD shows progress and the
 results screen displays Round Complete when the goal is reached. One submission
 counts once, even when it clears matching targets. Wrong answers and misses do
 not subtract progress; losing the base still ends the round early. Omit the
-option for the existing survival mode; invalid values also use survival mode.
+option to use the preset's goal; invalid values also use the preset's goal.
 Play Again retains the goal and starts fresh. Practice always finishes by
 completing its review list, independently of the round goal. Reaching the goal
 does not mark other active questions as mistakes. The callback still receives
