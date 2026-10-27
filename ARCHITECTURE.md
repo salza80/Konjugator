@@ -90,6 +90,11 @@ orange targets can leave without penalty. Entities notify the session when a
 falling word reaches the floor without hitting a block, so that path also resets
 the streak. Only block collisions reduce health. HUD labels do not own rules.
 
+`core/StreakMilestones.ts` awards thresholds 5, 10 and 20 once per session.
+The session can restore one missing block for each award, capped at starting
+health; `repairPosition` finds an empty grid slot independently of Phaser.
+The HUD presents a pausable milestone message separately from correction text.
+
 `core/SessionProgress.ts` owns scores, streaks, attempts, misses, review collection
 and remaining practice items. `SessionMode` explicitly represents survival,
 goal or practice; no boolean/goal combination can accidentally mix modes.

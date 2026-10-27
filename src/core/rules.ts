@@ -24,7 +24,10 @@ export function scoreFor(kinds: readonly WordKind[], streak: number): ScoreAward
   return { base, targetBonus, streakBonus, total: base + targetBonus + streakBonus };
 }
 
-export function blockPositions(count: number, bounds: { left: number; width: number; bottom: number }, size: number, random: () => number): { x: number; y: number }[] {
+interface BaseBounds { left: number; width: number; bottom: number }
+interface BlockPosition { x: number; y: number }
+
+export function blockPositions(count: number, bounds: BaseBounds, size: number, random: () => number): BlockPosition[] {
   const rows: number[][] = [];
   const columns = Math.floor(bounds.width / size);
   for (let i = 0; i < count; i++) {
@@ -34,4 +37,16 @@ export function blockPositions(count: number, bounds: { left: number; width: num
     else rows.push([x]);
   }
   return rows.flatMap((row, index) => row.map((x) => ({ x, y: bounds.bottom - size / 2 - index * (size + 1) })));
+}
+
+/** Fill an empty grid slot, starting near the centre; never overlap a live block. */
+export function repairPosition(occupied: readonly BlockPosition[], bounds: BaseBounds, size: number): BlockPosition | undefined {
+  const columns = Math.floor(bounds.width / size);
+  if (columns < 1) return undefined;
+  for (let index = 0; index <= occupied.length; index++) {
+    const x = ((Math.floor(columns / 2) + index) % columns) * size + size / 2 + bounds.left;
+    const y = bounds.bottom - size / 2 - Math.floor(index / columns) * (size + 1);
+    if (!occupied.some((block) => block.x === x && block.y === y)) return { x, y };
+  }
+  return undefined;
 }

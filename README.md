@@ -200,6 +200,12 @@ do not reset it. Streaks carry across level changes and pauses; a new game start
 at zero. Letting an optional orange target leave does not break the streak.
 The plugin's `game_over_callback` still receives `{ score }`.
 
+Streaks of 5, 10 and 20 trigger a short celebration and can repair one missing
+base block. Each threshold is awarded once per session, giving at most three
+repairs, never more than starting health. Resetting a streak cannot repeat a
+repair. The message uses its own HUD space so corrections remain readable;
+sound follows the sound toggle, and celebration timing pauses with gameplay.
+
 The results screen shows final score, answer accuracy, best streak and missed
 word count for that game. Misses count targets that hit the base or escape,
 including optional orange targets and repeated misses of the same word. Wrong

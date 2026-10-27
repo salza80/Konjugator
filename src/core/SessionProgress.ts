@@ -3,8 +3,9 @@ import type { ScoreAward } from './rules';
 import type { SessionMode, SessionResult, Word, WordKind } from './types';
 import { wordKey } from './words';
 import ReviewQueue from './ReviewQueue';
+import StreakMilestones from './StreakMilestones';
 
-interface AnswerAward extends ScoreAward { assisted: boolean; recovered: number }
+interface AnswerAward extends ScoreAward { assisted: boolean; recovered: number; milestone?: number }
 
 /** Gameplay accounting, independent of rendering, clocks and browser APIs. */
 export default class SessionProgress {
@@ -18,6 +19,7 @@ export default class SessionProgress {
   private readonly recovered = new Set<string>();
   missedWords = 0;
   readonly review = new ReviewQueue();
+  private readonly milestones = new StreakMilestones();
   private readonly mistakes = new Map<string, Word>();
   private readonly remaining = new Map<string, Word>();
   readonly practiceTotal: number;
@@ -58,7 +60,7 @@ export default class SessionProgress {
       }
       this.mistakes.delete(key);
     }
-    return { ...award, assisted: learning.assisted, recovered };
+    return { ...award, assisted: learning.assisted, recovered, milestone: this.milestones.claim(this.streak) };
   }
 
   reject(words: readonly Word[], now: number): boolean {

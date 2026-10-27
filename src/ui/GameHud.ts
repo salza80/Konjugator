@@ -27,8 +27,11 @@ export default class GameHud {
   private readonly baseHelp: Phaser.GameObjects.Text;
   private readonly healthX: number;
   private readonly healthWidth = 240;
+  private waveMessage = '';
+  private milestoneShowing = false;
+  private milestoneTimer?: Phaser.Time.TimerEvent;
 
-  constructor(scene: Phaser.Scene, bounds: Playfield, startText: string, mode: InputMode) {
+  constructor(private readonly scene: Phaser.Scene, bounds: Playfield, startText: string, mode: InputMode) {
     const style = { color: '#e9f1f7', fontSize: 20 };
     const center = (bounds.left + bounds.right) / 2;
     const statusX = Math.max(150, bounds.left);
@@ -49,12 +52,15 @@ export default class GameHud {
     this.help = scene.add.text(bounds.left + 100, 310, HELP[mode], {
       ...style, wordWrap: { width: bounds.width - 150 },
     });
-    this.baseHelp = scene.add.text(center, 400, `Protect your base: each block is 1 health.\nCorrect answers: ${SCORING.basePoints} points + target bonus.\nBuild a streak for up to +${SCORING.maxStreakBonus} extra points.`, {
+    this.baseHelp = scene.add.text(center, 400, `Protect your base: each block is 1 health.\nCorrect answers: ${SCORING.basePoints} points + target bonus.\nStreaks 5 / 10 / 20 can repair 1 health each.`, {
       ...style, fontSize: 22, align: 'center', wordWrap: { width: bounds.width - 150 },
     }).setOrigin(0.5, 0);
   }
 
   showCountdown(level: number, seconds: number, practiceTotal = 0): void {
+    this.milestoneTimer?.remove();
+    this.milestoneShowing = false;
+    this.wave.setColor('#e9f1f7');
     if (level === 1) this.feedback.clear();
     this.wave.setVisible(false);
     this.level.setText(practiceTotal ? 'Practice' : `Level ${level}`);
@@ -70,18 +76,36 @@ export default class GameHud {
 
   showPractice(completed: number, total: number, waiting = false): void {
     this.level.setText(`Practice: ${completed}/${total}`);
-    this.wave.setText(waiting ? 'Recall after this break' : 'Recall without help').setVisible(true);
+    this.setWave(waiting ? 'Recall after this break' : 'Recall without help');
   }
 
   showLevelClosing(level: number, seconds: number, remaining: number): void {
     this.level.setText(seconds ? `Level ${level} · ${seconds}s` : `Level ${level} · Finishing`);
-    this.wave.setText(remaining
+    this.setWave(remaining
       ? `Finish remaining words · ${remaining} left`
-      : 'Next level shortly').setVisible(true);
+      : 'Next level shortly');
   }
 
   showWave(index: number, label: string): void {
-    this.wave.setText(`Wave ${index + 1}/${WAVES.length} · ${label}`).setVisible(true);
+    this.setWave(`Wave ${index + 1}/${WAVES.length} · ${label}`);
+  }
+
+  private setWave(message: string): void {
+    this.waveMessage = message;
+    if (!this.milestoneShowing) this.wave.setText(message).setVisible(true);
+  }
+
+  showMilestone(streak: number, repaired: boolean): void {
+    this.milestoneTimer?.remove();
+    this.milestoneShowing = true;
+    this.wave.setText(`${streak} in a row!${repaired ? ' +1 health' : ''}`).setColor(COLORS.success).setVisible(true);
+    this.scene.tweens.killTweensOf(this.streak);
+    this.streak.setScale(1);
+    this.scene.tweens.add({ targets: this.streak, scale: 1.12, duration: 180, yoyo: true, repeat: 1 });
+    this.milestoneTimer = this.scene.time.delayedCall(1800, () => {
+      this.milestoneShowing = false;
+      this.wave.setColor('#e9f1f7').setText(this.waveMessage);
+    });
   }
 
   showScore(score: number): void {
@@ -127,6 +151,7 @@ export default class GameHud {
   }
 
   dispose(): void {
+    this.milestoneTimer?.remove();
     this.feedback.destroy();
   }
 }

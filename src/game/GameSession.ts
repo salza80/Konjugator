@@ -4,7 +4,7 @@ import { normalizeAnswer } from '../core/answers';
 import SessionProgress from '../core/SessionProgress';
 import DifficultyController from '../core/DifficultyController';
 import { wordKey } from '../core/words';
-import { blockPositions } from '../core/rules';
+import { blockPositions, repairPosition } from '../core/rules';
 import type { GameOptions, InputMode, Playfield, SessionMode, SessionPhase, SessionResult, Word } from '../core/types';
 import Block from '../entities/Block';
 import Bullet from '../entities/Bullet';
@@ -161,6 +161,11 @@ export default class GameSession {
       this.hud.showScore(this.score);
       this.hud.showRoundGoal(this.progress.correctAnswers, this.progress.roundGoal);
       this.hud.showStreak(this.streak, award.streakBonus);
+      if (award.milestone !== undefined) {
+        const repaired = this.repairBase();
+        this.hud.showMilestone(award.milestone, repaired);
+        this.scene.sound.playAudioSprite('sfx', 'smb_powerup');
+      }
       const bonuses = [
         award.targetBonus ? `+${award.targetBonus} target` : '',
         award.streakBonus ? `+${award.streakBonus} streak` : '',
@@ -214,6 +219,17 @@ export default class GameSession {
     this.hud.showCorrection(target.word, 'damage');
     if (!this.blocks.size) this.finishGame();
     else if (this.progress.mode.kind === 'practice') this.spawner.onFieldCleared();
+  }
+
+  private repairBase(): boolean {
+    if (this.blocks.size >= this.options.startingHealth) return false;
+    const position = repairPosition([...this.blocks].map((block) => ({ x: block.x, y: block.y })), this.bounds, GAME.blockSize);
+    if (!position) return false;
+    const block = new Block(this.scene, position.x, position.y);
+    this.blocks.add(block);
+    this.blockGroup.add(block);
+    this.hud.showHealth(this.blocks.size, this.options.startingHealth);
+    return true;
   }
 
   private finishGame(): void {
