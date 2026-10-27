@@ -241,6 +241,15 @@ input adapter is replaced and the effective mode is retained for replay.
 
 ## Configuration and distribution
 
+`core/records.ts` owns exact dataset/settings identity, record merging and
+achievable next challenges. `platform/records.ts` supplies per-game memory and
+opt-in, validated browser storage, bounded to 100 configurations. Practice and
+mixed-input runs are excluded. `GameScene` records once on session completion
+and passes a comparison snapshot to results; rendering never writes records.
+Public callbacks remain score-only. `PlayData.replay` selects the two-second
+replay/practice countdown; initial starts retain five seconds. Session/spawn
+composition uses named configuration objects rather than long positional calls.
+
 The public `GameConfig` keeps existing snake_case embedding options. Internal
 code uses normalized `GameOptions`. Scene handoffs use explicit interfaces;
 mutable gameplay state does not live in the Phaser registry.

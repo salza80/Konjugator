@@ -16,6 +16,7 @@
         asset_path: 'assets/',
         input_type: 'Keyboard',
         session_preset: 'quick',
+        remember_records: true,
         game_over_callback: ({ score }) => {
           document.getElementById('result').textContent = `Final score: ${score}`;
         }

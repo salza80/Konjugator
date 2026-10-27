@@ -13,13 +13,13 @@ export default class GameOverScene extends Phaser.Scene {
   init(result: ResultData): void { this.result = result; }
 
   create(): void {
-    const { summary, options, words, inputMode, lastCorrection } = this.result;
+    const { summary, options, words, inputMode, lastCorrection, records } = this.result;
     const reviewCount = summary.mistakes.length;
     const center = GAME.width / 2;
     const attempts = summary.correctAnswers + summary.incorrectAnswers;
     const accuracy = attempts ? `${Math.round(summary.correctAnswers / attempts * 100)}%` : '—';
     const style = { color: '#e9f1f7', fontSize: 22, align: 'center' };
-    this.add.rectangle(center, GAME.height / 2, 900, 590, 0x101923);
+    this.add.rectangle(center, GAME.height / 2, 900, 620, 0x101923);
     new SoundButton(this, GAME.width - 20, 20).setOrigin(1, 0);
     const title = summary.practiceTotal
       ? summary.practiceCompleted === summary.practiceTotal ? 'PRACTICE COMPLETE' : 'PRACTICE OVER'
@@ -27,7 +27,9 @@ export default class GameOverScene extends Phaser.Scene {
     this.add.text(center, 85, title, { ...style, fontSize: 40,
       color: summary.roundCompleted || (summary.practiceTotal > 0 && summary.practiceCompleted === summary.practiceTotal)
         ? COLORS.success : style.color }).setOrigin(0.5, 0);
-    this.add.text(center, 151, 'FINAL SCORE', { ...style, fontSize: 18 }).setOrigin(0.5, 0);
+    this.add.text(center, 151, records.newBest ? 'NEW PERSONAL BEST'
+      : records.best ? `FINAL SCORE · BEST ${records.best.score}` : 'FINAL SCORE',
+    { ...style, fontSize: 18, color: records.newBest ? '#ffcf70' : style.color }).setOrigin(0.5, 0);
     this.add.text(center, 180, summary.score.toString(), { ...style, color: COLORS.success, fontSize: 54 }).setOrigin(0.5, 0);
     this.add.text(center - 260, 270, 'ACCURACY', { ...style, fontSize: 18 }).setOrigin(0.5, 0);
     this.add.text(center - 260, 303, accuracy, { ...style, fontSize: 44 }).setOrigin(0.5, 0);
@@ -77,7 +79,7 @@ export default class GameOverScene extends Phaser.Scene {
     const start = (practiceWords?: readonly Word[]): void => {
       if (leaving) return;
       leaving = true;
-      const data: PlayData = { options, words, inputMode, practiceWords };
+      const data: PlayData = { options, words, inputMode, practiceWords, replay: true };
       this.scene.start('GameScene', data);
     };
     const playAgain = (): void => start();
@@ -100,7 +102,9 @@ export default class GameOverScene extends Phaser.Scene {
     }
     new InputButton(this, center + 300, 515, 'Menu', menu, 24)
       .setPadding(18, 12).setBackgroundColor('#24313e').setOrigin(0.5, 0);
-    this.add.text(center, 600, reviewCount ? 'Enter: play again · P: practise · X: menu' : 'Enter: play again · X: menu', {
+    const target = this.add.text(center, 577, records.target, { ...style, fontSize: 20, color: '#ffcf70' }).setOrigin(0.5, 0);
+    fitText(target, 820, 26, 20);
+    this.add.text(center, 620, reviewCount ? 'Enter: play again · P: practise · X: menu' : 'Enter: play again · X: menu', {
       ...style, fontSize: 18,
     }).setOrigin(0.5, 0);
     this.game.canvas.focus({ preventScroll: true });

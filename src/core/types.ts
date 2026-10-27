@@ -1,5 +1,6 @@
 import type { SessionPreset } from './sessionPresets';
 import type { Difficulty } from './DifficultyController';
+import type { RecordComparison } from './records';
 
 export type InputMode = 'Keyboard' | 'Touch' | 'Voice';
 export type WordKind = 'falling' | 'bonusfalling' | 'bonus';
@@ -50,6 +51,8 @@ export interface GameConfig {
   /** Quick uses a 15-answer goal and 12 health; omission retains survival. */
   session_preset?: SessionPreset;
   difficulty?: Difficulty;
+  /** Persist personal bests in this browser; default is memory only. */
+  remember_records?: boolean;
   /** Correct submitted answers needed to win; overrides the preset goal. */
   round_goal?: number;
   game_over_callback?: (result: GameResult) => void;
@@ -66,6 +69,7 @@ export interface GameOptions {
   sessionPreset: SessionPreset;
   startingHealth: number;
   difficulty: Difficulty;
+  rememberRecords: boolean;
   onGameOver: ((result: GameResult) => void) | null;
 }
 
@@ -76,11 +80,13 @@ export interface ReadyData {
 
 export interface PlayData extends ReadyData {
   inputMode: InputMode;
+  replay?: boolean;
   practiceWords?: readonly Word[];
 }
 
 export interface ResultData extends PlayData {
   summary: SessionResult;
+  records: RecordComparison;
   lastCorrection?: Word;
 }
 

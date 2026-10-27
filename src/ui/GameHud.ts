@@ -30,6 +30,7 @@ export default class GameHud {
   private waveMessage = '';
   private milestoneShowing = false;
   private milestoneTimer?: Phaser.Time.TimerEvent;
+  private countdownLevel = 0;
 
   constructor(private readonly scene: Phaser.Scene, bounds: Playfield, startText: string, mode: InputMode) {
     const style = { color: '#e9f1f7', fontSize: 20 };
@@ -57,14 +58,17 @@ export default class GameHud {
     }).setOrigin(0.5, 0);
   }
 
-  showCountdown(level: number, seconds: number, practiceTotal = 0): void {
-    this.milestoneTimer?.remove();
-    this.milestoneShowing = false;
-    this.wave.setColor('#e9f1f7');
-    if (level === 1) this.feedback.clear();
+  showCountdown(level: number, seconds: number, practiceTotal = 0, showInstructions = true): void {
+    if (this.countdownLevel !== level) {
+      this.countdownLevel = level;
+      this.milestoneTimer?.remove();
+      this.milestoneShowing = false;
+      this.wave.setColor('#e9f1f7');
+      if (level === 1) this.feedback.clear();
+    }
     this.wave.setVisible(false);
     this.level.setText(practiceTotal ? 'Practice' : `Level ${level}`);
-    for (const text of [this.intro, this.help, this.baseHelp]) text.setVisible(level === 1);
+    for (const text of [this.intro, this.help, this.baseHelp]) text.setVisible(showInstructions);
     this.countdown.setVisible(true);
     this.countdown.setText(practiceTotal ? `Practising ${practiceTotal} words in ${seconds}` : `Starting Level ${level} in ${seconds}`);
   }

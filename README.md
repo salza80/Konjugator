@@ -70,6 +70,7 @@ const config: GameConfig = {
   asset_path: 'assets/',
   input_type: 'Keyboard',
   session_preset: 'quick', // Recommended short session: 15 answers, 12 health.
+  remember_records: true, // Optional: save personal bests in this browser.
   round_goal: 10, // Optional: finish after 10 correct answers.
   game_over_callback: ({ score }) => console.log(score),
 };
@@ -157,7 +158,7 @@ missed, even past 90 seconds. Once the field and its answer feedback have cleare
 the next level starts with a short **two-second countdown**; an empty field skips
 the unused closing time. Instructions appear only in the initial five-second
 countdown. Level boundaries never count an unfinished word as a mistake.
-Practice keeps its existing untimed flow and initial countdown. Pausing freezes
+Practice keeps its untimed flow and uses the two-second replay countdown. Pausing freezes
 the shorter level countdown too.
 
 Later levels gradually increase speed and capacity and shorten spawn intervals.
@@ -220,6 +221,18 @@ interim voice results are excluded. With no attempts it displays a dash.
 Play Again (or Enter) starts a fresh full game with the original supplied data
 and active input mode. Menu (or X) returns to the start screen. Each completed
 game or practice invokes the unchanged `{ score }` callback once.
+
+Results compare normal runs with personal best score, streak and answer accuracy
+for the same question/answer set, input mode, difficulty, preset and round goal.
+Supplied order, hints and URLs do not reset a record. Practice and runs switching
+input mode midway are not ranked. A next target suggests review, completing the
+round, improving a reachable streak, or a clean repeat. Replay and practice use
+a two-second countdown without repeating instructions; a new start keeps five.
+
+Records live in memory for that game by default. `remember_records: true` opts
+into browser-local persistence, used by the standalone page and embed example.
+The store retains at most 100 recent configurations. Invalid or unavailable
+storage falls back to memory. Records do not change the score-only callback.
 
 ## Practising mistakes
 

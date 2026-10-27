@@ -13,6 +13,7 @@ import { onSceneEnd } from '../platform/lifecycle';
 import GameHud from '../ui/GameHud';
 import InputButton from '../ui/InputButton';
 import SoundButton from '../ui/SoundButton';
+import { recordRun } from '../platform/records';
 
 export default class GameScene extends Phaser.Scene {
   private ready!: PlayData;
@@ -25,6 +26,7 @@ export default class GameScene extends Phaser.Scene {
   create(): void {
     const fallback = this.ready.inputMode === 'Voice' && !supportsSpeechRecognition();
     let mode = fallback ? 'Keyboard' : this.ready.inputMode;
+    let mixedInput = false;
     const bounds = createPlayfield(mode);
     const practiceWords = this.ready.practiceWords?.length ? this.ready.practiceWords : undefined;
     const sessionWords = practiceWords ?? this.ready.words;
@@ -45,13 +47,19 @@ export default class GameScene extends Phaser.Scene {
     setupOrientation(this, pauseGame);
 
     const hud = new GameHud(this, bounds, this.ready.options.startText, mode);
-    this.session = new GameSession(this, sessionWords, bounds, mode, hud, (summary) => {
-      const result: ResultData = {
-        options: this.ready.options, words: this.ready.words, inputMode: mode, summary,
-        lastCorrection: hud.lastCorrection,
-      };
-      this.scene.start('GameOver', result);
-    }, sessionMode, this.ready.options);
+    this.session = new GameSession(this, {
+      words: sessionWords, bounds, mode, hud, sessionMode, options: this.ready.options, replay: this.ready.replay,
+      onGameOver: (summary) => {
+        const result: ResultData = {
+          options: this.ready.options, words: this.ready.words, inputMode: mode, summary,
+          lastCorrection: hud.lastCorrection,
+          records: recordRun(this.game, {
+            options: this.ready.options, words: this.ready.words, mode, summary, eligible: !mixedInput,
+          }),
+        };
+        this.scene.start('GameOver', result);
+      },
+    });
     const digitShortcuts = !sessionWords.some((word) => /[1-4]/.test(word.answer));
     let input: PlayerInput;
     if (mode === 'Touch') {
@@ -61,6 +69,7 @@ export default class GameScene extends Phaser.Scene {
     } else if (mode === 'Voice') {
       input = new VoiceInput(this, this.session.submit, () => {
         mode = 'Keyboard';
+        mixedInput = true;
         this.session.attachInput(new KeyboardInput(this, this.session.submit, digitShortcuts), mode);
         hud.showInputMode(mode);
         hud.showNotice('Keyboard enabled. Type an answer and press Enter.');

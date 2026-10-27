@@ -14,6 +14,17 @@ import { gameAudio, type GameAudio } from '../platform/audio';
 import type GameHud from '../ui/GameHud';
 import SpawnController from './SpawnController';
 
+interface SessionConfig {
+  words: readonly Word[];
+  bounds: Playfield;
+  mode: InputMode;
+  hud: GameHud;
+  onGameOver: (result: SessionResult) => void;
+  sessionMode: SessionMode;
+  options: GameOptions;
+  replay?: boolean;
+}
+
 /** Owns a single game's state. UI and input are attached by GameScene. */
 export default class GameSession {
   level = 1;
@@ -32,13 +43,14 @@ export default class GameSession {
   private readonly audio: GameAudio;
   private readonly difficulty: DifficultyController;
   private disposed = false;
+  private mode: InputMode;
   private countdown: number = GAME.initialCountdownSeconds;
   private elapsedMs = 0;
   private readonly tickClock = (_time: number, delta: number): void => { this.elapsedMs += delta * this.scene.time.timeScale; };
 
-  constructor(private readonly scene: Phaser.Scene, words: readonly Word[], private readonly bounds: Playfield,
-    private mode: InputMode, private readonly hud: GameHud, private readonly onGameOver: (result: SessionResult) => void,
-    sessionMode: SessionMode, private readonly options: GameOptions) {
+  constructor(private readonly scene: Phaser.Scene, private readonly config: SessionConfig) {
+    const { words, bounds, mode, hud, sessionMode, options } = config;
+    this.mode = mode;
     this.audio = gameAudio(scene.game);
     this.progress = new SessionProgress(sessionMode);
     this.difficulty = new DifficultyController(options.difficulty, mode);
@@ -70,9 +82,9 @@ export default class GameSession {
       this.blocks.add(block);
       this.blockGroup.add(block);
     }
-    this.hud.showHealth(this.blocks.size, options.startingHealth);
-    this.hud.showStreak(this.streak, 0);
-    this.hud.showRoundGoal(0, this.progress.roundGoal);
+    this.config.hud.showHealth(this.blocks.size, options.startingHealth);
+    this.config.hud.showStreak(this.streak, 0);
+    this.config.hud.showRoundGoal(0, this.progress.roundGoal);
     scene.physics.add.overlap(this.spawner.group, this.blockGroup, (target, block) => {
       if (target instanceof WordTarget && block instanceof Block) this.miss(target, block);
     });
@@ -91,15 +103,15 @@ export default class GameSession {
     if (this.disposed || this.phase === 'over') return;
     this.phase = 'countdown';
     this.clearLevel();
-    this.countdown = this.level === 1 ? GAME.initialCountdownSeconds : GAME.levelCountdownSeconds;
-    this.hud.showCountdown(this.level, this.countdown, this.progress.practiceTotal);
+    this.countdown = this.level === 1 && !this.config.replay ? GAME.initialCountdownSeconds : GAME.levelCountdownSeconds;
+    this.config.hud.showCountdown(this.level, this.countdown, this.progress.practiceTotal, this.level === 1 && !this.config.replay);
     this.timer = this.scene.time.addEvent({
       delay: 1000,
       repeat: this.countdown - 1,
       callback: () => {
         this.countdown--;
         if (this.countdown === 0) this.beginPlay();
-        else this.hud.showCountdown(this.level, this.countdown, this.progress.practiceTotal);
+        else this.config.hud.showCountdown(this.level, this.countdown, this.progress.practiceTotal, this.level === 1 && !this.config.replay);
       },
     });
   }
@@ -108,13 +120,13 @@ export default class GameSession {
     this.input?.clear();
     this.phase = 'playing';
     this.secondsRemaining = GAME.levelSeconds;
-    this.hud.showLevel(this.level, this.secondsRemaining);
+    this.config.hud.showLevel(this.level, this.secondsRemaining);
     this.spawner.start(this.level);
     if (this.progress.mode.kind === 'practice') {
-      this.hud.showPractice(0, this.progress.practiceTotal);
+      this.config.hud.showPractice(0, this.progress.practiceTotal);
       return;
     }
-    this.hud.showWave(this.spawner.wave.index, this.spawner.wave.label);
+    this.config.hud.showWave(this.spawner.wave.index, this.spawner.wave.label);
     this.timer = this.scene.time.addEvent({
       delay: 1000,
       loop: true,
@@ -123,11 +135,11 @@ export default class GameSession {
         if (this.secondsRemaining <= GAME.levelSpawnGraceSeconds) {
           // Cancel scheduled refills too, while leaving existing words fully playable.
           this.spawner.stop();
-          this.hud.showLevelClosing(this.level, this.secondsRemaining, this.spawner.activeTargets.length);
+          this.config.hud.showLevelClosing(this.level, this.secondsRemaining, this.spawner.activeTargets.length);
         } else {
-          this.hud.showLevel(this.level, this.secondsRemaining);
+          this.config.hud.showLevel(this.level, this.secondsRemaining);
           this.spawner.advance(GAME.levelSeconds - this.secondsRemaining);
-          this.hud.showWave(this.spawner.wave.index, this.spawner.wave.label);
+          this.config.hud.showWave(this.spawner.wave.index, this.spawner.wave.label);
         }
         this.advanceLevelIfReady();
       },
@@ -155,25 +167,25 @@ export default class GameSession {
       for (const target of targets) {
         target.resolve(true, target === first ? award.total : undefined, award.assisted);
         this.input?.remove?.(target);
-        this.bullets.add(new Bullet(this.scene, this.bounds.bottom, target, (this.bounds.left + this.bounds.right) / 2));
+        this.bullets.add(new Bullet(this.scene, this.config.bounds.bottom, target, (this.config.bounds.left + this.config.bounds.right) / 2));
       }
       // Speak once even when the same answer clears several targets.
       if (this.mode !== 'Voice') this.audio.say(first.word.voice || first.word.answer);
-      this.hud.showScore(this.score);
-      this.hud.showRoundGoal(this.progress.correctAnswers, this.progress.roundGoal);
-      this.hud.showStreak(this.streak, award.streakBonus);
+      this.config.hud.showScore(this.score);
+      this.config.hud.showRoundGoal(this.progress.correctAnswers, this.progress.roundGoal);
+      this.config.hud.showStreak(this.streak, award.streakBonus);
       if (award.milestone !== undefined) {
         const repaired = this.repairBase();
-        this.hud.showMilestone(award.milestone, repaired);
+        this.config.hud.showMilestone(award.milestone, repaired);
         this.scene.sound.playAudioSprite('sfx', 'smb_powerup');
       }
       const bonuses = [
         award.targetBonus ? `+${award.targetBonus} target` : '',
         award.streakBonus ? `+${award.streakBonus} streak` : '',
       ].filter(Boolean);
-      this.hud.showFeedback(`${award.assisted ? 'Correct with help' : award.recovered ? 'Recovered!' : 'Correct!'} ${first.word.answer}  +${award.total}${bonuses.length ? ` (${bonuses.join(', ')})` : ''}`, 'success');
+      this.config.hud.showFeedback(`${award.assisted ? 'Correct with help' : award.recovered ? 'Recovered!' : 'Correct!'} ${first.word.answer}  +${award.total}${bonuses.length ? ` (${bonuses.join(', ')})` : ''}`, 'success');
       if (this.progress.mode.kind === 'practice') {
-        this.hud.showPractice(this.progress.practiceCompleted, this.progress.practiceTotal);
+        this.config.hud.showPractice(this.progress.practiceCompleted, this.progress.practiceTotal);
       }
       if (this.progress.completed) this.finishGame();
       else this.spawner.onFieldCleared();
@@ -189,10 +201,10 @@ export default class GameSession {
       .map((candidate) => [wordKey(candidate), candidate]));
     const reset = this.progress.reject([...candidates.values()], this.elapsedMs);
     this.difficulty.record(false);
-    this.hud.showStreak(this.streak, 0);
+    this.config.hud.showStreak(this.streak, 0);
     const candidate = candidates.size === 1 ? candidates.values().next().value : undefined;
-    if (candidate) this.hud.showCorrection(candidate, 'retry');
-    else this.hud.showFeedback(`${message}${reset ? ' Streak reset.' : ''}`, 'error');
+    if (candidate) this.config.hud.showCorrection(candidate, 'retry');
+    else this.config.hud.showFeedback(`${message}${reset ? ' Streak reset.' : ''}`, 'error');
     this.scene.sound.playAudioSprite('sfx', 'smb_bump');
   };
 
@@ -210,11 +222,11 @@ export default class GameSession {
     this.progress.miss(target.word, target.kind, this.elapsedMs);
     this.input?.remove?.(target);
     if (!WORD_VARIANTS[target.kind].damage) {
-      this.hud.showCorrection(target.word, 'bonus');
+      this.config.hud.showCorrection(target.word, 'bonus');
       return;
     }
     this.difficulty.record(false);
-    this.hud.showStreak(this.streak, 0);
+    this.config.hud.showStreak(this.streak, 0);
     const center = target.x + target.displayWidth / 2;
     const block = hitBlock ?? [...this.blocks].sort((a, b) =>
       Math.abs(a.x - center) - Math.abs(b.x - center) || a.y - b.y)[0];
@@ -222,20 +234,20 @@ export default class GameSession {
       this.blocks.delete(block);
       block.breakApart();
     }
-    this.hud.showHealth(this.blocks.size, this.options.startingHealth);
-    this.hud.showCorrection(target.word, hitBlock ? 'damage' : 'missed');
+    this.config.hud.showHealth(this.blocks.size, this.config.options.startingHealth);
+    this.config.hud.showCorrection(target.word, hitBlock ? 'damage' : 'missed');
     if (!this.blocks.size) this.finishGame();
     else if (this.progress.mode.kind === 'practice') this.spawner.onFieldCleared();
   }
 
   private repairBase(): boolean {
-    if (this.blocks.size >= this.options.startingHealth) return false;
-    const position = repairPosition([...this.blocks].map((block) => ({ x: block.x, y: block.y })), this.bounds, GAME.blockSize);
+    if (this.blocks.size >= this.config.options.startingHealth) return false;
+    const position = repairPosition([...this.blocks].map((block) => ({ x: block.x, y: block.y })), this.config.bounds, GAME.blockSize);
     if (!position) return false;
     const block = new Block(this.scene, position.x, position.y);
     this.blocks.add(block);
     this.blockGroup.add(block);
-    this.hud.showHealth(this.blocks.size, this.options.startingHealth);
+    this.config.hud.showHealth(this.blocks.size, this.config.options.startingHealth);
     return true;
   }
 
@@ -243,7 +255,7 @@ export default class GameSession {
     if (this.disposed || this.phase === 'over') return;
     this.phase = 'over';
     this.clearLevel(!this.progress.roundCompleted);
-    this.onGameOver(this.progress.result());
+    this.config.onGameOver(this.progress.result());
   }
 
   private clearLevel(recordUnanswered = true): void {
@@ -266,7 +278,7 @@ export default class GameSession {
     if (this.disposed) return;
     this.disposed = true;
     this.scene.events.off('update', this.tickClock);
-    this.hud.onCorrectionShown();
+    this.config.hud.onCorrectionShown();
     this.timer?.remove();
     this.spawner.dispose();
     this.input?.dispose();

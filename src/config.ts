@@ -45,6 +45,7 @@ export function normalizeConfig(config: GameConfig): GameOptions {
     sessionPreset,
     startingHealth: preset.health,
     difficulty: DIFFICULTIES.includes(config.difficulty ?? 'standard') ? config.difficulty ?? 'standard' : 'standard',
+    rememberRecords: config.remember_records === true,
     onGameOver: typeof config.game_over_callback === 'function' ? config.game_over_callback : null,
   };
 }
