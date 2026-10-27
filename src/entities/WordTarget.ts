@@ -124,7 +124,7 @@ export default class WordTarget extends Phaser.GameObjects.Text {
     this.flash?.remove();
     this.clearTint();
     const label = hit ? `✓ ${this.word.answer}${points === undefined ? '' : `  +${points}`}${assisted ? '\nTry again later' : ''}`
-      : `Missed\n${this.word.question}\nAnswer: ${this.word.answer}`;
+      : `${this.kind === 'bonus' ? 'Bonus skipped' : 'Missed'}\n${this.word.question}\nAnswer: ${this.word.answer}`;
     this.setText(this.word.tip ? `${label}\nHint: ${this.word.tip}` : label);
     this.setColor(hit ? COLORS.success : '#e9f1f7');
     this.setBackgroundColor(hit ? '#12202b' : '#35202b').setPadding(12, 8).setDepth(1);

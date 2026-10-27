@@ -31,6 +31,7 @@ export interface SessionResult extends GameResult {
   assistedAnswers: number;
   recoveredWords: number;
   missedWords: number;
+  missedBonuses: number;
   bestStreak: number;
   mistakes: readonly Word[];
   practiceTotal: number;

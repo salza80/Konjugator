@@ -1,4 +1,4 @@
-import { scoreFor } from './rules';
+import { scoreFor, WORD_VARIANTS } from './rules';
 import type { ScoreAward } from './rules';
 import type { SessionMode, SessionResult, Word, WordKind } from './types';
 import { wordKey } from './words';
@@ -18,6 +18,7 @@ export default class SessionProgress {
   assistedAnswers = 0;
   private readonly recovered = new Set<string>();
   missedWords = 0;
+  missedBonuses = 0;
   readonly review = new ReviewQueue();
   private readonly milestones = new StreakMilestones();
   private readonly mistakes = new Map<string, Word>();
@@ -71,10 +72,12 @@ export default class SessionProgress {
   }
 
   miss(word: Word, kind: WordKind, now: number): boolean {
-    this.missedWords++;
+    const required = WORD_VARIANTS[kind].damage > 0;
+    if (required) this.missedWords++;
+    else this.missedBonuses++;
     this.remember([word]);
     this.review.fail([word], now);
-    return kind === 'bonus' ? false : this.resetStreak();
+    return required ? this.resetStreak() : false;
   }
 
   remember(words: readonly Word[]): void {
@@ -95,6 +98,7 @@ export default class SessionProgress {
     return {
       score: this.score, correctAnswers: this.correctAnswers,
       incorrectAnswers: this.incorrectAnswers, missedWords: this.missedWords,
+      missedBonuses: this.missedBonuses,
       unassistedAnswers: this.unassistedAnswers, assistedAnswers: this.assistedAnswers,
       recoveredWords: this.recoveredWords,
       bestStreak: this.bestStreak, mistakes: [...review.values()],

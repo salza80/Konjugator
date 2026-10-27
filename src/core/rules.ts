@@ -1,9 +1,9 @@
 import type { WordKind } from './types';
 
 export const WORD_VARIANTS = {
-  falling: { color: '#de77ae', fontSize: 30, bonusPoints: 0, hitSound: 'smb_coin', targetChance: 8 / 11 },
-  bonusfalling: { color: '#F21536', fontSize: 30, bonusPoints: 5, hitSound: 'smb_pipe', targetChance: 4 / 11 },
-  bonus: { color: '#ffa500', fontSize: 20, bonusPoints: 10, hitSound: 'smb_powerup', targetChance: 0 },
+  falling: { color: '#de77ae', fontSize: 30, bonusPoints: 0, damage: 1, hitSound: 'smb_coin', targetChance: 8 / 11 },
+  bonusfalling: { color: '#F21536', fontSize: 30, bonusPoints: 5, damage: 1, hitSound: 'smb_pipe', targetChance: 4 / 11 },
+  bonus: { color: '#ffa500', fontSize: 20, bonusPoints: 10, damage: 0, hitSound: 'smb_powerup', targetChance: 0 },
 } as const;
 
 export const SCORING = { basePoints: 10, maxStreakBonus: 5 } as const;

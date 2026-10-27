@@ -35,6 +35,11 @@ export default class GameOverScene extends Phaser.Scene {
     this.add.text(center, 303, summary.bestStreak.toString(), { ...style, color: '#ffcf70', fontSize: 44 }).setOrigin(0.5, 0);
     this.add.text(center + 260, 270, 'MISSED WORDS', { ...style, fontSize: 18 }).setOrigin(0.5, 0);
     this.add.text(center + 260, 303, summary.missedWords.toString(), { ...style, fontSize: 44 }).setOrigin(0.5, 0);
+    if (summary.missedBonuses) {
+      const bonuses = this.add.text(center + 260, 242, `Bonus skips: ${summary.missedBonuses}`,
+        { ...style, fontSize: 18, color: '#a9bac7' }).setOrigin(0.5, 0);
+      fitText(bonuses, 240, 22, 18);
+    }
     const attemptSummary = attempts
       ? `${summary.unassistedAnswers} unassisted · ${summary.assistedAnswers} with correction · ${summary.incorrectAnswers} incorrect`
       : 'No answers submitted.';

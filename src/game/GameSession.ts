@@ -4,7 +4,7 @@ import { normalizeAnswer } from '../core/answers';
 import SessionProgress from '../core/SessionProgress';
 import DifficultyController from '../core/DifficultyController';
 import { wordKey } from '../core/words';
-import { blockPositions, repairPosition } from '../core/rules';
+import { blockPositions, repairPosition, WORD_VARIANTS } from '../core/rules';
 import type { GameOptions, InputMode, Playfield, SessionMode, SessionPhase, SessionResult, Word } from '../core/types';
 import Block from '../entities/Block';
 import Bullet from '../entities/Bullet';
@@ -23,6 +23,7 @@ export default class GameSession {
   secondsRemaining: number = GAME.levelSeconds;
   phase: SessionPhase = 'countdown';
   private readonly blocks = new Set<Block>();
+  private readonly recordedMisses = new WeakSet<WordTarget>();
   private readonly blockGroup: Phaser.GameObjects.Group;
   private readonly bullets: Phaser.GameObjects.Group;
   readonly spawner: SpawnController;
@@ -195,28 +196,34 @@ export default class GameSession {
     this.scene.sound.playAudioSprite('sfx', 'smb_bump');
   };
 
-  private missedWord(target: WordTarget): void {
-    if (this.disposed || this.phase !== 'playing') return;
-    this.progress.miss(target.word, target.kind, this.elapsedMs);
-    this.input?.remove?.(target);
-    this.hud.showCorrection(target.word, target.kind === 'bonus' ? 'bonus' : 'missed');
-    if (target.kind === 'bonus') return;
-    this.difficulty.record(false);
-    this.hud.showStreak(this.streak, 0);
-    if (this.progress.mode.kind === 'practice') this.spawner.onFieldCleared();
-  }
+  private missedWord(target: WordTarget): void { this.applyMiss(target); }
 
   private miss(target: WordTarget, block: Block): void {
-    if (this.phase !== 'playing' || target.state !== 'active' || !this.blocks.has(block)) return;
+    if (this.disposed || this.phase !== 'playing' || target.state !== 'active' || !this.blocks.has(block)) return;
+    target.resolve(false);
+    this.applyMiss(target, block);
+  }
+
+  private applyMiss(target: WordTarget, hitBlock?: Block): void {
+    if (this.disposed || this.phase !== 'playing' || this.recordedMisses.has(target)) return;
+    this.recordedMisses.add(target);
     this.progress.miss(target.word, target.kind, this.elapsedMs);
+    this.input?.remove?.(target);
+    if (!WORD_VARIANTS[target.kind].damage) {
+      this.hud.showCorrection(target.word, 'bonus');
+      return;
+    }
     this.difficulty.record(false);
     this.hud.showStreak(this.streak, 0);
-    this.blocks.delete(block);
-    block.breakApart();
-    target.resolve(false);
-    this.input?.remove?.(target);
+    const center = target.x + target.displayWidth / 2;
+    const block = hitBlock ?? [...this.blocks].sort((a, b) =>
+      Math.abs(a.x - center) - Math.abs(b.x - center) || a.y - b.y)[0];
+    if (block) {
+      this.blocks.delete(block);
+      block.breakApart();
+    }
     this.hud.showHealth(this.blocks.size, this.options.startingHealth);
-    this.hud.showCorrection(target.word, 'damage');
+    this.hud.showCorrection(target.word, hitBlock ? 'damage' : 'missed');
     if (!this.blocks.size) this.finishGame();
     else if (this.progress.mode.kind === 'practice') this.spawner.onFieldCleared();
   }

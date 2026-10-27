@@ -207,9 +207,11 @@ repair. The message uses its own HUD space so corrections remain readable;
 sound follows the sound toggle, and celebration timing pauses with gameplay.
 
 The results screen shows final score, answer accuracy, best streak and missed
-word count for that game. Misses count targets that hit the base or escape,
-including optional orange targets and repeated misses of the same word. Wrong
-submissions, unspawned practice words and targets cleared at game end do not add
+word count for that game. Misses count falling targets that hit the base or
+escape, including repeated misses of the same word. Optional orange bonuses
+are counted separately and never reduce health or reset a streak. They remain
+available for optional review. Wrong submissions, unspawned practice words and
+targets cleared at game end do not add
 misses. The unique review-word count is separate. Practice results also show
 completed/total words, a percentage and a progress bar; goal rounds show goal
 progress. Accuracy is correct submissions divided by correct plus incorrect attempts
@@ -265,7 +267,8 @@ copy. Voice output still depends on the browser's speech implementation.
 Correct answers score and stop fully visible matching words immediately; shots are visual
 feedback. Score and target effects update immediately; the HUD shows accepted
 answers and points when a correction is not being read. Base health appears as
-a bar and remaining-block count. Each word hitting a block removes one health.
+a bar and remaining-block count. Every missed falling word removes one health,
+whether it hits a block or passes through a gap. Each target is counted once.
 Incorrect entries do not damage the base, and keyboard answers remain editable
 until accepted. Low health is labelled as well as coloured.
 

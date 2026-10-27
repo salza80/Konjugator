@@ -52,7 +52,7 @@ export default class GameHud {
     this.help = scene.add.text(bounds.left + 100, 310, HELP[mode], {
       ...style, wordWrap: { width: bounds.width - 150 },
     });
-    this.baseHelp = scene.add.text(center, 400, `Protect your base: each block is 1 health.\nCorrect answers: ${SCORING.basePoints} points + target bonus.\nStreaks 5 / 10 / 20 can repair 1 health each.`, {
+    this.baseHelp = scene.add.text(center, 400, `Missed falling word: −1 health. Orange bonuses are optional.\nCorrect answers: ${SCORING.basePoints} points + target bonus.\nStreak milestones can repair missing health.`, {
       ...style, fontSize: 22, align: 'center', wordWrap: { width: bounds.width - 150 },
     }).setOrigin(0.5, 0);
   }

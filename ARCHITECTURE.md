@@ -57,14 +57,16 @@ express ownership without a global event bus.
    the accepted answer and points when a correction is not being read; score
    and target effects always update immediately. Keyboard errors retain editable input.
    Input adapters do not decide scores or manipulate physics.
-   Base health is the number of remaining blocks. Only an active word colliding
-   with a block removes health; incorrect entries do not. The HUD renders this
+   Base health is the number of remaining blocks. Each missed falling word
+   removes one health, including words passing through gaps; incorrect entries
+   do not. The HUD renders this
    session-owned value as a count and bar, with a low-health label.
 7. The session reports an internal `SessionResult` snapshot containing score,
    correct/incorrect attempts, missed-target count, best streak and deduplicated review words. `GameScene` passes it alongside
    options, validated words and the effective input mode in `ResultData`.
    `GameOverScene` shows accuracy (correct divided by all submitted attempts)
-   and best streak alongside missed targets and practice/round-goal completion
+   and best streak alongside missed falling targets, separately skipped optional
+   bonuses, and practice/round-goal completion
    progress. Missed-target events count once per escaped or base-hitting target,
    independently of deduplicated review items and submitted-answer accuracy.
    It invokes the unchanged `{ score }` embedding callback once
@@ -88,7 +90,9 @@ multiple targets. Wrong reported attempts and missed falling targets reset it;
 empty input, interim recognition, level transitions and pauses do not. Optional
 orange targets can leave without penalty. Entities notify the session when a
 falling word reaches the floor without hitting a block, so that path also resets
-the streak. Only block collisions reduce health. HUD labels do not own rules.
+the streak. Both floor escapes and block collisions remove one health through
+a shared, deduplicated session handler. Optional bonuses do neither; their
+miss count is separate. HUD labels do not own rules.
 
 `core/StreakMilestones.ts` awards thresholds 5, 10 and 20 once per session.
 The session can restore one missing block for each award, capped at starting

@@ -9,7 +9,7 @@ export type CorrectionKind = 'missed' | 'damage' | 'bonus' | 'retry';
 interface Correction { word: Word; kind: CorrectionKind }
 
 const HEADINGS: Record<CorrectionKind, string> = {
-  missed: 'Missed word', damage: 'Base hit −1', bonus: 'Bonus missed', retry: 'Try again',
+  missed: 'Missed −1 health', damage: 'Base hit −1 health', bonus: 'Optional bonus skipped', retry: 'Try again',
 };
 const MAX_PENDING = 6;
 
