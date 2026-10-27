@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { COLORS } from '../config';
 import { enterMobileFullscreen, isPortrait } from '../platform/orientation';
+import { onSceneEnd } from '../platform/lifecycle';
 import InputButton from '../ui/InputButton';
 
 interface OrientationData { returnScene: string }
@@ -24,7 +25,7 @@ export default class OrientationScene extends Phaser.Scene {
     this.scale.on('orientationchange', render);
     this.scale.on('resize', render);
     this.events.on('wake', wake);
-    this.events.once('shutdown', () => {
+    onSceneEnd(this, () => {
       this.scale.off('orientationchange', render);
       this.scale.off('resize', render);
       this.events.off('wake', wake);

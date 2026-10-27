@@ -6,6 +6,7 @@ import TitleScene from './scenes/TitleScene';
 import GameScene from './scenes/GameScene';
 import GameOverScene from './scenes/GameOverScene';
 import OrientationScene from './scenes/OrientationScene';
+import PauseScene from './scenes/PauseScene';
 
 export type { GameConfig, GameResult, InputMode, Word } from './core/types';
 
@@ -24,7 +25,7 @@ export function startGame(customConfig: GameConfig = {}): Phaser.Game {
       autoRound: true,
     },
     physics: { default: 'arcade', arcade: { gravity: { x: 0, y: 300 }, debug: false } },
-    scene: [BootScene, TitleScene, GameScene, GameOverScene, OrientationScene],
+    scene: [BootScene, TitleScene, GameScene, GameOverScene, OrientationScene, PauseScene],
     callbacks: { preBoot(game) { game.registry.set('options', options); } },
   });
 }

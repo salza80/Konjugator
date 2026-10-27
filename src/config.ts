@@ -4,14 +4,18 @@ export const GAME = {
   width: 1280,
   height: 700,
   bottomSpace: 100,
-  touchSideWidth: 110,
+  hudHeight: 140,
+  touchSideWidth: 192,
   blockSize: 20,
   startingBlocks: 60,
   levelSeconds: 90,
-  countdownSeconds: 5,
+  levelSpawnGraceSeconds: 10,
+  initialCountdownSeconds: 5,
+  levelCountdownSeconds: 2,
   answerDisplayMs: 1500,
-  bulletSpeed: 200,
-  homingBulletSpeed: 500,
+  correctionDisplayMs: 3200,
+  feedbackDisplayMs: 2200,
+  shotDisplayMs: 240,
   horizontalWordSpeed: 70,
   startText: 'Konjugiere das verb! Bist du bereit?',
 } as const;
@@ -22,6 +26,7 @@ export const COLORS = {
   answer: '#ffff00',
   selected: '#070a91',
   error: '#ff8888',
+  success: '#8ff0a4',
 } as const;
 
 export function normalizeConfig(config: GameConfig): GameOptions {
@@ -32,6 +37,7 @@ export function normalizeConfig(config: GameConfig): GameOptions {
     inputMode: modes.includes(config.input_type) ? config.input_type ?? null : null,
     words: config.words,
     wordsUrl: typeof config.words_url === 'string' && config.words_url ? config.words_url : null,
+    roundGoal: Number.isSafeInteger(config.round_goal) && (config.round_goal ?? 0) > 0 ? config.round_goal ?? 0 : 0,
     onGameOver: typeof config.game_over_callback === 'function' ? config.game_over_callback : null,
   };
 }
@@ -41,7 +47,7 @@ export function createPlayfield(mode: InputMode): Playfield {
   return {
     left: sideWidth,
     right: GAME.width - sideWidth,
-    top: 0,
+    top: GAME.hudHeight,
     bottom: GAME.height - GAME.bottomSpace,
     width: GAME.width - sideWidth * 2,
     height: GAME.height,

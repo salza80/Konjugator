@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { COLORS, GAME } from '../config';
 import type { GameOptions, ReadyData } from '../core/types';
 import { parseWords } from '../core/words';
+import { onSceneEnd } from '../platform/lifecycle';
 import InputButton from '../ui/InputButton';
 
 export default class BootScene extends Phaser.Scene {
@@ -23,7 +24,7 @@ export default class BootScene extends Phaser.Scene {
     const onError = (file: Phaser.Loader.File): void => { this.loadErrors.push(file.key); };
     this.load.on('progress', onProgress);
     this.load.on('loaderror', onError);
-    this.events.once('shutdown', () => {
+    onSceneEnd(this, () => {
       this.load.off('progress', onProgress);
       this.load.off('loaderror', onError);
     });

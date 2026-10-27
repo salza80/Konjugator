@@ -5,6 +5,7 @@ import { SpeechRecognitionAdapter } from '../platform/speech';
 import type { SpeechResult, RecognitionStatus } from '../platform/speech';
 import AnswerEntry from '../ui/AnswerEntry';
 import InputButton from '../ui/InputButton';
+import { fitText } from '../ui/fitText';
 import type { PlayerInput } from './types';
 
 const LABELS: Record<RecognitionStatus, string> = {
@@ -16,17 +17,23 @@ export default class VoiceInput implements PlayerInput {
   private readonly entry: AnswerEntry;
   private readonly button: InputButton;
   private shot = false;
+  private readonly fallback: InputButton;
 
-  constructor(private readonly scene: Phaser.Scene, private readonly submit: SubmitAnswer) {
+  constructor(private readonly scene: Phaser.Scene, private readonly submit: SubmitAnswer, onKeyboard: () => void) {
     this.entry = new AnswerEntry(scene, false);
     this.recognition = new SpeechRecognitionAdapter((result) => this.onResult(result), (status) => {
-      if (this.button.scene) this.button.setText(LABELS[status]);
+      if (!this.button.scene) return;
+      this.button.setText(LABELS[status]);
+      fitText(this.button, 360, 40, 32);
+      this.fallback.setVisible(status === 'blocked' || status === 'error');
     });
-    this.button = new InputButton(scene, GAME.width / 2, GAME.height - 55, 'Talk', () => {
+    this.button = new InputButton(scene, GAME.width / 2 - 100, GAME.height - 55, 'Talk', () => {
       if (this.recognition.listening) return;
       this.shot = false;
       this.recognition.start();
-    }).setOrigin(0.5, 0).setDepth(2);
+    }, 32).setOrigin(0.5, 0).setDepth(2);
+    this.fallback = new InputButton(scene, GAME.width / 2 + 230, GAME.height - 55, 'Use keyboard', onKeyboard, 24)
+      .setOrigin(0.5, 0).setDepth(2).setVisible(false);
   }
 
   private onResult(result: SpeechResult): void {
@@ -53,5 +60,10 @@ export default class VoiceInput implements PlayerInput {
   }
 
   pause(): void { this.recognition.cancel(); }
-  dispose(): void { this.recognition.cancel(); }
+  dispose(): void {
+    this.recognition.cancel();
+    this.entry.destroy();
+    this.button.destroy();
+    this.fallback.destroy();
+  }
 }

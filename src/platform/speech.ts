@@ -3,7 +3,6 @@ export interface SpeechResult {
   alternatives: readonly string[];
   final: boolean;
 }
-
 interface NativeResult extends ArrayLike<{ transcript: string }> {
   isFinal: boolean;
 }
@@ -122,21 +121,5 @@ export class SpeechRecognitionAdapter {
   private setStatus(status: RecognitionStatus): void {
     this.status = status;
     this.onStatus(status);
-  }
-}
-
-export class SpeechPlayback {
-  private utterance?: SpeechSynthesisUtterance;
-
-  say(text: string): void {
-    if (!window.speechSynthesis || !window.SpeechSynthesisUtterance || window.speechSynthesis.speaking) return;
-    this.utterance = new window.SpeechSynthesisUtterance(text);
-    this.utterance.lang = 'de-DE';
-    window.speechSynthesis.speak(this.utterance);
-  }
-
-  cancel(): void {
-    if (this.utterance) window.speechSynthesis?.cancel();
-    this.utterance = undefined;
   }
 }

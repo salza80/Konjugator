@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import type { InputMode, PlayData, ReadyData } from '../core/types';
 import { checkOrientation, enterMobileFullscreen, setupOrientation } from '../platform/orientation';
 import InputButton from '../ui/InputButton';
+import SoundButton from '../ui/SoundButton';
+import { GAME } from '../config';
 
 export default class TitleScene extends Phaser.Scene {
   private ready!: ReadyData;
@@ -13,6 +15,7 @@ export default class TitleScene extends Phaser.Scene {
   create(): void {
     setupOrientation(this);
     this.scene.bringToTop();
+    new SoundButton(this, GAME.width - 20, 20).setOrigin(1, 0);
     if (this.ready.options.inputMode) {
       const mode = this.ready.options.inputMode;
       new InputButton(this, 200, 200, 'START GAME', () => this.play(mode));

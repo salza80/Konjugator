@@ -1,44 +1,28 @@
 import Phaser from 'phaser';
 import { GAME } from '../config';
-import WordTarget from './WordTarget';
+import type WordTarget from './WordTarget';
 
+/** Cosmetic shot. Answer acceptance and scoring never depend on its arrival. */
 export default class Bullet extends Phaser.GameObjects.Sprite {
-  declare body: Phaser.Physics.Arcade.Body;
-  collider?: Phaser.Physics.Arcade.Collider;
-
-  constructor(scene: Phaser.Scene, y: number, readonly target: WordTarget, launchX: number) {
-    super(scene, target.kind === 'bonus' ? launchX : target.x + target.width / 2, y, 'bullet');
+  constructor(scene: Phaser.Scene, y: number, target: WordTarget, launchX: number) {
+    const x = target.kind === 'bonus' ? launchX : target.x + target.displayWidth / 2;
+    super(scene, x, y, 'bullet');
     scene.add.existing(this);
-    scene.physics.world.enable(this);
-    this.body.setAllowGravity(false).setSize(5 / this.scaleX, 10 / this.scaleY);
-    this.body.setCollideWorldBounds(true);
-    this.body.onWorldBounds = true;
-    this.body.world.on('worldbounds', this.onWorldBounds, this);
-    if (target.kind !== 'bonus') this.body.setVelocityY(-GAME.bulletSpeed);
+    const destination = { x: target.x + target.displayWidth / 2, y: target.y + target.displayHeight / 2 };
+    this.setRotation(Phaser.Math.Angle.Between(x, y, destination.x, destination.y));
     scene.sound.playAudioSprite('sfx', 'smb_fireball');
-  }
-
-  override update(): void {
-    if (!this.target.scene || this.target.state === 'resolved') {
-      this.destroy();
-      return;
-    }
-    if (this.target.kind === 'bonus') {
-      const x = this.target.x + this.target.width / 2;
-      this.rotation = Phaser.Math.Angle.Between(this.x, this.y, x, this.target.y);
-      this.scene.physics.moveTo(this, x, this.target.y, GAME.homingBulletSpeed);
-    }
-  }
-
-  private onWorldBounds(body: Phaser.Physics.Arcade.Body): void {
-    if (body.gameObject === this) this.destroy();
+    scene.tweens.add({
+      targets: this,
+      ...destination,
+      duration: GAME.shotDisplayMs,
+      ease: 'Quad.easeOut',
+      onComplete: () => this.destroy(),
+    });
   }
 
   override destroy(fromScene?: boolean): void {
     if (!this.scene) return;
-    this.body?.world?.off('worldbounds', this.onWorldBounds, this);
-    this.collider?.destroy();
-    if (this.target.state === 'targeted') this.target.state = 'active';
+    this.scene.tweens.killTweensOf(this);
     super.destroy(fromScene);
   }
 }
