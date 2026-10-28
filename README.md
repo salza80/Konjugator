@@ -1,3 +1,5 @@
+# Moved to StudyArcade Repo
+
 # Konjugator
 
 A falling-text German conjugation game built with TypeScript, Phaser 4 and Vite.
