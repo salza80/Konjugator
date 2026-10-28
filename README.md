@@ -293,7 +293,9 @@ missed falling words and missed optional bonuses. Several misses queue up so
 their corrections can be read in turn; repeated entries are combined and the
 queue is bounded to six pending items. Correct answers still score immediately
 while a correction is visible. Corrections use the pausable
-scene clock and can continue through the short level countdown. Pause shows
+scene clock and can continue through the short level countdown. Local answer
+cards count as assistance immediately, including when another copy of that word
+is still active and its HUD correction is queued. Pause shows
 the most recently displayed word and the complete hint, with pages for long hints. Reading
 it counts as assistance when deciding whether a later answer is independent recall.
 

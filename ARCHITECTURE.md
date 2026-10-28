@@ -122,8 +122,9 @@ Practice summaries stay internal; the host still receives only `{ score }`.
 It spaces failures by three presentations where possible and at least 6.4
 seconds after correction exposure, using session time accumulated only during
 active scene updates. A tiny pool uses the time delay without requiring missing
-intervening words. HUD correction-display callbacks mark help actually shown,
-including queued corrections. Active duplicates cannot clear that assistance.
+intervening words. The session marks the local answer card as help immediately;
+HUD correction-display callbacks refresh that exposure when queued corrections
+appear. Active duplicates cannot clear that assistance.
 Only later unassisted answers clear review/practice entries; results separately
 count assisted and unassisted submissions and distinct recovered words.
 The spawner receives named callbacks/policies, maintains one cancellable refill
@@ -206,6 +207,8 @@ overlay. Text buttons require a press and release on the same target.
 - `platform/lifecycle.ts` runs scene cleanup once on either shutdown or destruction.
   The scene disposes the session and input adapter on shutdown. Disposal does
   not clear groups that Phaser may already have destroyed.
+  Target-removal callbacks update input only while their scene is active;
+  teardown must not redraw controls that Phaser may already have destroyed.
 - Pausing for orientation or blurring the game cancels browser recognition and
   speech playback. Resuming never silently reopens the microphone: press Talk.
 - `GameScene` owns pause requests from its Pause button, Escape, window blur,

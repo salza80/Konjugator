@@ -63,7 +63,8 @@ export default class GameSession {
       blockColumns: () => [...this.blocks].map((block) => block.x),
       onSelect: (target) => this.input?.select?.(target),
       onRemove: (target) => {
-        if (!this.disposed) {
+        // Phaser can destroy targets after their input controls during host teardown.
+        if (!this.disposed && scene.sys.isActive()) {
           this.input?.remove?.(target);
           this.advanceLevelIfReady();
         }
@@ -220,6 +221,8 @@ export default class GameSession {
     if (this.disposed || this.phase !== 'playing' || this.recordedMisses.has(target)) return;
     this.recordedMisses.add(target);
     this.progress.miss(target.word, target.kind, this.elapsedMs);
+    // The local answer card is already visible, even if its HUD correction is queued.
+    this.progress.review.expose(target.word, this.elapsedMs);
     this.input?.remove?.(target);
     if (!WORD_VARIANTS[target.kind].damage) {
       this.config.hud.showCorrection(target.word, 'bonus');
