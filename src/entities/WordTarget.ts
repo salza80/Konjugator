@@ -27,6 +27,9 @@ export default class WordTarget extends Phaser.GameObjects.Text {
   private readonly onMiss: (target: WordTarget) => void;
   private flash?: Phaser.Time.TimerEvent;
   private removal?: Phaser.Time.TimerEvent;
+  private resolvedCenterX?: number;
+
+  get impactX(): number { return this.resolvedCenterX ?? this.x + this.displayWidth / 2; }
 
   constructor(config: TargetConfig) {
     const variant = WORD_VARIANTS[config.kind];
@@ -42,9 +45,11 @@ export default class WordTarget extends Phaser.GameObjects.Text {
     fitText(this, Math.min(TARGET_LAYOUT.maxWidth, this.playBounds.right - this.playBounds.left - 20),
       this.kind === 'bonus' ? TARGET_LAYOUT.bonusHeight - 16 : (this.playBounds.bottom - this.playBounds.top) / 3, variant.fontSize);
     const tapPadding = TARGET_LAYOUT.gap / 2;
+    const tapHeight = Math.max(this.height + tapPadding * 2, 82);
     this.setInteractive({
       useHandCursor: true,
-      hitArea: new Phaser.Geom.Rectangle(-tapPadding, -tapPadding, this.width + tapPadding * 2, this.height + tapPadding * 2),
+      hitArea: new Phaser.Geom.Rectangle(-tapPadding, (this.height - tapHeight) / 2,
+        this.width + tapPadding * 2, tapHeight),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
     this.on('pointerdown', () => { if (this.isPlayable) config.onSelect(this); });
@@ -55,12 +60,13 @@ export default class WordTarget extends Phaser.GameObjects.Text {
       { x: this.x, y: this.y, width: this.displayWidth, height: this.displayHeight });
   }
 
-  start(x: number, y: number, speed: number, fromRight = false): void {
+  start(x: number, y: number, speed: number, fromRight = false, horizontalSpeed: number = GAME.horizontalWordSpeed): void {
     this.setPosition(x, y).setVisible(true);
     this.scene.physics.world.enable(this);
     this.body.setSize(this.width, this.height).reset(x, y);
+    this.updateHitArea();
     if (this.kind === 'bonus') {
-      this.body.setAllowGravity(false).setVelocityX(fromRight ? -GAME.horizontalWordSpeed : GAME.horizontalWordSpeed);
+      this.body.setAllowGravity(false).setVelocityX(fromRight ? -horizontalSpeed : horizontalSpeed);
       this.scene.sound.playAudioSprite('sfx', 'smb_powerup_appears');
     } else {
       this.body.setAllowGravity(true).setMaxSpeed(speed);
@@ -77,6 +83,7 @@ export default class WordTarget extends Phaser.GameObjects.Text {
   override update(): void {
     if (this.state === 'resolved') return;
     this.cropToPlayfield();
+    this.updateHitArea();
     if (this.kind === 'bonus') {
       if (this.x > this.bounds.right || this.x + this.displayWidth < this.bounds.left) {
         this.resolve(false);
@@ -86,6 +93,15 @@ export default class WordTarget extends Phaser.GameObjects.Text {
       this.resolve(false);
       this.onMiss(this);
     }
+  }
+
+  private updateHitArea(): void {
+    if (!this.isPlayable || !(this.input?.hitArea instanceof Phaser.Geom.Rectangle)) return;
+    const padding = TARGET_LAYOUT.gap / 2;
+    const height = Math.max(this.displayHeight + padding * 2, 82) / this.scaleY;
+    const top = Math.max((this.height - height) / 2, (this.playBounds.top - this.y) / this.scaleY);
+    const bottom = Math.min((this.height + height) / 2, (this.playBounds.bottom - this.y) / this.scaleY);
+    this.input.hitArea.setTo(-padding, top, this.width + padding * 2, Math.max(0, bottom - top));
   }
 
   /** Texture cropping works in both Phaser's Canvas and WebGL renderers. */
@@ -103,17 +119,21 @@ export default class WordTarget extends Phaser.GameObjects.Text {
       Math.max(0, bottom - top) * resolution);
   }
 
-  setFallSpeed(speed: number): void {
-    if (this.state === 'active' && this.kind !== 'bonus') this.body.setMaxSpeed(speed);
+  setSpeed(speed: number, horizontalSpeed: number): void {
+    if (this.state !== 'active') return;
+    if (this.kind === 'bonus') this.body.setVelocityX(Math.sign(this.body.velocity.x) * horizontalSpeed);
+    else this.body.setMaxSpeed(speed);
   }
 
   select(selected: boolean): void {
     if (this.state !== 'resolved') this.setBackgroundColor(selected ? COLORS.selected : 'transparent');
   }
 
-  resolve(hit: boolean, points?: number): void {
+  resolve(hit: boolean, points?: number, assisted = false): void {
     if (this.state === 'resolved') return;
-    const feedbackWidth = this.displayWidth + TARGET_LAYOUT.gap / 2;
+    const feedbackWidth = Math.max(200, Math.min(TARGET_LAYOUT.maxWidth, Array.from(this.word.answer).length * 17 + 32),
+      this.displayWidth + TARGET_LAYOUT.gap / 2);
+    this.resolvedCenterX = this.x + this.displayWidth / 2;
     if (hit) this.scene.sound.playAudioSprite('sfx', WORD_VARIANTS[this.kind].hitSound);
     this.state = 'resolved';
     this.body.stop();
@@ -121,12 +141,12 @@ export default class WordTarget extends Phaser.GameObjects.Text {
     this.setActive(false).disableInteractive().setCrop().setBackgroundColor('transparent');
     this.flash?.remove();
     this.clearTint();
-    const label = hit ? `✓ ${this.word.answer}${points === undefined ? '' : `  +${points}`}`
-      : `Missed\n${this.word.question}\nAnswer: ${this.word.answer}`;
-    this.setText(this.word.tip ? `${label}\nHint: ${this.word.tip}` : label);
+    const label = hit ? `✓ ${this.word.answer}${points === undefined ? '' : `  +${points}`}${assisted ? '\nTry again later' : ''}`
+      : `${this.kind === 'bonus' ? 'Bonus skipped' : 'Missed'}\n${this.word.answer}`;
+    this.setText(label);
     this.setColor(hit ? COLORS.success : '#e9f1f7');
     this.setBackgroundColor(hit ? '#12202b' : '#35202b').setPadding(12, 8).setDepth(1);
-    fitText(this, Math.min(feedbackWidth, this.bounds.width - 20), (this.bounds.bottom - this.bounds.top) / 2, 26);
+    fitText(this, Math.min(feedbackWidth, this.bounds.width - 20), 100, 28);
     this.setY(Math.max(this.bounds.top, Math.min(this.y, this.bounds.bottom - this.displayHeight)));
     this.clampPosition();
     this.removal = this.scene.time.delayedCall(hit ? GAME.answerDisplayMs : GAME.correctionDisplayMs, () => this.destroy());

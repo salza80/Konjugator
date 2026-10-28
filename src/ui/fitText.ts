@@ -12,3 +12,15 @@ export function fitText(text: Phaser.GameObjects.Text, width: number, height: nu
   const scale = Math.min(1, width / Math.max(1, text.width), height / Math.max(1, text.height));
   text.setScale(scale);
 }
+
+/** Keep auxiliary hints readable; the pause view provides the expanded text. */
+export function singleLine(text: Phaser.GameObjects.Text, value: string, width: number, fontSize: number): void {
+  text.setScale(1).setFontSize(fontSize).setWordWrapWidth(0);
+  const characters = Array.from(value.replace(/\s+/gu, ' ').trim());
+  let end = Math.min(characters.length, Math.ceil(width / (fontSize / 4)));
+  do {
+    text.setText(characters.slice(0, end).join('') + (end < characters.length ? '…' : ''));
+    if (text.width <= width || end === 0) break;
+    end--;
+  } while (end >= 0);
+}

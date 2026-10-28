@@ -11,8 +11,9 @@ import { supportsSpeechRecognition } from '../platform/speech';
 import { canvasShortcuts, hasGameFocus } from '../platform/keyboard';
 import { onSceneEnd } from '../platform/lifecycle';
 import GameHud from '../ui/GameHud';
-import InputButton from '../ui/InputButton';
+import ActionButton from '../ui/ActionButton';
 import SoundButton from '../ui/SoundButton';
+import { recordRun } from '../platform/records';
 
 export default class GameScene extends Phaser.Scene {
   private ready!: PlayData;
@@ -25,6 +26,7 @@ export default class GameScene extends Phaser.Scene {
   create(): void {
     const fallback = this.ready.inputMode === 'Voice' && !supportsSpeechRecognition();
     let mode = fallback ? 'Keyboard' : this.ready.inputMode;
+    let mixedInput = false;
     const bounds = createPlayfield(mode);
     const practiceWords = this.ready.practiceWords?.length ? this.ready.practiceWords : undefined;
     const sessionWords = practiceWords ?? this.ready.words;
@@ -40,18 +42,24 @@ export default class GameScene extends Phaser.Scene {
       const focusOverlay = hasGameFocus(this.game) && document.hasFocus();
       this.session.pause();
       this.scene.pause();
-      this.scene.launch('PauseScene', { focusOverlay });
+      this.scene.launch('PauseScene', { focusOverlay, ready: this.ready, readingWord: hud.revealReadingWord() });
     };
     setupOrientation(this, pauseGame);
 
     const hud = new GameHud(this, bounds, this.ready.options.startText, mode);
-    this.session = new GameSession(this, sessionWords, bounds, mode, hud, (summary) => {
-      const result: ResultData = {
-        options: this.ready.options, words: this.ready.words, inputMode: mode, summary,
-        lastCorrection: hud.lastCorrection,
-      };
-      this.scene.start('GameOver', result);
-    }, sessionMode);
+    this.session = new GameSession(this, {
+      words: sessionWords, bounds, mode, hud, sessionMode, options: this.ready.options, replay: this.ready.replay,
+      onGameOver: (summary) => {
+        const result: ResultData = {
+          options: this.ready.options, words: this.ready.words, inputMode: mode, summary,
+          lastCorrection: hud.lastCorrection,
+          records: recordRun(this.game, {
+            options: this.ready.options, words: this.ready.words, mode, summary, eligible: !mixedInput,
+          }),
+        };
+        this.scene.start('GameOver', result);
+      },
+    });
     const digitShortcuts = !sessionWords.some((word) => /[1-4]/.test(word.answer));
     let input: PlayerInput;
     if (mode === 'Touch') {
@@ -61,6 +69,7 @@ export default class GameScene extends Phaser.Scene {
     } else if (mode === 'Voice') {
       input = new VoiceInput(this, this.session.submit, () => {
         mode = 'Keyboard';
+        mixedInput = true;
         this.session.attachInput(new KeyboardInput(this, this.session.submit, digitShortcuts), mode);
         hud.showInputMode(mode);
         hud.showNotice('Keyboard enabled. Type an answer and press Enter.');
@@ -70,16 +79,13 @@ export default class GameScene extends Phaser.Scene {
     }
     this.session.attachInput(input);
 
-    this.add.image(GAME.width - 30, 25, 'maximize').setDisplaySize(50, 50).setDepth(12)
-      .setInteractive({ useHandCursor: true }).on('pointerdown', () => {
-        if (this.scale.isFullscreen) this.scale.stopFullscreen();
-        else this.scale.startFullscreen();
-      });
-    new InputButton(this, 20, 10, 'Menu', () => {
-      this.scene.start('TitleScene', { options: this.ready.options, words: this.ready.words });
-    }, 20).setDepth(12);
-    new InputButton(this, 20, 88, 'Pause', pauseGame, 20).setDepth(12);
-    new SoundButton(this, 20, 54).setDepth(12);
+    new ActionButton(this, GAME.width - 112, 10, '', () => {
+      if (this.scale.isFullscreen) this.scale.stopFullscreen();
+      else this.scale.startFullscreen();
+    }, 96).setDepth(12);
+    this.add.image(GAME.width - 64, 54, 'maximize').setDisplaySize(50, 50).setDepth(13);
+    new ActionButton(this, 16, 10, 'Pause', pauseGame, 180).setDepth(12);
+    new SoundButton(this, 16, 110).setDepth(12);
 
     const onPause = (): void => this.session.pause();
     const onResume = (): void => { pauseRequested = false; this.session.resume(); };

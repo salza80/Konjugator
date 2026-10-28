@@ -1,19 +1,21 @@
 import type { GameConfig, GameOptions, InputMode, Playfield } from './core/types';
+import { SESSION_PRESETS } from './core/sessionPresets';
+import { DIFFICULTIES } from './core/DifficultyController';
+import { CORRECTION_MS } from './core/ReviewQueue';
 
 export const GAME = {
   width: 1280,
   height: 700,
   bottomSpace: 100,
-  hudHeight: 140,
+  hudHeight: 210,
   touchSideWidth: 192,
   blockSize: 20,
-  startingBlocks: 60,
   levelSeconds: 90,
   levelSpawnGraceSeconds: 10,
   initialCountdownSeconds: 5,
   levelCountdownSeconds: 2,
   answerDisplayMs: 1500,
-  correctionDisplayMs: 3200,
+  correctionDisplayMs: CORRECTION_MS,
   feedbackDisplayMs: 2200,
   shotDisplayMs: 240,
   horizontalWordSpeed: 70,
@@ -31,13 +33,19 @@ export const COLORS = {
 
 export function normalizeConfig(config: GameConfig): GameOptions {
   const modes: readonly unknown[] = ['Keyboard', 'Touch', 'Voice'];
+  const sessionPreset = config.session_preset === 'quick' ? 'quick' : 'survival';
+  const preset = SESSION_PRESETS[sessionPreset];
   return {
     startText: typeof config.start_text === 'string' && config.start_text ? config.start_text : GAME.startText,
     assetPath: typeof config.asset_path === 'string' && config.asset_path ? config.asset_path : 'assets/',
     inputMode: modes.includes(config.input_type) ? config.input_type ?? null : null,
     words: config.words,
     wordsUrl: typeof config.words_url === 'string' && config.words_url ? config.words_url : null,
-    roundGoal: Number.isSafeInteger(config.round_goal) && (config.round_goal ?? 0) > 0 ? config.round_goal ?? 0 : 0,
+    roundGoal: Number.isSafeInteger(config.round_goal) && (config.round_goal ?? 0) > 0 ? config.round_goal ?? preset.roundGoal : preset.roundGoal,
+    sessionPreset,
+    startingHealth: preset.health,
+    difficulty: DIFFICULTIES.includes(config.difficulty ?? 'standard') ? config.difficulty ?? 'standard' : 'standard',
+    rememberRecords: config.remember_records === true,
     onGameOver: typeof config.game_over_callback === 'function' ? config.game_over_callback : null,
   };
 }

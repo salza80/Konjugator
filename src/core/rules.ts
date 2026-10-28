@@ -1,9 +1,9 @@
 import type { WordKind } from './types';
 
 export const WORD_VARIANTS = {
-  falling: { color: '#de77ae', fontSize: 30, bonusPoints: 0, hitSound: 'smb_coin', targetChance: 8 / 11 },
-  bonusfalling: { color: '#F21536', fontSize: 30, bonusPoints: 5, hitSound: 'smb_pipe', targetChance: 4 / 11 },
-  bonus: { color: '#ffa500', fontSize: 20, bonusPoints: 10, hitSound: 'smb_powerup', targetChance: 0 },
+  falling: { color: '#de77ae', fontSize: 30, bonusPoints: 0, damage: 1, hitSound: 'smb_coin', targetChance: 8 / 11 },
+  bonusfalling: { color: '#F21536', fontSize: 30, bonusPoints: 5, damage: 1, hitSound: 'smb_pipe', targetChance: 4 / 11 },
+  bonus: { color: '#ffa500', fontSize: 20, bonusPoints: 10, damage: 0, hitSound: 'smb_powerup', targetChance: 0 },
 } as const;
 
 export const SCORING = { basePoints: 10, maxStreakBonus: 5 } as const;
@@ -24,7 +24,10 @@ export function scoreFor(kinds: readonly WordKind[], streak: number): ScoreAward
   return { base, targetBonus, streakBonus, total: base + targetBonus + streakBonus };
 }
 
-export function blockPositions(count: number, bounds: { left: number; width: number; bottom: number }, size: number, random: () => number): { x: number; y: number }[] {
+interface BaseBounds { left: number; width: number; bottom: number }
+interface BlockPosition { x: number; y: number }
+
+export function blockPositions(count: number, bounds: BaseBounds, size: number, random: () => number): BlockPosition[] {
   const rows: number[][] = [];
   const columns = Math.floor(bounds.width / size);
   for (let i = 0; i < count; i++) {
@@ -34,4 +37,16 @@ export function blockPositions(count: number, bounds: { left: number; width: num
     else rows.push([x]);
   }
   return rows.flatMap((row, index) => row.map((x) => ({ x, y: bounds.bottom - size / 2 - index * (size + 1) })));
+}
+
+/** Fill an empty grid slot, starting near the centre; never overlap a live block. */
+export function repairPosition(occupied: readonly BlockPosition[], bounds: BaseBounds, size: number): BlockPosition | undefined {
+  const columns = Math.floor(bounds.width / size);
+  if (columns < 1) return undefined;
+  for (let index = 0; index <= occupied.length; index++) {
+    const x = ((Math.floor(columns / 2) + index) % columns) * size + size / 2 + bounds.left;
+    const y = bounds.bottom - size / 2 - Math.floor(index / columns) * (size + 1);
+    if (!occupied.some((block) => block.x === x && block.y === y)) return { x, y };
+  }
+  return undefined;
 }

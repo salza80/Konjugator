@@ -57,14 +57,16 @@ express ownership without a global event bus.
    the accepted answer and points when a correction is not being read; score
    and target effects always update immediately. Keyboard errors retain editable input.
    Input adapters do not decide scores or manipulate physics.
-   Base health is the number of remaining blocks. Only an active word colliding
-   with a block removes health; incorrect entries do not. The HUD renders this
+   Base health is the number of remaining blocks. Each missed falling word
+   removes one health, including words passing through gaps; incorrect entries
+   do not. The HUD renders this
    session-owned value as a count and bar, with a low-health label.
 7. The session reports an internal `SessionResult` snapshot containing score,
    correct/incorrect attempts, missed-target count, best streak and deduplicated review words. `GameScene` passes it alongside
    options, validated words and the effective input mode in `ResultData`.
    `GameOverScene` shows accuracy (correct divided by all submitted attempts)
-   and best streak alongside missed targets and practice/round-goal completion
+   and best streak alongside missed falling targets, separately skipped optional
+   bonuses, and practice/round-goal completion
    progress. Missed-target events count once per escaped or base-hitting target,
    independently of deduplicated review items and submitted-answer accuracy.
    It invokes the unchanged `{ score }` embedding callback once
@@ -75,6 +77,12 @@ express ownership without a global event bus.
    Result-screen keyboard listeners are removed on shutdown. Missed targets
    and ignored input do not count as attempts.
 
+`core/DifficultyController.ts` owns difficulty presets, input/answer-length
+allowances and a bounded recent-performance adjustment. The spawner snapshots
+the policy at level starts and wave boundaries, applying one consistent factor
+to falling and horizontal movement. Empty input and optional bonus misses do
+not influence adaptation. Practice always uses its gentle, single-word policy.
+
 Scoring is calculated in `core/rules.ts`: 10 base points per accepted answer,
 plus the highest matching target bonus (0/5/10) and a streak bonus of
 `min(streak - 1, 5)`. One submission advances the streak once, even if it clears
@@ -82,7 +90,14 @@ multiple targets. Wrong reported attempts and missed falling targets reset it;
 empty input, interim recognition, level transitions and pauses do not. Optional
 orange targets can leave without penalty. Entities notify the session when a
 falling word reaches the floor without hitting a block, so that path also resets
-the streak. Only block collisions reduce health. HUD labels do not own rules.
+the streak. Both floor escapes and block collisions remove one health through
+a shared, deduplicated session handler. Optional bonuses do neither; their
+miss count is separate. HUD labels do not own rules.
+
+`core/StreakMilestones.ts` awards thresholds 5, 10 and 20 once per session.
+The session can restore one missing block for each award, capped at starting
+health; `repairPosition` finds an empty grid slot independently of Phaser.
+The HUD presents a pausable milestone message separately from correction text.
 
 `core/SessionProgress.ts` owns scores, streaks, attempts, misses, review collection
 and remaining practice items. `SessionMode` explicitly represents survival,
@@ -92,8 +107,9 @@ The session delegates accounting and immutable result snapshots to this model.
 objects. Wrong touch choices supply their selected word. Wrong free-form
 answers record visible candidates because no question is selected. Misses and
 unanswered targets at game over enter review without adding accuracy attempts.
-Orange escapes enter review without resetting streaks. Successful practice
-answers remove words from the remaining map; the session ends when progress reports completion.
+Orange escapes enter review without resetting streaks. Unassisted practice
+answers remove words from the remaining map; assisted answers score but remain
+for later recall. The session ends when progress reports completion.
 When practice ends, remaining words are merged into the deduplicated review
 snapshot, preserving unspawned items if the base is lost. This does not add
 incorrect attempts or change the number of completed practice words.
@@ -101,6 +117,18 @@ The spawner's optional practice-word provider exposes only remaining items,
 limits the field to one normal word and disables timed wave progression. Misses
 schedule another attempt through the same cancellable field-refill timer.
 Practice summaries stay internal; the host still receives only `{ score }`.
+
+`core/ReviewQueue.ts` inserts targeted retries between fresh bag selections.
+It spaces failures by three presentations where possible and at least 6.4
+seconds after correction exposure, using session time accumulated only during
+active scene updates. A tiny pool uses the time delay without requiring missing
+intervening words. The session marks the local answer card as help immediately;
+HUD correction-display callbacks refresh that exposure when queued corrections
+appear. Active duplicates cannot clear that assistance.
+Only later unassisted answers clear review/practice entries; results separately
+count assisted and unassisted submissions and distinct recovered words.
+The spawner receives named callbacks/policies, maintains one cancellable refill
+or recall-wait timer, and retains a deferred special through recall waits.
 
 SessionProgress is the accounting source of truth; the session owns runtime coordination. HUD text is never read back as gameplay
 state. Word selection happens in the spawner, using validated data supplied by
@@ -131,18 +159,20 @@ separate top band. Target entities apply positions chosen by the spawner and
 crop their text to the play area in both Canvas and WebGL; they never choose
 random columns themselves. A shared play-area containment check
 governs answer eligibility, touch selection and review attribution. Placement, floor detection, visibility checks and cosmetic shots use
-display dimensions, including when text is scaled. Resolved answers and hints,
-answer entry and HUD feedback use the same fitting helper with separate bounds.
+display dimensions, including when text is scaled. Resolved answer labels,
+answer entry and HUD feedback use bounded fitting with separate display areas.
 
 `ui/FeedbackBanner.ts` owns the HUD's status and correction rendering. A correction
-has a question line and a separately styled answer line. A bounded, deduplicated
+has a question line, a separately styled answer line and a readable, single-line
+hint preview. `ui/HintPanel.ts` pages complete hints in the pause overlay; opening
+that correction notifies the same assistance tracker as the HUD. A bounded, deduplicated
 queue handles bursts of misses; ordinary success messages cannot replace a
 correction before its reading time finishes. System notices may interrupt and
 then return to it. The scene clock pauses both the banner and resolved-target
 timers. Success targets remain for 1.5 seconds; missed targets (including escaped
-bonuses) show question, answer and optional hint for 3.2 seconds. Local labels
-stay within their original word lanes so simultaneous misses do not expand
-across neighbouring labels. HUD corrections give the full labelled answer and
+bonuses) show a compact answer label for 3.2 seconds. Local cards reserve
+answer-length-aware width for readability, remain behind active questions, and omit repeated
+prompts and hints. HUD corrections give the full labelled answer and
 survive later-level countdowns without extending them. Misses immediately clear
 touch selection; they do not change the existing accounting rules.
 
@@ -154,14 +184,18 @@ the final correction after scene shutdown. Public configuration, `SessionResult`
 accounting and the `{ score }` callback are unchanged.
 
 `ui/TouchChoicePanel.ts` owns touch-choice layout and paging in 192-unit side
-panels. It reuses six 168×104 tiles rather than allocating one text button per
+panels. It reuses six 168×82 tiles rather than allocating one text button per
 character in the dataset. `TouchButton` separates its fixed hit rectangle from
 its fitted label, provides pressed feedback and requires a press/release on the
 same tile. Up to six choices appear per page; 88-unit navigation buttons expose
 remaining choices without reducing tile sizes. `TouchInput` owns selection and
 partial answers, so paging never changes scoring or progress. Retapping the
 selected question leaves progress intact. Word hit areas extend halfway into
-the shared layout gap without changing physics bodies or answer eligibility.
+the horizontal layout gap and grow to at least 82 units where their playfield band allows, without changing
+physics bodies or answer eligibility. The 210-unit HUD reserves room for large
+secondary controls and correction text. `ActionButton` shares an 88-unit height
+for pause, sound, fullscreen, reading and results controls; Menu is in the pause
+overlay. Text buttons require a press and release on the same target.
 
 ## Lifecycle
 
@@ -173,6 +207,8 @@ the shared layout gap without changing physics bodies or answer eligibility.
 - `platform/lifecycle.ts` runs scene cleanup once on either shutdown or destruction.
   The scene disposes the session and input adapter on shutdown. Disposal does
   not clear groups that Phaser may already have destroyed.
+  Target-removal callbacks update input only while their scene is active;
+  teardown must not redraw controls that Phaser may already have destroyed.
 - Pausing for orientation or blurring the game cancels browser recognition and
   speech playback. Resuming never silently reopens the microphone: press Talk.
 - `GameScene` owns pause requests from its Pause button, Escape, window blur,
@@ -214,12 +250,25 @@ input adapter is replaced and the effective mode is retained for replay.
 
 ## Configuration and distribution
 
+`core/records.ts` owns exact dataset/settings identity, record merging and
+achievable next challenges. `platform/records.ts` supplies per-game memory and
+opt-in, validated browser storage, bounded to 100 configurations. Practice and
+mixed-input runs are excluded. `GameScene` records once on session completion
+and passes a comparison snapshot to results; rendering never writes records.
+Public callbacks remain score-only. `PlayData.replay` selects the two-second
+replay/practice countdown; initial starts retain five seconds. Session/spawn
+composition uses named configuration objects rather than long positional calls.
+
 The public `GameConfig` keeps existing snake_case embedding options. Internal
 code uses normalized `GameOptions`. Scene handoffs use explicit interfaces;
 mutable gameplay state does not live in the Phaser registry.
 
 Optional `round_goal` normalizes to a positive safe integer (zero internally
-means survival mode). The session counts correct submissions toward this goal
+means survival mode). `core/sessionPresets.ts` defines opt-in quick sessions
+(15 answers, 12 health) and compatible survival defaults (no goal, 60 health).
+The standalone adapter and embed example opt into quick sessions; existing
+hosts retain survival. An explicit positive goal overrides the preset goal.
+The session counts correct submissions toward this goal
 and ends successfully when it is reached; matching duplicate targets count once.
 Success clears leftover targets without recording them as mistakes. Internal
 results include the goal and completion flag for the HUD/results screen; the

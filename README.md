@@ -69,6 +69,8 @@ const config: GameConfig = {
   start_text: 'Konjugiere das Verb! Bist du bereit?',
   asset_path: 'assets/',
   input_type: 'Keyboard',
+  session_preset: 'quick', // Recommended short session: 15 answers, 12 health.
+  remember_records: true, // Optional: save personal bests in this browser.
   round_goal: 10, // Optional: finish after 10 correct answers.
   game_over_callback: ({ score }) => console.log(score),
 };
@@ -91,12 +93,18 @@ Optional configuration includes `words` (question/answer objects, with optional
 to the game document, independently of `asset_path`. Loading and validation
 failures show a retry screen.
 
+Set `session_preset: 'quick'` for a short, winnable session: 15 correct answers
+and 12 health. The standalone page and embed example use this preset. Existing
+hosts that omit it retain survival with 60 health. `session_preset: 'survival'`
+selects that behaviour explicitly. A positive `round_goal` overrides the preset's
+goal while retaining its health budget.
+
 Set `round_goal` to a positive integer to finish a normal round successfully
 after that many correct submitted answers. The HUD shows progress and the
 results screen displays Round Complete when the goal is reached. One submission
 counts once, even when it clears matching targets. Wrong answers and misses do
 not subtract progress; losing the base still ends the round early. Omit the
-option for the existing survival mode; invalid values also use survival mode.
+option to use the preset's goal; invalid values also use the preset's goal.
 Play Again retains the goal and starts fresh. Practice always finishes by
 completing its review list, independently of the round goal. Reaching the goal
 does not mark other active questions as mistakes. The callback still receives
@@ -117,6 +125,14 @@ remains a layout safeguard; the data limits keep active questions readable and
 quick to answer.
 
 ## Pacing
+
+Optional `difficulty` is `relaxed`, `standard` (default), or `challenge`.
+Touch and voice get slower travel and fewer simultaneous questions; longer
+answers get additional travel time without changing points. Every eight
+submitted answers or normal misses can gently adjust pressure, capped between
+85% and 110% of the preset. Changes apply at wave boundaries rather than
+speeding up a word immediately after an answer. Practice stays gentle, with
+one question and no escalation. Pausing freezes all pacing clocks.
 
 Each 90-second level follows five waves, shown in the HUD:
 
@@ -142,7 +158,7 @@ missed, even past 90 seconds. Once the field and its answer feedback have cleare
 the next level starts with a short **two-second countdown**; an empty field skips
 the unused closing time. Instructions appear only in the initial five-second
 countdown. Level boundaries never count an unfinished word as a mistake.
-Practice keeps its existing untimed flow and initial countdown. Pausing freezes
+Practice keeps its untimed flow and uses the two-second replay countdown. Pausing freezes
 the shorter level countdown too.
 
 Later levels gradually increase speed and capacity and shorten spawn intervals.
@@ -157,8 +173,12 @@ Targets appear fully within their play areas. Partly exited targets cannot be
 answered or selected.
 
 Word selection uses a shuffled bag of distinct question/answer pairs, shared by
-normal and special targets. Every pair gets a turn before the bag refills, and
-coverage carries across levels. Active duplicates and immediate repeats are
+normal and special targets. Fresh selection covers each pair before reshuffling,
+and coverage carries across levels. Missed or corrected items also enter a spaced
+review queue: they return after three other presentations where possible, with
+at least 6.4 seconds of active-scene time after help. Tiny pools wait for that
+delay instead of stalling. A later unassisted answer removes the item from review.
+Active duplicates and immediate repeats are
 avoided when alternatives are available. If remaining bag entries are active,
 spawning waits rather than repeating already-covered alternatives; tiny pools
 can repeat when every available pair is already active. A new game gets a fresh
@@ -181,10 +201,18 @@ do not reset it. Streaks carry across level changes and pauses; a new game start
 at zero. Letting an optional orange target leave does not break the streak.
 The plugin's `game_over_callback` still receives `{ score }`.
 
+Streaks of 5, 10 and 20 trigger a short celebration and can repair one missing
+base block. Each threshold is awarded once per session, giving at most three
+repairs, never more than starting health. Resetting a streak cannot repeat a
+repair. The message uses its own HUD space so corrections remain readable;
+sound follows the sound toggle, and celebration timing pauses with gameplay.
+
 The results screen shows final score, answer accuracy, best streak and missed
-word count for that game. Misses count targets that hit the base or escape,
-including optional orange targets and repeated misses of the same word. Wrong
-submissions, unspawned practice words and targets cleared at game end do not add
+word count for that game. Misses count falling targets that hit the base or
+escape, including repeated misses of the same word. Optional orange bonuses
+are counted separately and never reduce health or reset a streak. They remain
+available for optional review. Wrong submissions, unspawned practice words and
+targets cleared at game end do not add
 misses. The unique review-word count is separate. Practice results also show
 completed/total words, a percentage and a progress bar; goal rounds show goal
 progress. Accuracy is correct submissions divided by correct plus incorrect attempts
@@ -194,9 +222,21 @@ Play Again (or Enter) starts a fresh full game with the original supplied data
 and active input mode. Menu (or X) returns to the start screen. Each completed
 game or practice invokes the unchanged `{ score }` callback once.
 
+Results compare normal runs with personal best score, streak and answer accuracy
+for the same question/answer set, input mode, difficulty, preset and round goal.
+Supplied order, hints and URLs do not reset a record. Practice and runs switching
+input mode midway are not ranked. A next target suggests review, completing the
+round, improving a reachable streak, or a clean repeat. Replay and practice use
+a two-second countdown without repeating instructions; a new start keeps five.
+
+Records live in memory for that game by default. `remember_records: true` opts
+into browser-local persistence, used by the standalone page and embed example.
+The store retains at most 100 recent configurations. Invalid or unavailable
+storage falls back to memory. Records do not change the score-only callback.
+
 ## Practising mistakes
 
-Choose Practise My Mistakes (or press P) on the results screen to retry that
+Choose Practise Mistakes (or press P) on the results screen to retry that
 game's review words. The option is disabled when no review words were recorded.
 Words are deduplicated by question and answer, retaining their original hints
 and voice text. No review history is saved beyond the current game flow.
@@ -209,9 +249,12 @@ Empty input and unmatched interim voice results do not add review words.
 Missing an optional orange target adds it to review without breaking a streak.
 
 Practice presents one normal word at a time, with no escalating waves or level
-timer. A missed word remains available to retry. Progress advances only when a
-word is answered correctly, and practice finishes once every review word has
-been answered correctly (or the base is lost). Score, accuracy and streaks start
+timer. A missed word remains available to retry. Answers given while a correction
+is showing score normally and are labelled as assisted, but remain in practice
+for a later recall. Progress advances when the word is answered without the
+correction; practice finishes once every review word has been recalled (or the
+base is lost). Results separate unassisted answers from answers with correction.
+Score, accuracy and streaks start
 fresh. If the base is lost, every unfinished practice word stays in the next
 review list, including words that have not appeared yet, alongside mistakes
 recorded during that practice round. Play Again and Menu always retain the
@@ -237,19 +280,24 @@ copy. Voice output still depends on the browser's speech implementation.
 Correct answers score and stop fully visible matching words immediately; shots are visual
 feedback. Score and target effects update immediately; the HUD shows accepted
 answers and points when a correction is not being read. Base health appears as
-a bar and remaining-block count. Each word hitting a block removes one health.
+a bar and remaining-block count. Every missed falling word removes one health,
+whether it hits a block or passes through a gap. Each target is counted once.
 Incorrect entries do not damage the base, and keyboard answers remain editable
 until accepted. Low health is labelled as well as coloured.
 
 Corrections pair the original question with a clearly labelled correct answer.
-Missed words and their optional hints remain in the playfield for 3.2 seconds;
-successful answer labels keep their shorter 1.5-second display. The HUD shows
-the question above a larger green correct answer, distinguishing base hits,
+Missed words leave a compact answer label in the playfield for 3.2 seconds;
+successful labels keep their shorter 1.5-second display. The HUD shows
+the question above a larger green correct answer and a readable hint preview, distinguishing base hits,
 missed falling words and missed optional bonuses. Several misses queue up so
 their corrections can be read in turn; repeated entries are combined and the
 queue is bounded to six pending items. Correct answers still score immediately
 while a correction is visible. Corrections use the pausable
-scene clock and can continue through the short level countdown.
+scene clock and can continue through the short level countdown. Local answer
+cards count as assistance immediately, including when another copy of that word
+is still active and its HUD correction is queued. Pause shows
+the most recently displayed word and the complete hint, with pages for long hints. Reading
+it counts as assistance when deciding whether a later answer is independent recall.
 
 Wrong touch choices show the answer for the selected question. Keyboard and
 voice errors show it when there is only one distinct visible question;
@@ -264,12 +312,16 @@ buttons and F1–F4 insert ä, ö, ü and ß; 1–4 remain aliases only when the
 answers contain none of those digits. Results shortcuts only act while the
 game has focus, so host-page typing cannot trigger replay or navigation. Touch
 players tap a question, then build its answer using large tiles in the side
-panels; the whole tile responds. Questions select on press with a padded hit area.
+panels; the whole tile responds. Questions select on press with taller hit areas,
+at least 82 units high where their playfield band allows. Horizontal padding
+stays inside the gaps between word lanes.
 Tapping the same question again preserves the partial answer. Spaces are inserted
 automatically. Tiles stay in fixed positions for that question, with up to six
 choices per page. Longer answers use Back/More controls instead of shrinking the
 tiles. Paging preserves the partial answer and does not count as an attempt.
-Sliding off a tile cancels its press. Menu leaves the current game. After game over, choose Play Again
+Sliding off a tile or secondary button cancels its press. Pause, sound,
+fullscreen and results actions have large controls; the 210-unit HUD keeps
+status and corrections separate. Menu in the pause overlay leaves the current game. After game over, choose Play Again
 or press Enter to replay; choose Menu or press X to return to the start screen.
 
 Choose Pause or press Escape to pause, then choose Continue, Enter, Space or Escape to resume.
